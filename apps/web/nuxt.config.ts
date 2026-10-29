@@ -2,6 +2,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-10-29",
   devtools: { enabled: false },
   telemetry: false,
+  ssr: false,
   devServer: { port: 3001 },
   css: ["@riftkeeper/ui/styles.css"],
   runtimeConfig: {

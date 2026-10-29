@@ -29,11 +29,11 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: "node .output/server/index.mjs",
+      command: `node node_modules/nuxt/bin/nuxt.mjs generate && node node_modules/wrangler/bin/wrangler.js dev --ip 127.0.0.1 --port ${webPort} --show-interactive-dev-session=false`,
       url: `http://127.0.0.1:${webPort}`,
-      env: { HOST: "127.0.0.1", PORT: String(webPort), NUXT_PUBLIC_API_BASE: apiBase },
+      env: { NUXT_PUBLIC_API_BASE: apiBase, WRANGLER_SEND_METRICS: "false" },
       reuseExistingServer: false,
-      timeout: 30_000,
+      timeout: 120_000,
     },
   ],
 });

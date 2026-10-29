@@ -4,11 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
-    "preview": "node .output/server/index.mjs",
+    "build": "nuxt generate",
+    "preview": "wrangler dev",
     "typecheck": "nuxt typecheck",
     "test": "bun test unit",
-    "test:e2e": "nuxt build && playwright test"
+    "test:e2e": "playwright test",
+    "test:production": "playwright test --config playwright.production.config.ts"
   },
   "dependencies": {
     "@riftkeeper/ui": "workspace:*",
@@ -23,6 +24,7 @@
     "@types/bun": "^1.4.4",
     "@types/node": "^24.0.0",
     "typescript": "~6.0.3",
-    "vue-tsc": "^3.3.13"
+    "vue-tsc": "^3.3.13",
+    "wrangler": "4.154.0"
   }
 }

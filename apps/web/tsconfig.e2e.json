@@ -5,5 +5,12 @@
     "lib": ["ESNext", "DOM"],
     "types": ["node", "bun"]
   },
-  "include": ["e2e", "unit", "app/utils/card-images.ts", "playwright.config.ts"]
+  "include": [
+    "e2e",
+    "production",
+    "unit",
+    "app/utils/card-images.ts",
+    "playwright.config.ts",
+    "playwright.production.config.ts"
+  ]
 }

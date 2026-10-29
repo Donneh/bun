@@ -2,15 +2,15 @@
 
 Bun workspaces monorepo for Riftkeeper, a card API for the Riftbound trading card game.
 
-| Path              | Contents                                                                                                          |
-| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                      |
-| `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md))  |
-| `apps/web`        | `@riftkeeper/web`, the Nuxt search page that calls the API ([README](apps/web/README.md))                         |
-| `packages/ui`     | `@riftkeeper/ui`, the Vue components and design tokens the web app renders with ([README](packages/ui/README.md)) |
-| `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                           |
-| `packages/search` | `@riftkeeper/search`, the card search query language, matching and sorting                                        |
-| `infrastructure/` | OpenTofu configuration that deploys the API to Cloudflare Workers ([README](infrastructure/README.md))            |
+| Path              | Contents                                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                           |
+| `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md))       |
+| `apps/web`        | `@riftkeeper/web`, the Nuxt search page that calls the API ([README](apps/web/README.md))                              |
+| `packages/ui`     | `@riftkeeper/ui`, the Vue components and design tokens the web app renders with ([README](packages/ui/README.md))      |
+| `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                                |
+| `packages/search` | `@riftkeeper/search`, the card search query language, matching and sorting                                             |
+| `infrastructure/` | OpenTofu configuration that deploys the API and the web app to Cloudflare Workers ([README](infrastructure/README.md)) |
 
 New apps go in `apps/` and shared packages in `packages/`. Both folders are workspaces.
 
@@ -37,8 +37,8 @@ bun run test:api    # black-box HTTP tests against the API running in workerd
 bun run test:e2e    # Playwright test of the web app against a local API, see apps/web/README.md
 bun run benchmark   # search latency per query under V8, see apps/api/README.md
 bun run typecheck   # tsc, vue-tsc and nuxt typecheck in every workspace
-bun run build       # bundle the API Worker without deploying, and build the web app
-bun run deploy      # build the API and tofu apply it to Cloudflare, see infrastructure/README.md
+bun run build       # bundle the API Worker without deploying, and build the static web app
+bun run deploy      # build the API and the web app and tofu apply them to Cloudflare, see infrastructure/README.md
 bun run lint        # biome lint over the whole repository
 bun run format      # biome format --write over the whole repository
 bun run check       # biome check, typecheck, test and build, as CI runs it
