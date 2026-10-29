@@ -1,6 +1,7 @@
 export type { FilterNode, ParsedQuery, SearchNode } from "./ast.ts";
 export type { Decomposition, FilterChip, FilterChipValue } from "./decomposition.ts";
 export type { ComparisonOperator, Filter, FilterField, NumberComparison, NumericField, TextField } from "./filter.ts";
+export { parseQuery } from "./parser.ts";
 export {
   PAGE_SIZE,
   type SearchPage,
