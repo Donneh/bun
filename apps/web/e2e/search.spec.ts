@@ -1,8 +1,9 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Page, type Response, test } from "@playwright/test";
 import { apiBase } from "../playwright.config.ts";
 
 const searchBox = (page: Page) => page.getByRole("searchbox", { name: "Search cards" });
 const results = (page: Page) => page.getByRole("list", { name: "Search results" });
+const MAX_FIRST_SCREEN_IMAGE_BYTES = 1_000_000;
 const isSearchRequest = (url: URL) => url.origin === apiBase && url.pathname === "/search";
 
 async function expectFirstImageLoaded(page: Page) {
@@ -96,6 +97,37 @@ test("a failed search shows the error and can be retried", async ({ page }) => {
   await page.getByRole("button", { name: "Search" }).click();
 
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
+});
+
+test("the first screen of a query loads resized WebP images", async ({ page }, testInfo) => {
+  const imageResponses: Response[] = [];
+  page.on("response", (response) => {
+    if (response.request().resourceType() === "image") imageResponses.push(response);
+  });
+  await page.goto("/");
+  await search(page, "c:fury");
+  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+  await page.waitForLoadState("networkidle");
+
+  const transferred = await Promise.all(
+    imageResponses.map(async (response) => {
+      const sizes = await response.request().sizes();
+      return {
+        url: response.url(),
+        type: await response.headerValue("content-type"),
+        bytes: sizes.responseBodySize + sizes.responseHeadersSize,
+      };
+    }),
+  );
+  const totalBytes = transferred.reduce((sum, image) => sum + image.bytes, 0);
+  await testInfo.attach("image-transfers", {
+    body: JSON.stringify({ totalBytes, transferred }, null, 2),
+    contentType: "application/json",
+  });
+
+  expect(transferred.length).toBeGreaterThan(0);
+  for (const image of transferred) expect(image.type).toBe("image/webp");
+  expect(totalBytes).toBeLessThan(MAX_FIRST_SCREEN_IMAGE_BYTES);
 });
 
 test("landscape cards keep their landscape shape", async ({ page }) => {
