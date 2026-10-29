@@ -1,5 +1,6 @@
 import type { Card } from "@riftkeeper/cards";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { createCardsRoutes } from "./cards/cards.routes.ts";
 import { errorBody } from "./http/errors.ts";
 import { createSearchRoutes } from "./search/search.routes.ts";
@@ -10,6 +11,7 @@ interface Bindings {
 
 export function createApp({ cards }: { cards: readonly Card[] }) {
   return new Hono<{ Bindings: Bindings }>()
+    .use(cors({ origin: "*", allowMethods: ["GET"] }))
     .get("/health", (c) =>
       c.json({ data: { status: "ok", cards: cards.length, version: c.env?.CF_VERSION_METADATA?.id ?? null } }, 200),
     )

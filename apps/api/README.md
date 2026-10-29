@@ -28,6 +28,8 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 
 Errors use the shape `{ error: { code, message } }`.
 
+Every response sends `Access-Control-Allow-Origin: *`, so a browser on any origin, such as the web app, can call the API. Only `GET` is allowed, and the API never asks for credentials.
+
 A card id is a lowercase slug of the card name and subtitle with apostrophes removed, for example `agonys-embrace` or `jinx-rebel`.
 
 A `Card` holds the gameplay facts shared by all printings: `id`, `name`, `subtitle`, `type`, `supertype`, `domains` (can be empty), `energyCost`, `powerCost`, `might`, `mightBonus`, `ability`, `effect` and `tags`. Facts Riot does not give are `null`. Its `printings` array holds one entry per printed version with `id`, `publicCode`, `set`, `collectorNumber`, `variant`, `rarity`, `artist` (`null` when unknown), `imageUrl` and `orientation`. The schema lives in `packages/cards/src/card.ts`.
