@@ -7,6 +7,8 @@ export function parseQuery(query: string): ParsedQuery {
   return new Parser(query).parse();
 }
 
+const MAX_GROUP_DEPTH = 64;
+
 type KeywordValueToken = Extract<Token, { type: "keywordValue" }>;
 
 class Parser {
@@ -15,6 +17,8 @@ class Parser {
   private readonly warnings: SearchWarning[];
   private cursor = 0;
   private groupDepth = 0;
+  private operandsConsumed = 0;
+  private warnedTooDeep = false;
 
   constructor(query: string) {
     const lexed = tokenize(query);
@@ -65,8 +69,10 @@ class Parser {
 
     operators.finish();
 
-    if (words.length > 0) {
-      terms.push({ kind: "text", value: words.join(" ") });
+    const nonEmptyWords = words.filter((word) => word !== "");
+
+    if (nonEmptyWords.length > 0) {
+      terms.push({ kind: "text", value: nonEmptyWords.join(" ") });
     }
 
     return combine("and", terms);
@@ -121,6 +127,12 @@ class Parser {
 
   private parseGroup(): SearchNode | null {
     const open = this.advance();
+
+    if (this.groupDepth >= MAX_GROUP_DEPTH) {
+      this.warnTooDeep(open);
+      return null;
+    }
+
     const contentStart = this.cursor;
 
     this.groupDepth++;
@@ -134,8 +146,8 @@ class Parser {
       this.warn('Missing closing ")" for the group starting here; its contents were still used.', open.span);
     }
 
-    if (isEmpty) {
-      this.warn("Empty group was ignored.", { start: open.span.start, end: (close ?? open).span.end });
+    if (isEmpty && close !== null) {
+      this.warn("Empty group was ignored.", { start: open.span.start, end: close.span.end });
     }
 
     return inner;
@@ -161,10 +173,10 @@ class Parser {
   }
 
   private parseOperand(operators: DanglingOperators, parse: () => SearchNode | null): SearchNode | null {
-    const start = this.cursor;
+    const operandsBefore = this.operandsConsumed;
     const node = parse();
 
-    if (this.cursor > start) {
+    if (this.operandsConsumed > operandsBefore) {
       operators.operand();
     }
 
@@ -200,6 +212,13 @@ class Parser {
     };
   }
 
+  private warnTooDeep(open: Token): void {
+    if (!this.warnedTooDeep) {
+      this.warnedTooDeep = true;
+      this.warn(`Groups nested deeper than ${MAX_GROUP_DEPTH} levels were ignored.`, open.span);
+    }
+  }
+
   private warnUnexpected(token: Token): void {
     this.warn(`Unexpected "${token.lexeme}" was ignored.`, token.span);
   }
@@ -221,6 +240,10 @@ class Parser {
 
     if (token.type !== "eof") {
       this.cursor++;
+    }
+
+    if (token.type === "word" || token.type === "keywordValue") {
+      this.operandsConsumed++;
     }
 
     return token;

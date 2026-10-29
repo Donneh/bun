@@ -37,6 +37,16 @@ describe("numeric filters", () => {
     expect(rejection(`cost:${value}`)).toEqual([`Invalid value for "cost": "${value}" is not a whole number.`]);
   });
 
+  test.each(["9".repeat(400), "9007199254740993", "-9007199254740993"])("rejects %p as not a safe integer", (value) => {
+    expect(rejection(`cost:${value}`)).toEqual([`Invalid value for "cost": "${value}" is not a whole number.`]);
+  });
+
+  test("reads -0 as 0", () => {
+    const filter = filterOf("cost:-0") as { comparison: { value: number } };
+
+    expect(Object.is(filter.comparison.value, 0)).toBe(true);
+  });
+
   test.each([
     ["cost", "cost"],
     ["might", "might"],

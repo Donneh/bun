@@ -12,6 +12,9 @@ const cost = (value: number) => ({ kind: "filter", filter: { field: "cost", comp
 const tag = (value: string) => ({ kind: "filter", filter: { field: "tag", text: value } });
 const domain = (name: string) => ({ kind: "filter", filter: { field: "domain", anyOf: [name] } });
 
+const MISSING_CLOSE = 'Missing closing ")" for the group starting here; its contents were still used.';
+const UNTERMINATED_QUOTE = "Unterminated quote; the rest of the query was treated as part of this value.";
+
 const messages = (query: string) => parseQuery(query).warnings.map((warning) => warning.message);
 
 describe("parseQuery", () => {
@@ -291,5 +294,63 @@ describe("decided changes from the old search", () => {
 
   test("a group holding only a dropped filter is not empty", () => {
     expect(messages("(unknown:1)")).toEqual(['Unknown keyword "unknown" was ignored.']);
+  });
+
+  test.each([
+    ["vex or and", text("vex"), ['Dangling "and" was ignored.', 'Dangling "or" was ignored.']],
+    ["and or and", null, ['Dangling "and" was ignored.', 'Dangling "or" was ignored.', 'Dangling "and" was ignored.']],
+    ["vex or not", text("vex"), ['Nothing to negate after "not".', 'Dangling "or" was ignored.']],
+    ["vex or ()", text("vex"), ["Empty group was ignored.", 'Dangling "or" was ignored.']],
+    ["vex or (", text("vex"), [MISSING_CLOSE, 'Dangling "or" was ignored.']],
+  ])("%p warns about an operator whose only neighbor is ignored", (query, root, expected) => {
+    expect(parseQuery(query).root).toEqual(root);
+    expect(messages(query)).toEqual(expected);
+  });
+
+  test.each(["(", "not (", "vex or ("])("an unclosed empty group in %p only warns that it is unclosed", (query) => {
+    expect(messages(query)).toContain(MISSING_CLOSE);
+    expect(messages(query)).not.toContain("Empty group was ignored.");
+  });
+
+  test.each(['"" vex', 'vex ""', 'vex "'])("%p drops the empty word", (query) => {
+    expect(parseQuery(query).root).toEqual(text("vex"));
+  });
+
+  test('vex " still warns about the unterminated quote', () => {
+    expect(messages('vex "')).toEqual([UNTERMINATED_QUOTE]);
+  });
+});
+
+describe("group depth", () => {
+  const NESTED_TOO_DEEP = "Groups nested deeper than 64 levels were ignored.";
+
+  test("allows 64 nested groups", () => {
+    const query = `${"(".repeat(64)}cost:3${")".repeat(64)}`;
+
+    expect(parseQuery(query)).toMatchObject({ root: { kind: "filter", groupDepth: 64 }, warnings: [] });
+  });
+
+  test("ignores the 65th nested group and its closing parenthesis", () => {
+    const query = `${"(".repeat(65)}cost:3${")".repeat(65)}`;
+    const { root, warnings } = parseQuery(query);
+
+    expect(root).toMatchObject({ kind: "filter", groupDepth: 64 });
+    expect(warnings).toEqual([
+      { message: NESTED_TOO_DEEP, span: { start: 64, end: 65 } },
+      { message: 'Unexpected ")" was ignored.', span: { start: query.length - 1, end: query.length } },
+    ]);
+  });
+
+  test.each([
+    ["10,000 open parentheses", "(".repeat(10_000)],
+    ["negated groups", "-(".repeat(10_000)],
+    ["unclosed or groups", "(x or ".repeat(10_000)],
+    ["balanced parentheses", `${"(".repeat(10_000)}vex${")".repeat(10_000)}`],
+  ])("survives %s quickly with one depth warning", (_shape, query) => {
+    const started = performance.now();
+    const found = messages(query).filter((message) => message === NESTED_TOO_DEEP);
+
+    expect(found).toHaveLength(1);
+    expect(performance.now() - started).toBeLessThan(1000);
   });
 });

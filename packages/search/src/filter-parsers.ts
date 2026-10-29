@@ -39,12 +39,13 @@ function numeric(field: NumericField): FilterParser {
   return (value) => {
     const operator = OPERATORS_LONGEST_FIRST.find((candidate) => value.startsWith(candidate));
     const digits = value.slice(operator?.length ?? 0).trim();
+    const number = Number(digits);
 
-    if (!/^-?\d+$/.test(digits)) {
+    if (!/^-?\d+$/.test(digits) || !Number.isSafeInteger(number)) {
       return invalid(`"${value}" is not a whole number.`);
     }
 
-    return ok({ field, comparison: { operator: operator ?? "=", value: Number(digits) } });
+    return ok({ field, comparison: { operator: operator ?? "=", value: Object.is(number, -0) ? 0 : number } });
   };
 }
 
