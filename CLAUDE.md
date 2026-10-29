@@ -13,8 +13,8 @@ Bun workspaces monorepo for a Riftbound card API. Production is the API on `http
 
 `bun run check` is the gate. Run it before every push. It runs Biome, the type checks (including `vue-tsc` and `nuxt typecheck`), every unit and component test, `test:api`, the Worker build and the Nuxt build.
 
-- `bun run test` runs the unit tests in every workspace, and the Vitest component tests in `packages/ui`.
-- `bun run test:e2e` builds `apps/web` against a local API on port 8787, serves the static build with `wrangler dev` the way production serves it, and runs the Playwright test in `apps/web/e2e/`. It records a video and a screenshot per test in `apps/web/test-results/`. Run `bunx playwright install chromium` in `apps/web` once. CI runs it in the E2E workflow and uploads `test-results` as an artifact.
+- `bun run test` runs the unit tests in every workspace, one workspace after another, and the Vitest component tests in `packages/ui`. Keep it sequential: Bun's parallel `--filter` is suspected of hanging on Windows.
+- `bun run test:e2e` builds `apps/web` against a local API on port 8787, serves the static build with `wrangler dev` the way production serves it, and runs the Playwright test in `apps/web/e2e/`. It records a video and a screenshot per test in `apps/web/test-results/`. Run `bunx playwright install chromium` in `apps/web` once. CI runs it in the E2E workflow and uploads `test-results` as an artifact. When another agent may run it too, set `E2E_API_PORT` and `E2E_WEB_PORT` to free ports (defaults 8787 and 3100).
 - `bun run dev:web` serves the web app on port 3001 against production. Set `NUXT_PUBLIC_API_BASE=http://localhost:3000` to use the API from `bun run dev`.
 - `bun run test:api` starts the Worker in workerd and runs the black-box HTTP tests in `apps/api/test-api/` against it. Set `BASE_URL` to test another server, such as production.
 - `tofu -chdir=infrastructure validate` checks the infrastructure. CI also runs `tofu fmt -check -recursive`.
@@ -22,8 +22,6 @@ Bun workspaces monorepo for a Riftbound card API. Production is the API on `http
 Black-box and end-to-end tests run against the real card snapshot, which changes daily. Assert on shapes and relations between responses, never on specific cards.
 
 `packages/ui` and `apps/web` pin TypeScript 6 because `vue-tsc` needs the TypeScript JavaScript API, which TypeScript 7 does not ship. The other workspaces use TypeScript 7.
-
-On Windows, `bun run check` sometimes hangs in the step that runs every workspace's tests in parallel. If it runs for more than a minute, stop it and run the steps one by one.
 
 ## Ship
 
@@ -42,6 +40,10 @@ After a new or changed custom domain, Cloudflare answers with an empty, cacheabl
 - Never run `wrangler deploy`. OpenTofu owns both Workers and their settings, and wrangler would overwrite them. Wrangler is only for `bun run dev`, `wrangler dev` and bundling.
 - Write self-documenting code and avoid comments.
 - Infrastructure changes go through `infrastructure/` and a pull request, never through the dashboard or the Cloudflare API.
+- Base every pull request on `main`, never on another feature branch: GitHub closes a pull request when its base branch is deleted on merge. Force-pushes are denied, so update a branch by merging `main` into it.
+- Write GitHub issue, pull request and comment bodies to a file and pass the file (`gh pr create --body-file`, `gh api ... -F body=@file`), never inline through the shell. Then read the rendered result back with `gh pr view` or `gh issue view`.
+- Name scratch files after the task or branch, such as `pr-body-<branch>.md`, never a generic name. Parallel agents share the scratchpad directory and overwrite each other's files.
+- A `PostToolUse` hook in `.claude/settings.json` runs `biome format --write` on every file an agent writes or edits.
 
 ## Ask a human
 

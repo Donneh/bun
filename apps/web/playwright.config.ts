@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const apiPort = 8787;
-const webPort = 3100;
+const apiPort = Number(process.env.E2E_API_PORT ?? 8787);
+const webPort = Number(process.env.E2E_WEB_PORT ?? 3100);
 const isCi = Boolean(process.env.CI);
 
 export const apiBase = `http://127.0.0.1:${apiPort}`;
