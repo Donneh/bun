@@ -2,13 +2,14 @@
 
 [OpenTofu](https://opentofu.org) configuration that hosts [`@riftkeeper/api`](../apps/api/README.md) on Cloudflare Workers. It owns the whole deployment:
 
-| Resource                           | Purpose                                                                  |
-| ---------------------------------- | ------------------------------------------------------------------------ |
-| `cloudflare_worker`                | The Worker and its settings. Logs are on and `workers.dev` is off.       |
-| `cloudflare_worker_version`        | The code. It uploads `apps/api/dist/index.js`.                           |
-| `cloudflare_workers_deployment`    | Sends all traffic to the latest version.                                 |
-| `cloudflare_workers_custom_domain` | Serves the Worker on `hostname`. Cloudflare creates the DNS record.      |
-| `cloudflare_zone_setting`          | Turns on Always Use HTTPS, so `http://` requests redirect to `https://`. |
+| Resource                           | Purpose                                                                                                                               |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `cloudflare_worker`                | The Worker and its settings. Logs are on and `workers.dev` is off.                                                                    |
+| `cloudflare_worker_version`        | The code. It uploads `apps/api/dist/index.js`.                                                                                        |
+| `cloudflare_workers_deployment`    | Sends all traffic to the latest version.                                                                                              |
+| `cloudflare_workers_custom_domain` | Serves the Worker on `hostname`. Cloudflare creates the DNS record.                                                                   |
+| `cloudflare_zone_setting`          | Turns on Always Use HTTPS, so `http://` requests redirect to `https://`.                                                              |
+| `cloudflare_ruleset`               | Rate limits the API: an IP that sends more than 50 requests in 10 seconds to one data center is blocked with HTTP 429 for 10 seconds. |
 
 Do not run `wrangler deploy`. It rewrites the Worker settings that OpenTofu owns. Wrangler stays the tool for `bun run dev` and for bundling.
 
@@ -24,7 +25,7 @@ Do this once per Cloudflare account:
 
 1. Create the state bucket in the EU jurisdiction: `bunx wrangler r2 bucket create riftkeeper-tofu-state --jurisdiction eu` from `apps/api`, or pick the EU jurisdiction in the dashboard.
 2. Create an R2 API token with **Object Read & Write** on that bucket. Keep its access key ID and secret access key.
-3. Create a Cloudflare API token with **Workers Scripts Write** on the account, and **Workers Routes Write** and **Zone Settings Write** on the zone. Use these legacy permissions, not the newer Workers roles: the API endpoints that create a Worker and attach a custom domain accept only Workers Scripts Write.
+3. Create a Cloudflare API token with **Workers Scripts Write** on the account, and **Workers Routes Write**, **Zone Settings Write** and **Zone WAF Write** on the zone. Use these legacy permissions, not the newer Workers roles: the API endpoints that create a Worker and attach a custom domain accept only Workers Scripts Write.
 
 ## Deploy from GitHub
 
