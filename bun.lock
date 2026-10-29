@@ -13,6 +13,7 @@
       "dependencies": {
         "@hono/zod-validator": "^0.9.1",
         "@riftkeeper/cards": "workspace:*",
+        "@riftkeeper/search": "workspace:*",
         "hono": "^4.13.14",
         "zod": "^4.6.7",
       },

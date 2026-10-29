@@ -2,11 +2,13 @@ import type { Card } from "@riftkeeper/cards";
 import { Hono } from "hono";
 import { createCardsRoutes } from "./cards/cards.routes.ts";
 import { errorBody } from "./http/errors.ts";
+import { createSearchRoutes } from "./search/search.routes.ts";
 
 export function createApp({ cards }: { cards: readonly Card[] }) {
   return new Hono()
     .get("/health", (c) => c.json({ data: { status: "ok", cards: cards.length } }, 200))
     .route("/cards", createCardsRoutes({ cards }))
+    .route("/search", createSearchRoutes({ cards }))
     .notFound((c) =>
       c.json(errorBody({ code: "not_found", message: `No route for ${c.req.method} ${c.req.path}` }), 404),
     )
