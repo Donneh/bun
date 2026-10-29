@@ -1,14 +1,6 @@
 import type { Card, Printing } from "@riftkeeper/cards";
 import type { SearchNode } from "./ast.ts";
-import type { ComparisonOperator, Filter, FilterField } from "./filter.ts";
-
-type FilterOf<F extends FilterField> = Filter extends infer Member
-  ? Member extends { field: infer Field }
-    ? F extends Field
-      ? Member
-      : never
-    : never
-  : never;
+import type { ComparisonOperator, Filter, FilterField, FilterOf } from "./filter.ts";
 
 type FilterMatchers = {
   [F in FilterField]: (filter: FilterOf<F>, card: Card, printing: Printing) => boolean;

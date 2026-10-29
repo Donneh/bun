@@ -25,3 +25,11 @@ export type Filter =
   | { readonly field: TextField; readonly text: string };
 
 export type FilterField = Filter["field"];
+
+export type FilterOf<F extends FilterField> = Filter extends infer Member
+  ? Member extends { field: infer Field }
+    ? F extends Field
+      ? Member
+      : never
+    : never
+  : never;
