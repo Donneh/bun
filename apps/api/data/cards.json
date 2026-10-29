@@ -1343,7 +1343,7 @@
     "powerCost": 1,
     "might": 4,
     "mightBonus": null,
-    "ability": "Your spells and abilities deal 1 Bonus Damage. (Each instance of damage the spell deals is increased by 1.)",
+    "ability": "Your spells and abilities deal 1 Bonus Damage. (Each instance of damage they deal is increased by 1.)",
     "effect": null,
     "tags": [
       "Annie",
@@ -2790,7 +2790,7 @@
         },
         "collectorNumber": 147,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "黯荧岛Dark Glow",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/97d0f7aa81f67bf8f4a19099c648a23a2df169ae-744x1039.png",
         "orientation": "portrait"
@@ -2887,7 +2887,7 @@
         },
         "collectorNumber": 230,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Oussama Agazzoum",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/5099aa2938091dfcc54277877e320a7f83aeeec1-744x1039.png",
         "orientation": "portrait"
@@ -2901,7 +2901,7 @@
         },
         "collectorNumber": 230,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Oussama Agazzoum",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/8d270600e9ec7472cbb51eb56ad0799b7be38c7b-744x1039.png",
         "orientation": "portrait"
@@ -4144,7 +4144,7 @@
         },
         "collectorNumber": 228,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Kindlejack",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/b4095d98aff998fda5a08d4c32e97a2a66ccf1e6-744x1039.png",
         "orientation": "portrait"
@@ -4158,7 +4158,7 @@
         },
         "collectorNumber": 228,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Kindlejack",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/75ff8f0b0a4ea110dd4af5b14c23da804481387a-744x1039.png",
         "orientation": "portrait"
@@ -4275,7 +4275,7 @@
         },
         "collectorNumber": 87,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "Grafit Studio",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/d6c05e13dfb9ce38cc4d829d33acaf1560abe62a-744x1039.png",
         "orientation": "portrait"
@@ -4700,7 +4700,7 @@
     "powerCost": null,
     "might": 5,
     "mightBonus": null,
-    "ability": "As you play me, you may discard 1 as an additional cost. If you do, reduce my cost by :rb_energy_2:.",
+    "ability": "As you play me, you may discard a card as an additional cost. If you do, reduce my cost by :rb_energy_2:.",
     "effect": null,
     "tags": [
       "Bilgewater",
@@ -4979,7 +4979,7 @@
     ],
     "energyCost": null,
     "powerCost": null,
-    "might": null,
+    "might": 1,
     "mightBonus": null,
     "ability": "A unit may have no more than one buff at a time.",
     "effect": null,
@@ -6861,8 +6861,8 @@
     ]
   },
   {
-    "id": "corinna-veraza",
-    "name": "Corinna Veraza",
+    "id": "corina-veraza",
+    "name": "Corina Veraza",
     "subtitle": null,
     "type": "unit",
     "supertype": null,
@@ -7733,7 +7733,7 @@
         },
         "collectorNumber": 225,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9b097e8f9866788e0de2bfada48627c752d3e4b9-744x1039.png",
         "orientation": "portrait"
@@ -8254,7 +8254,7 @@
         },
         "collectorNumber": 235,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Valentine Tran",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/656450f89be4dc253438a4e0af7f7638ed5f90b2-744x1039.png",
         "orientation": "portrait"
@@ -8268,7 +8268,7 @@
         },
         "collectorNumber": 235,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Valentine Tran",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/78a3153e914b2124cdc918f3134a8087b342caf7-744x1039.png",
         "orientation": "portrait"
@@ -8960,7 +8960,7 @@
         },
         "collectorNumber": 79,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/f538c2659c02af20a173503784989e39a0c291f6-744x1039.png",
         "orientation": "portrait"
@@ -9010,7 +9010,7 @@
         },
         "collectorNumber": 149,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/d9082f75895c8645e05c0a38edc1b1c83c508d84-744x1039.png",
         "orientation": "portrait"
@@ -10712,7 +10712,7 @@
         },
         "collectorNumber": 118,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "TUTU",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/42d3ce7a0917d57fd9e5809f4d8b66ef40f52d1a-744x1039.png",
         "orientation": "portrait"
@@ -12894,7 +12894,7 @@
     "powerCost": 2,
     "might": null,
     "mightBonus": null,
-    "ability": "[Reaction]\nChoose one —\n- Counter a spell.\n- Play four 1 :rb_might: Bird unit tokens with [Deflect]. (Opponents must pay :rb_rune_rainbow: to choose them with a spell or ability.)",
+    "ability": "[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose one —\n- Counter a spell.\n- Play four 1 :rb_might: Bird unit tokens with [Deflect]. (Opponents must pay :rb_rune_rainbow: to choose them with a spell or ability.)",
     "effect": null,
     "tags": [],
     "printings": [
@@ -14335,7 +14335,7 @@
         },
         "collectorNumber": 232,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Hozure",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/d044ea46fa38cff80c39fdb0b890dd7226c22b89-744x1039.png",
         "orientation": "portrait"
@@ -14349,7 +14349,7 @@
         },
         "collectorNumber": 232,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Hozure",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/748c7cb9574c8805d7fdbaba0f2471af06cceae3-744x1039.png",
         "orientation": "portrait"
@@ -14733,7 +14733,7 @@
         },
         "collectorNumber": 233,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Michelle Mauk",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/d200178cde5075990f7ca1856675d02c4c2538be-744x1039.png",
         "orientation": "portrait"
@@ -14747,7 +14747,7 @@
         },
         "collectorNumber": 233,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Michelle Mauk",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/76283fb4384cf39408489f35d00827e0d5b1f9bb-744x1039.png",
         "orientation": "portrait"
@@ -15008,7 +15008,7 @@
     "powerCost": 1,
     "might": null,
     "mightBonus": null,
-    "ability": "Return up to two cards with [Hidden] from your trash to your hand. You can hide cards ignoring costs this turn.",
+    "ability": "Return up to two cards with [Hidden] from your trash to your hand. You can hide ignoring costs this turn.",
     "effect": null,
     "tags": [
       "Teemo"
@@ -17842,7 +17842,7 @@
         },
         "collectorNumber": 177,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/72462350a7842b6b81c022ac255ae0e82f3559fd-744x1039.png",
         "orientation": "portrait"
@@ -17892,7 +17892,7 @@
         },
         "collectorNumber": 51,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/4564b2f80dd53a8bcbca1633eb1ef69455692c58-744x1039.png",
         "orientation": "portrait"
@@ -18468,7 +18468,7 @@
         },
         "collectorNumber": 89,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/992e0a23ba7ad3fe88410f023bb1311195e1863a-744x1039.png",
         "orientation": "portrait"
@@ -18518,7 +18518,7 @@
         },
         "collectorNumber": 22,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/0e67164270e12b8d91905e977a314c7248a343e9-744x1039.png",
         "orientation": "portrait"
@@ -19224,7 +19224,7 @@
         },
         "collectorNumber": 237,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "KK Zhang",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/41321ddb3b1c63492285d1c3d067ee42ade502e4-744x1039.png",
         "orientation": "portrait"
@@ -19238,7 +19238,7 @@
         },
         "collectorNumber": 237,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "KK Zhang",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/c2b3ae8c4beac316128a8b7b1704a221abedec8e-744x1039.png",
         "orientation": "portrait"
@@ -19461,7 +19461,7 @@
         },
         "collectorNumber": 119,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/6998b6c309c93d549284638ff0a3e20c75691978-744x1039.png",
         "orientation": "portrait"
@@ -19525,7 +19525,7 @@
         },
         "collectorNumber": 143,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/b1e7f8762aba8ecf571eb0c83bba8874703dc8be-744x1039.png",
         "orientation": "portrait"
@@ -20327,7 +20327,7 @@
         },
         "collectorNumber": 90,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/0850c122c2528fadab0fa95ae1fd329288208afe-744x1039.png",
         "orientation": "portrait"
@@ -20377,7 +20377,7 @@
         },
         "collectorNumber": 172,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/d18932d3dddd203c6f68f30279f3886ec2e7130a-744x1039.png",
         "orientation": "portrait"
@@ -20854,7 +20854,7 @@
         },
         "collectorNumber": 82,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/b06072002316a5b86f11750bbe21e9dfb94be08d-744x1039.png",
         "orientation": "portrait"
@@ -20905,7 +20905,7 @@
         },
         "collectorNumber": 58,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/92cdae8b6bfef70d0a38761f1dc4aa771a37753a-744x1039.png",
         "orientation": "portrait"
@@ -21024,7 +21024,7 @@
         },
         "collectorNumber": 221,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/82b7043ef6519a4c7e2eb7d45cb6ae91dfd749ca-744x1039.png",
         "orientation": "portrait"
@@ -22193,7 +22193,7 @@
         },
         "collectorNumber": 113,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/1adb032501aac0070ea1bb0ca31c4efa11cd31a3-744x1039.png",
         "orientation": "portrait"
@@ -22243,7 +22243,7 @@
         },
         "collectorNumber": 59,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/cb53c3b70820fca73540223addbe5369b5267e15-744x1039.png",
         "orientation": "portrait"
@@ -23896,7 +23896,7 @@
         },
         "collectorNumber": 224,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/2fdb5e1ff9aae4137910fa59065b69ef17144752-744x1039.png",
         "orientation": "portrait"
@@ -26226,7 +26226,7 @@
         },
         "collectorNumber": 229,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Jonathan Santoro",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/08c48ad82381bb5830a0b413d7a2f25dd2b20d76-744x1039.png",
         "orientation": "portrait"
@@ -26240,7 +26240,7 @@
         },
         "collectorNumber": 229,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Jonathan Santoro",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/0febae9c611339d9ed65c7ebe43237b5ec42c9a3-744x1039.png",
         "orientation": "portrait"
@@ -26530,7 +26530,7 @@
         },
         "collectorNumber": 222,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/c6c996fcead364682a031f32948a084101d83493-744x1039.png",
         "orientation": "portrait"
@@ -26581,7 +26581,7 @@
         },
         "collectorNumber": 178,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/e171fc13d69ea7bafb03982cf0f8233d2830c1d2-744x1039.png",
         "orientation": "portrait"
@@ -26632,7 +26632,7 @@
         },
         "collectorNumber": 116,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/c0efda4bdfea473f7b9f3fb4ba482990795283a4-744x1039.png",
         "orientation": "portrait"
@@ -26850,7 +26850,7 @@
         },
         "collectorNumber": 220,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/0c91b90d91c4f988aa9942dd9e06a634a66c6975-744x1039.png",
         "orientation": "portrait"
@@ -27051,7 +27051,7 @@
         },
         "collectorNumber": 227,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Duy Nguyen",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/1f80a016015ebc77bd3d23ce471e364d70698279-744x1039.png",
         "orientation": "portrait"
@@ -27065,7 +27065,7 @@
         },
         "collectorNumber": 227,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Duy Nguyen",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9bfffdcab9899c4b0d94ab31d138edd7d2f8e4f1-744x1039.png",
         "orientation": "portrait"
@@ -27620,7 +27620,7 @@
         },
         "collectorNumber": 28,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/583f1c15c1bdc47c9d4ebb41a210c182262c8ee9-744x1039.png",
         "orientation": "portrait"
@@ -27670,7 +27670,7 @@
         },
         "collectorNumber": 145,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Six More Vodka",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/14a9712798a0b13bfa29ed841f171a21e7fdf035-744x1039.png",
         "orientation": "portrait"
@@ -28738,7 +28738,7 @@
         },
         "collectorNumber": 29,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "JunHuan",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/69d4208b748074b68f775cdfa8f1d2ba20ece8ae-744x1039.png",
         "orientation": "portrait"
@@ -29410,7 +29410,7 @@
         },
         "collectorNumber": 120,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/7e6d106e0170e7f45341c1755f829f286d782bb7-744x1039.png",
         "orientation": "portrait"
@@ -29475,7 +29475,7 @@
         },
         "collectorNumber": 24,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/cdab60d27d6d920f19ebed000b13dc25a439848c-744x1039.png",
         "orientation": "portrait"
@@ -29865,7 +29865,7 @@
         },
         "collectorNumber": 179,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "Grafit Studio",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/e8fe608bffa46642e454b0b34f7524c5daef299e-744x1039.png",
         "orientation": "portrait"
@@ -31316,7 +31316,7 @@
         },
         "collectorNumber": 234,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Lisha Du",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/8bd4006c34aa020211e501e3cb7ee14ab5b4c41f-744x1039.png",
         "orientation": "portrait"
@@ -31330,7 +31330,7 @@
         },
         "collectorNumber": 234,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Lisha Du",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9782a99fcb36b09adc5d97cdc29595682f26220d-744x1039.png",
         "orientation": "portrait"
@@ -31874,7 +31874,7 @@
     "powerCost": null,
     "might": null,
     "mightBonus": null,
-    "ability": "When you conquer here, draw 1 for each other battlefield you or allies control..",
+    "ability": "When you conquer here, draw 1 for each other battlefield you or allies control.",
     "effect": null,
     "tags": [],
     "printings": [
@@ -33593,8 +33593,8 @@
     ]
   },
   {
-    "id": "sky-crusier",
-    "name": "Sky Crusier",
+    "id": "sky-cruiser",
+    "name": "Sky Cruiser",
     "subtitle": null,
     "type": "unit",
     "supertype": null,
@@ -35662,7 +35662,7 @@
     "powerCost": null,
     "might": 6,
     "mightBonus": null,
-    "ability": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhen a stunned enemy unit dies here, draw 1.",
+    "ability": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhen a stunned enemy unit here dies, draw 1.",
     "effect": null,
     "tags": [],
     "printings": [
@@ -36284,7 +36284,7 @@
     "powerCost": 2,
     "might": null,
     "mightBonus": null,
-    "ability": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Action] (Play on your turn or in showdowns.)\nSwap the Might of two units at the same battlefield this turn.",
+    "ability": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Action] (Play on your turn or in showdowns.)\nSwap the Mights of two units at the same battlefield this turn.",
     "effect": null,
     "tags": [],
     "printings": [
@@ -38716,7 +38716,7 @@
     "powerCost": null,
     "might": 5,
     "mightBonus": null,
-    "ability": ":rb_exhaust:: Play two :rb_energy_1: :rb_might: Bird unit tokens with [Deflect]. Use this ability only while I'm at a battlefield. (Opponents must pay :rb_rune_rainbow: to choose a [Deflect] unit with a spell or ability.)",
+    "ability": ":rb_exhaust:: Play two 1 :rb_might: Bird unit tokens with [Deflect]. Use this ability only while I'm at a battlefield. (Opponents must pay :rb_rune_rainbow: to choose a [Deflect] unit with a spell or ability.)",
     "effect": null,
     "tags": [
       "Freljord",
@@ -38752,7 +38752,7 @@
     "powerCost": 2,
     "might": null,
     "mightBonus": null,
-    "ability": "Exhaust all friendly units, then deal 12 to ALL units at battlefields.",
+    "ability": "Exhaust all friendly units, then deal 12 to all units at battlefields.",
     "effect": null,
     "tags": [],
     "printings": [
@@ -39587,7 +39587,7 @@
         },
         "collectorNumber": 223,
         "variant": "standard",
-        "rarity": "common",
+        "rarity": "showcase",
         "artist": "FOREDAWN",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/337f38fae6a4d801fc14abcda2a7d09c3e7e6ae3-744x1039.png",
         "orientation": "portrait"
@@ -39638,7 +39638,7 @@
         },
         "collectorNumber": 150,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9dd2a50fcfe6258ef934bdcf73b2fdb19d18ea94-744x1039.png",
         "orientation": "portrait"
@@ -39726,7 +39726,7 @@
         },
         "collectorNumber": 55,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/9594ce4be31689c364a43954a541c4391fe0d4f3-744x1039.png",
         "orientation": "portrait"
@@ -39826,7 +39826,7 @@
         },
         "collectorNumber": 30,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/646df8e81d42025a558112775fc1032c86cab2d0-744x1039.png",
         "orientation": "portrait"
@@ -39876,7 +39876,7 @@
         },
         "collectorNumber": 176,
         "variant": "alt-art",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "League Splash Team",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/6bde3fc4f76015d36d70e86c8fbcc3b6b7aa43dd-744x1039.png",
         "orientation": "portrait"
@@ -40075,7 +40075,7 @@
         },
         "collectorNumber": 60,
         "variant": "alt-art",
-        "rarity": "epic",
+        "rarity": "showcase",
         "artist": "Envar Studio",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/229efda03d93b27741b8f9e86e1151b5c2a5095f-744x1039.png",
         "orientation": "portrait"
@@ -40158,7 +40158,7 @@
         },
         "collectorNumber": 226,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Blaine Burgos",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/47f10693258104e9373396165e335014bf5783a2-744x1039.png",
         "orientation": "portrait"
@@ -40172,7 +40172,7 @@
         },
         "collectorNumber": 226,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Blaine Burgos",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/94fb0a4944da2427ce615dd2c311a2c9bc781fd2-744x1039.png",
         "orientation": "portrait"
@@ -40480,7 +40480,7 @@
         },
         "collectorNumber": 236,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Jeffrey Chen",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/ffed0102adcae6fe01d173042487ea85ebe899bc-744x1039.png",
         "orientation": "portrait"
@@ -40494,7 +40494,7 @@
         },
         "collectorNumber": 236,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Jeffrey Chen",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/e3bff5dc4489376697823d056b42eba7b90566b6-744x1039.png",
         "orientation": "portrait"
@@ -40564,7 +40564,7 @@
     "powerCost": 2,
     "might": 10,
     "mightBonus": null,
-    "ability": "[Shield 3] (+3 :rb_might: while I'm a defender.)\n[Tank] (I must be assigned combat damage first.)\nWhen an opponent moves to a battlefield other than mine, draw 1. (Bases are not battlefield.)",
+    "ability": "[Shield 3] (+3 :rb_might: while I'm a defender.)\n[Tank] (I must be assigned combat damage first.)\nWhen an opponent moves to a battlefield other than mine, draw 1. (Bases are not battlefields.)",
     "effect": null,
     "tags": [
       "Freljord",
@@ -40950,7 +40950,7 @@
     "domains": [
       "chaos"
     ],
-    "energyCost": 3,
+    "energyCost": 4,
     "powerCost": 1,
     "might": null,
     "mightBonus": null,
@@ -41535,7 +41535,7 @@
         },
         "collectorNumber": 231,
         "variant": "standard",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Shawn Lee",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/557e41d84ac36ffa2bf805deda159f45e0a815f9-744x1039.png",
         "orientation": "portrait"
@@ -41549,7 +41549,7 @@
         },
         "collectorNumber": 231,
         "variant": "signed",
-        "rarity": "rare",
+        "rarity": "showcase",
         "artist": "Shawn Lee",
         "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/ebc612b2bf6003be8019930e059f0ac119997bc8-744x1039.png",
         "orientation": "portrait"
