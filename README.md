@@ -7,6 +7,7 @@ Bun workspaces monorepo for Riftkeeper, a card API for the Riftbound trading car
 | `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                     |
 | `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md)) |
 | `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                          |
+| `packages/search` | `@riftkeeper/search`, the card search query language, matching and sorting                                       |
 | `infrastructure/` | OpenTofu configuration that deploys the API to Cloudflare Workers ([README](infrastructure/README.md))           |
 
 New apps go in `apps/` and shared packages in `packages/`. Both folders are workspaces.
