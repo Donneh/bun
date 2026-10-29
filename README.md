@@ -2,13 +2,15 @@
 
 Bun workspaces monorepo for Riftkeeper, a card API for the Riftbound trading card game.
 
-| Path              | Contents                                                                                                         |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                     |
-| `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md)) |
-| `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                          |
-| `packages/search` | `@riftkeeper/search`, the card search query language, matching and sorting                                       |
-| `infrastructure/` | OpenTofu configuration that deploys the API to Cloudflare Workers ([README](infrastructure/README.md))           |
+| Path              | Contents                                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                      |
+| `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md))  |
+| `apps/web`        | `@riftkeeper/web`, the Nuxt search page that calls the API ([README](apps/web/README.md))                         |
+| `packages/ui`     | `@riftkeeper/ui`, the Vue components and design tokens the web app renders with ([README](packages/ui/README.md)) |
+| `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                           |
+| `packages/search` | `@riftkeeper/search`, the card search query language, matching and sorting                                        |
+| `infrastructure/` | OpenTofu configuration that deploys the API to Cloudflare Workers ([README](infrastructure/README.md))            |
 
 New apps go in `apps/` and shared packages in `packages/`. Both folders are workspaces.
 
@@ -28,12 +30,14 @@ Run these from this folder:
 
 ```sh
 bun run dev         # run the API in the local Workers runtime on http://localhost:3000
+bun run dev:web     # run the web app on http://localhost:3001 against https://api.riftkeeper.app
 bun run scrape      # refresh apps/api/data/cards.json, flags as in apps/ingest/README.md
-bun run test        # bun test in every workspace
+bun run test        # unit tests in every workspace, and the component tests in packages/ui
 bun run test:api    # black-box HTTP tests against the API running in workerd
+bun run test:e2e    # Playwright test of the web app against a local API, see apps/web/README.md
 bun run benchmark   # search latency per query under V8, see apps/api/README.md
-bun run typecheck   # tsc in every workspace
-bun run build       # bundle the API Worker with wrangler deploy --dry-run, without deploying
+bun run typecheck   # tsc, vue-tsc and nuxt typecheck in every workspace
+bun run build       # bundle the API Worker without deploying, and build the web app
 bun run deploy      # build the API and tofu apply it to Cloudflare, see infrastructure/README.md
 bun run lint        # biome lint over the whole repository
 bun run format      # biome format --write over the whole repository
