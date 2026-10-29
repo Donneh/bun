@@ -1,7 +1,6 @@
-import { parseCardSnapshot } from "@riftkeeper/cards/snapshot";
 import { decompose, parseQuery, type SortDirection, type SortKey, searchCards } from "@riftkeeper/search";
-import snapshot from "../data/cards.json";
 import { createApp } from "../src/app.ts";
+import { cards } from "../src/cards/card-snapshot.ts";
 
 interface BenchmarkCase {
   readonly name: string;
@@ -14,7 +13,6 @@ interface BenchmarkCase {
 
 const WARMUP_ITERATIONS = 50;
 const MEASURED_ITERATIONS = 300;
-const SNAPSHOT_ITERATIONS = 30;
 
 const CASES: readonly BenchmarkCase[] = [
   { name: "empty query", q: "", expectMatches: true },
@@ -51,17 +49,9 @@ function ms(value: number) {
   return value.toFixed(3);
 }
 
-const cards = parseCardSnapshot({ json: snapshot, path: "apps/api/data/cards.json" });
 const app = createApp({ cards });
 const failures: string[] = [];
 let checksum = 0;
-
-const snapshotSamples: number[] = [];
-for (let i = 0; i < SNAPSHOT_ITERATIONS; i++) {
-  const start = performance.now();
-  checksum += parseCardSnapshot({ json: snapshot, path: "apps/api/data/cards.json" }).length;
-  snapshotSamples.push(performance.now() - start);
-}
 
 const rows = [];
 for (const benchmark of CASES) {
@@ -126,8 +116,6 @@ for (const benchmark of CASES) {
 const runtime = typeof Bun === "undefined" ? `node ${process.version}` : `bun ${Bun.version}`;
 console.log(`Search benchmark on ${runtime}, ${cards.length} cards, ${MEASURED_ITERATIONS} measured runs per case`);
 console.table(rows);
-const startup = percentiles(snapshotSamples);
-console.log(`Snapshot validation (cold start work): p50 ${ms(startup.p50)} ms, p99 ${ms(startup.p99)} ms`);
 console.log(`Failures: ${failures.length}${failures.length > 0 ? `\n${failures.join("\n")}` : ""}`);
 console.log(`Checksum: ${checksum}`);
 process.exitCode = failures.length > 0 ? 1 : 0;
