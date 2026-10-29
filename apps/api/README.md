@@ -20,6 +20,7 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 
 | Method | Path         | Response                                          |
 | ------ | ------------ | ------------------------------------------------- |
+| GET    | `/health`    | `200 { data: { status: "ok", cards: number } }`   |
 | GET    | `/cards`     | `200 { data: Card[] }`                            |
 | GET    | `/cards/:id` | `200 { data: Card }`, `400` bad id, `404` no card |
 
@@ -43,7 +44,7 @@ Set `BASE_URL` to run the same tests against another server instead:
 BASE_URL=https://api.example.com bun run test:api
 ```
 
-The deploy workflow does this after every deploy, as a smoke test. With `BASE_URL` set, the runner first waits up to 3 minutes for `/cards` to answer with JSON, because a new custom domain answers with an empty 404 for about a minute before it routes to the Worker.
+The deploy workflow does this after every deploy, as a smoke test. With `BASE_URL` set, the runner first waits up to 3 minutes for `/health` to answer with JSON, because a new custom domain answers with an empty 404 for about a minute before it routes to the Worker.
 
 ## Check
 

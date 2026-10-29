@@ -79,3 +79,9 @@ resource "cloudflare_workers_custom_domain" "api" {
 
   depends_on = [cloudflare_workers_deployment.api]
 }
+
+resource "cloudflare_zone_setting" "always_use_https" {
+  zone_id    = var.zone_id
+  setting_id = "always_use_https"
+  value      = "on"
+}

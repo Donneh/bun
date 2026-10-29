@@ -9,6 +9,9 @@ if (!baseUrl) {
 
 const CardListResponseSchema = z.object({ data: z.tuple([CardSchema], CardSchema) });
 const CardResponseSchema = z.object({ data: CardSchema });
+const HealthResponseSchema = z.object({
+  data: z.object({ status: z.literal("ok"), cards: z.number().int().positive() }),
+});
 const ErrorResponseSchema = z.object({ error: z.object({ code: z.string(), message: z.string().min(1) }) });
 
 async function get(path: string) {
@@ -22,6 +25,15 @@ async function getCardList() {
   expect(status).toBe(200);
   return CardListResponseSchema.parse(body).data;
 }
+
+describe("GET /health", () => {
+  test("reports ok with the loaded snapshot", async () => {
+    const { status, body } = await get("/health");
+
+    expect(status).toBe(200);
+    expect(HealthResponseSchema.parse(body).data.status).toBe("ok");
+  });
+});
 
 describe("GET /cards", () => {
   test("returns the card snapshot", async () => {
