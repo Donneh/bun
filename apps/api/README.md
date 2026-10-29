@@ -99,7 +99,7 @@ Set `BASE_URL` to run the same tests against another server instead:
 BASE_URL=https://api.example.com bun run test:api
 ```
 
-The deploy workflow does this after every deploy, as a smoke test. It also sets `EXPECTED_VERSION` to the Worker version it just deployed, and the runner waits until `/health` reports that version, because Cloudflare keeps serving the previous version in some locations for a short while after a deploy. `.github/workflows/monitor.yml` also runs the suite against production every 15 minutes; GitHub emails the repository owner when a run fails. With `BASE_URL` set, the runner first waits up to 3 minutes for `/health` to answer with JSON, because a new custom domain answers with an empty 404 for about a minute before it routes to the Worker.
+The deploy workflow does this after every deploy, as a smoke test. It also sets `EXPECTED_VERSION` to the Worker version it just deployed, and the runner waits until `/health` reports that version, because Cloudflare keeps serving the previous version in some locations for a short while after a deploy. `.github/workflows/monitor.yml` also runs the suite against production, and the website smoke test against `https://riftkeeper.app`, at minutes 7, 22, 37 and 52 of every hour. GitHub emails the repository owner when a scheduled run fails. GitHub can delay or drop scheduled runs under load, so this is best effort. For alerting that does not depend on GitHub, add an external monitor such as Better Stack, which checks from outside every few minutes. With `BASE_URL` set, the runner first waits up to 3 minutes for `/health` to answer with JSON, because a new custom domain answers with an empty 404 for about a minute before it routes to the Worker.
 
 ## Check
 
