@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "riftkeeper-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-23",
+  "dev": {
+    "port": 3000
+  }
+}

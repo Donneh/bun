@@ -1,0 +1,18 @@
+{
+  "name": "@riftkeeper/ingest",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "scrape": "bun src/scrape.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@riftkeeper/cards": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2"
+  }
+}

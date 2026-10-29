@@ -1,0 +1,22 @@
+{
+  "name": "riftkeeper",
+  "private": true,
+  "packageManager": "bun@1.4.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter @riftkeeper/api dev",
+    "scrape": "bun run --filter @riftkeeper/ingest scrape",
+    "test": "bun run --filter \"*\" test",
+    "typecheck": "bun run --filter \"*\" typecheck",
+    "build": "bun run --filter \"*\" build",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "check": "biome check && bun run typecheck && bun run test && bun run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3"
+  }
+}
