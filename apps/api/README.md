@@ -62,11 +62,19 @@ Bare words search the card name with its subtitle (`Annie, Fiery`) and match tag
 | Variant     | `variant`                   | `variant:alt-art`                                 |
 | Set         | `set`, `s`                  | `s:ogn`, `s:origins`                              |
 | Artist      | `artist`, `a`               | `a:kudos`                                         |
-| Card text   | `ability`                   | `ability:"draw a card"`                           |
+| Card text   | `ability`                   | `ability:"draw 1"`                                |
 
 Numbers take `=`, `!=`, `<`, `<=`, `>` and `>=`. In a domain value, `,` means any of, `+` means all of and `-` means none of. Quote values with spaces. Combine with `and` (or just a space), `or`, `not` (or `-`) and parentheses, for example `(c:fury or c:chaos) -type:spell cost:<=3`.
 
 `promo`, `owned`, `flavor`, `legal` and `keyword` existed in the old API; they are not supported yet and come back as warnings.
+
+## Benchmark
+
+`bun run benchmark:v8` bundles `scripts/benchmark.ts` and runs it under Node, which uses V8 like workerd. `bun run benchmark` runs it under Bun for a quicker look; Bun uses a different engine, so its numbers differ. The workspace root `bun run benchmark` runs the V8 version.
+
+For each query it warms up, then reports p50 and p99 of the search core (parse, match, sort, page, decompose) and p50, p95 and p99 of the full request through the Hono app, including JSON serialization, plus the response size. It also times the snapshot validation that runs on every cold start. It exits with an error when a query that should match returns nothing or a request does not return 200, so a broken query cannot produce a fast number.
+
+These are warm, in-process numbers. Production requests on lightly used Worker instances also pay for cold starts and unoptimized code; compare with CPU and wall time per route in Workers Observability.
 
 ## Card snapshot
 
