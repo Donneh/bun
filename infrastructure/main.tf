@@ -93,3 +93,23 @@ resource "cloudflare_zone_setting" "always_use_https" {
   setting_id = "always_use_https"
   value      = "on"
 }
+
+resource "cloudflare_ruleset" "rate_limit" {
+  zone_id = var.zone_id
+  name    = "Rate limit the API"
+  kind    = "zone"
+  phase   = "http_ratelimit"
+
+  rules = [{
+    ref         = "api_requests_per_ip"
+    description = "Block an IP for 10 seconds after 50 requests in 10 seconds"
+    expression  = "http.host eq \"${var.hostname}\""
+    action      = "block"
+    ratelimit = {
+      characteristics     = ["cf.colo.id", "ip.src"]
+      period              = 10
+      requests_per_period = 50
+      mitigation_timeout  = 10
+    }
+  }]
+}

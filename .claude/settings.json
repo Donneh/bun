@@ -46,8 +46,7 @@
       "Bash(tofu -chdir=infrastructure destroy:*)",
       "Bash(gh secret:*)",
       "Bash(gh variable:*)",
-      "Bash(gh api:*)",
-      "mcp__cloudflare__execute"
+      "Bash(gh api:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
