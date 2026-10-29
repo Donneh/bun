@@ -1,14 +1,6 @@
 import type { FilterNode, SearchNode } from "./ast.ts";
 import type { Decomposition, FilterChip, FilterChipValue } from "./decomposition.ts";
-import type { Filter, FilterField } from "./filter.ts";
-
-type FilterOf<F extends FilterField> = Filter extends infer U
-  ? U extends Filter
-    ? F extends U["field"]
-      ? U & { readonly field: F }
-      : never
-    : never
-  : never;
+import type { FilterField, FilterOf } from "./filter.ts";
 
 interface FieldMapping<F extends FilterField> {
   readonly label: string;
