@@ -3,7 +3,14 @@
   "compilerOptions": {
     "composite": true,
     "lib": ["ESNext", "DOM"],
-    "types": ["node"]
+    "types": ["node", "bun"]
   },
-  "include": ["e2e", "production", "playwright.config.ts", "playwright.production.config.ts"]
+  "include": [
+    "e2e",
+    "production",
+    "unit",
+    "app/utils/card-images.ts",
+    "playwright.config.ts",
+    "playwright.production.config.ts"
+  ]
 }

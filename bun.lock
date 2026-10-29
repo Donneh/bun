@@ -47,6 +47,7 @@
         "@playwright/test": "^1.64.1",
         "@riftkeeper/cards": "workspace:*",
         "@riftkeeper/search": "workspace:*",
+        "@types/bun": "^1.4.4",
         "@types/node": "^24.0.0",
         "typescript": "~6.0.3",
         "vue-tsc": "^3.3.13",

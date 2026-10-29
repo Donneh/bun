@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import type { CardOrientation } from "./card-summary.ts";
 
-defineProps<{ name: string; subtitle: string | null; imageUrl: string; orientation: CardOrientation }>();
+defineProps<{
+  name: string;
+  subtitle: string | null;
+  imageUrl: string;
+  orientation: CardOrientation;
+  srcset?: string;
+  sizes?: string;
+}>();
 </script>
 
 <template>
   <figure class="tile" :class="orientation">
     <div class="frame">
-      <img class="image" :src="imageUrl" :alt="name" loading="lazy" decoding="async" />
+      <img class="image" :src="imageUrl" :srcset="srcset" :sizes="sizes" :alt="name" loading="lazy" decoding="async" />
     </div>
     <figcaption class="caption">
       <span class="name">{{ name }}</span>
