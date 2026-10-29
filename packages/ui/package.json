@@ -1,0 +1,26 @@
+{
+  "name": "@riftkeeper/ui",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@testing-library/user-event": "^14.6.8",
+    "@testing-library/vue": "^8.1.0",
+    "@vitejs/plugin-vue": "^6.0.10",
+    "happy-dom": "^21.0.4",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5",
+    "vue": "^3.5.44",
+    "vue-tsc": "^3.3.13"
+  }
+}
