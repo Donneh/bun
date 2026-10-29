@@ -43,7 +43,7 @@ Set `BASE_URL` to run the same tests against another server instead:
 BASE_URL=https://api.example.com bun run test:api
 ```
 
-The deploy workflow does this after every deploy, as a smoke test.
+The deploy workflow does this after every deploy, as a smoke test. With `BASE_URL` set, the runner first waits up to 3 minutes for `/cards` to answer with JSON, because a new custom domain answers with an empty 404 for about a minute before it routes to the Worker.
 
 ## Check
 

@@ -1,6 +1,7 @@
 import type { Subprocess } from "bun";
 
-const READY_TIMEOUT_MS = 30_000;
+const LOCAL_READY_TIMEOUT_MS = 30_000;
+const REMOTE_READY_TIMEOUT_MS = 180_000;
 
 async function freePort() {
   const server = Bun.serve({ port: 0, fetch: () => new Response() });
@@ -9,20 +10,27 @@ async function freePort() {
   return port;
 }
 
-async function waitUntilServing(url: URL, worker: Subprocess) {
-  const deadline = Date.now() + READY_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    if (worker.exitCode !== null) {
-      throw new Error(`wrangler dev exited with code ${worker.exitCode} before serving ${url}`);
-    }
-    try {
-      await fetch(url);
-      return;
-    } catch {
-      await Bun.sleep(250);
-    }
+async function servesApi(baseUrl: URL) {
+  try {
+    const response = await fetch(new URL("/cards", baseUrl));
+    return response.headers.get("content-type")?.startsWith("application/json") ?? false;
+  } catch {
+    return false;
   }
-  throw new Error(`wrangler dev did not serve ${url} within ${READY_TIMEOUT_MS} ms`);
+}
+
+async function waitUntilServing(baseUrl: URL, timeoutMs: number, worker?: Subprocess) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (worker && worker.exitCode !== null) {
+      throw new Error(`wrangler dev exited with code ${worker.exitCode} before serving ${baseUrl}`);
+    }
+    if (await servesApi(baseUrl)) {
+      return;
+    }
+    await Bun.sleep(1_000);
+  }
+  throw new Error(`${baseUrl.origin} did not serve the API within ${timeoutMs} ms`);
 }
 
 async function startLocalWorker() {
@@ -42,7 +50,7 @@ async function startLocalWorker() {
   );
   const baseUrl = new URL(`http://127.0.0.1:${port}`);
   try {
-    await waitUntilServing(baseUrl, worker);
+    await waitUntilServing(baseUrl, LOCAL_READY_TIMEOUT_MS, worker);
   } catch (error) {
     worker.kill();
     throw error;
@@ -60,7 +68,9 @@ async function runSuite(baseUrl: URL) {
 }
 
 if (process.env.BASE_URL) {
-  process.exit(await runSuite(new URL(process.env.BASE_URL)));
+  const baseUrl = new URL(process.env.BASE_URL);
+  await waitUntilServing(baseUrl, REMOTE_READY_TIMEOUT_MS);
+  process.exit(await runSuite(baseUrl));
 }
 
 const local = await startLocalWorker();
