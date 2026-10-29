@@ -31,6 +31,7 @@ bun run dev         # run the API in the local Workers runtime on http://localho
 bun run scrape      # refresh apps/api/data/cards.json, flags as in apps/ingest/README.md
 bun run test        # bun test in every workspace
 bun run test:api    # black-box HTTP tests against the API running in workerd
+bun run benchmark   # search latency per query under V8, see apps/api/README.md
 bun run typecheck   # tsc in every workspace
 bun run build       # bundle the API Worker with wrangler deploy --dry-run, without deploying
 bun run deploy      # build the API and tofu apply it to Cloudflare, see infrastructure/README.md
