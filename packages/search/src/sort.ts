@@ -2,6 +2,19 @@ import type { Card, Printing, Rarity } from "@riftkeeper/cards";
 import type { SortDirection, SortKey } from "./search.ts";
 import { setReleaseRank } from "./set-order.ts";
 
+type PrintingSortKey = Extract<SortKey, "set" | "collector_number" | "rarity">;
+type CardSortKey = Exclude<SortKey, PrintingSortKey>;
+
+interface Representative {
+  readonly printing: Printing;
+  readonly setRank: number;
+}
+
+interface RankedCard {
+  readonly card: Card;
+  readonly representative: Representative;
+}
+
 const RARITY_RANK: Record<Rarity, number> = { common: 0, uncommon: 1, rare: 2, epic: 3, showcase: 4 };
 
 function compareValues<T extends string | number>(a: T, b: T): number {
@@ -12,8 +25,8 @@ function compareCollectorOrder(a: Printing, b: Printing): number {
   return compareValues(a.collectorNumber, b.collectorNumber) || compareValues(a.publicCode, b.publicCode);
 }
 
-function comparePrintings(a: Printing, b: Printing): number {
-  return compareValues(setReleaseRank(a.set.code), setReleaseRank(b.set.code)) || compareCollectorOrder(a, b);
+function compareRepresentatives(a: Representative, b: Representative): number {
+  return compareValues(a.setRank, b.setRank) || compareCollectorOrder(a.printing, b.printing);
 }
 
 function compareNames(a: Card, b: Card): number {
@@ -24,8 +37,18 @@ function compareNames(a: Card, b: Card): number {
   return compareValues(a.subtitle, b.subtitle);
 }
 
-function representative(card: Card): Printing {
-  return card.printings.reduce((best, printing) => (comparePrintings(printing, best) < 0 ? printing : best));
+function compareTieBreakers(a: Card, b: Card): number {
+  return compareNames(a, b) || compareValues(a.id, b.id);
+}
+
+function representative(card: Card): Representative {
+  let best: Representative | null = null;
+  for (const printing of card.printings) {
+    const candidate = { printing, setRank: setReleaseRank(printing.set.code) };
+    if (best === null || compareRepresentatives(candidate, best) < 0) best = candidate;
+  }
+  if (best === null) throw new Error(`Card ${card.id} has no printings`);
+  return best;
 }
 
 function compareStat(a: number | null, b: number | null, direction: SortDirection): number {
@@ -35,17 +58,21 @@ function compareStat(a: number | null, b: number | null, direction: SortDirectio
   return direction === "asc" ? a - b : b - a;
 }
 
-function comparePrimary(key: SortKey, a: Card, b: Card, direction: SortDirection): number {
-  const sign = direction === "asc" ? 1 : -1;
+function comparePrintingKey(key: PrintingSortKey, a: Representative, b: Representative): number {
   switch (key) {
     case "set":
-      return sign * comparePrintings(representative(a), representative(b));
+      return compareRepresentatives(a, b);
     case "collector_number":
-      return sign * compareCollectorOrder(representative(a), representative(b));
-    case "name":
-      return sign * compareNames(a, b);
+      return compareCollectorOrder(a.printing, b.printing);
     case "rarity":
-      return sign * (RARITY_RANK[representative(a).rarity] - RARITY_RANK[representative(b).rarity]);
+      return RARITY_RANK[a.printing.rarity] - RARITY_RANK[b.printing.rarity];
+  }
+}
+
+function compareCardKey(key: CardSortKey, a: Card, b: Card, direction: SortDirection): number {
+  switch (key) {
+    case "name":
+      return (direction === "asc" ? 1 : -1) * compareNames(a, b);
     case "cost":
       return compareStat(a.energyCost, b.energyCost, direction);
     case "might":
@@ -55,8 +82,21 @@ function comparePrimary(key: SortKey, a: Card, b: Card, direction: SortDirection
   }
 }
 
+function isPrintingSortKey(key: SortKey): key is PrintingSortKey {
+  return key === "set" || key === "collector_number" || key === "rarity";
+}
+
 export function sortCards(cards: readonly Card[], key: SortKey, direction: SortDirection): Card[] {
-  return cards.toSorted(
-    (a, b) => comparePrimary(key, a, b, direction) || compareNames(a, b) || compareValues(a.id, b.id),
-  );
+  if (!isPrintingSortKey(key)) {
+    return cards.toSorted((a, b) => compareCardKey(key, a, b, direction) || compareTieBreakers(a, b));
+  }
+
+  const sign = direction === "asc" ? 1 : -1;
+  return cards
+    .map((card): RankedCard => ({ card, representative: representative(card) }))
+    .sort(
+      (a, b) =>
+        sign * comparePrintingKey(key, a.representative, b.representative) || compareTieBreakers(a.card, b.card),
+    )
+    .map((ranked) => ranked.card);
 }
