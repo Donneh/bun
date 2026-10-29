@@ -1,5 +1,4 @@
 ---
-
 name: reviewer
 description: Independent read-only reviewer for risky Riftkeeper pull requests. Use before merging a PR that changes search query parsing or search semantics (packages/search, /search), infrastructure/ or the Cloudflare deploy token, the GitHub workflows or deploy pipeline, tests that call production, performance claims, or anything else that touches api.riftkeeper.app or riftkeeper.app. Give it the PR number and the issue it implements. It reproduces every finding with a minimal input, ranks findings by severity, and never edits, pushes or merges.
 tools: Read, Grep, Glob, Bash, mcp__cloudflare__search, mcp__cloudflare__docs, mcp__cloudflare-docs__search_cloudflare_documentation

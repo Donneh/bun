@@ -1,5 +1,4 @@
 ---
-
 name: ship
 description: Land a finished Riftkeeper change and prove it is live. Runs bun run check, commits, pushes, opens the PR from a body file, waits for the PR checks (check, infrastructure, web), squash-merges into main, watches the Deploy workflow and its smoke tests, and verifies api.riftkeeper.app and riftkeeper.app. Use when a change is ready to ship, merge, deploy or "land", or after an approved PR, and whenever someone asks to get a change into production. Stops and reports on red checks, a failed deploy or a failed smoke test.
 ---
