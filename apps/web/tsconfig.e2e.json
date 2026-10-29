@@ -5,5 +5,5 @@
     "lib": ["ESNext", "DOM"],
     "types": ["node"]
   },
-  "include": ["e2e", "playwright.config.ts"]
+  "include": ["e2e", "production", "playwright.config.ts", "playwright.production.config.ts"]
 }

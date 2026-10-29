@@ -1,0 +1,12 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "riftkeeper-web",
+  "compatibility_date": "2026-10-23",
+  "assets": {
+    "directory": ".output/public",
+    "not_found_handling": "404-page"
+  },
+  "dev": {
+    "port": 3002
+  }
+}

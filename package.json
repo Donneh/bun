@@ -16,7 +16,7 @@
     "benchmark": "bun run --filter @riftkeeper/api benchmark:v8",
     "typecheck": "bun run --filter \"*\" typecheck",
     "build": "bun run --filter \"*\" build",
-    "deploy": "bun run --filter @riftkeeper/api build && tofu -chdir=infrastructure apply",
+    "deploy": "bun run --filter @riftkeeper/api build && bun run --filter @riftkeeper/web build && tofu -chdir=infrastructure apply",
     "lint": "biome lint",
     "format": "biome format --write",
     "check": "biome check && bun run typecheck && bun run test && bun run test:api && bun run build"
