@@ -10,6 +10,8 @@
     "production",
     "unit",
     "app/utils/card-images.ts",
+    "app/utils/filter-chips.ts",
+    "app/utils/search-state.ts",
     "playwright.config.ts",
     "playwright.production.config.ts"
   ]

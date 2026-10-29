@@ -37,14 +37,13 @@ describe("FilterChips", () => {
   });
 
   test("mentions conditions that have no chip", () => {
-    render(FilterChips, { props: { chips: [], moreConditions: true } });
+    render(FilterChips, { props: { chips, moreConditions: true } });
 
-    expect(screen.getByText("The query has more conditions than these filters.")).toBeTruthy();
-    expect(screen.queryByRole("list")).toBeNull();
+    expect(screen.getByText("Plus other conditions in the query")).toBeTruthy();
   });
 
-  test("renders nothing without filters or other conditions", () => {
-    const { container } = render(FilterChips, { props: { chips: [] } });
+  test("renders nothing without filters", () => {
+    const { container } = render(FilterChips, { props: { chips: [], moreConditions: true } });
 
     expect(container.textContent).toBe("");
   });

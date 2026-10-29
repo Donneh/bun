@@ -10,8 +10,8 @@ const emit = defineEmits<{ remove: [id: string] }>();
 </script>
 
 <template>
-  <div v-if="chips.length > 0 || moreConditions" class="filters">
-    <ul v-if="chips.length > 0" class="chips" :aria-label="label">
+  <div v-if="chips.length > 0" class="filters">
+    <ul class="chips" :aria-label="label">
       <li v-for="chip in chips" :key="chip.id" class="chip" :class="{ removable: chip.removable }">
         <span class="label">{{ chip.label }}</span>
         <span class="value">{{ chip.value }}</span>
@@ -26,7 +26,7 @@ const emit = defineEmits<{ remove: [id: string] }>();
         </button>
       </li>
     </ul>
-    <p v-if="moreConditions" class="more">The query has more conditions than these filters.</p>
+    <p v-if="moreConditions" class="more">Plus other conditions in the query</p>
   </div>
 </template>
 
