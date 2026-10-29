@@ -10,7 +10,11 @@ if (!baseUrl) {
 const CardListResponseSchema = z.object({ data: z.tuple([CardSchema], CardSchema) });
 const CardResponseSchema = z.object({ data: CardSchema });
 const HealthResponseSchema = z.object({
-  data: z.object({ status: z.literal("ok"), cards: z.number().int().positive() }),
+  data: z.object({
+    status: z.literal("ok"),
+    cards: z.number().int().positive(),
+    version: z.string().min(1).nullable(),
+  }),
 });
 const ErrorResponseSchema = z.object({ error: z.object({ code: z.string(), message: z.string().min(1) }) });
 

@@ -48,7 +48,9 @@ jobs:
         run: |
           tofu apply -auto-approve -input=false
           echo "api_url=$(tofu output -raw api_url)" >> "$GITHUB_OUTPUT"
+          echo "version=$(tofu output -raw worker_version_id)" >> "$GITHUB_OUTPUT"
       - name: Smoke test the deployed API
         run: bun run test:api
         env:
           BASE_URL: ${{ steps.apply.outputs.api_url }}
+          EXPECTED_VERSION: ${{ steps.apply.outputs.version }}
