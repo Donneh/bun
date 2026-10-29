@@ -44,6 +44,9 @@ resource "cloudflare_worker" "api" {
       enabled         = true
       invocation_logs = true
     }
+    traces = {
+      enabled = true
+    }
   }
 }
 
