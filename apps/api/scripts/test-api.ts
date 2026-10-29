@@ -12,7 +12,7 @@ async function freePort() {
 
 async function servesApi(baseUrl: URL) {
   try {
-    const response = await fetch(new URL("/cards", baseUrl));
+    const response = await fetch(new URL("/health", baseUrl));
     return response.headers.get("content-type")?.startsWith("application/json") ?? false;
   } catch {
     return false;
