@@ -19,7 +19,7 @@ The API base URL is the runtime config value `public.apiBase`. It defaults to pr
 
 The page renders in the browser (`ssr: false`), and `bun run build` runs `nuxt generate`. Every query lives in `?q=`, which a prerendered page cannot know, so server rendering would only show the empty state before the browser replaced it. Production serves `.output/public` as the static assets of the `riftkeeper-web` Worker on `riftkeeper.app`, and `www.riftkeeper.app` redirects there. A page view never runs Worker code. `wrangler.jsonc` holds the Worker name, the asset directory and the not-found handling, which OpenTofu reads (see [Infrastructure](../../infrastructure/README.md)). Never run `wrangler deploy`.
 
-The Deploy workflow runs `bun run test:production` after each apply. It waits until `BASE_URL` serves the build with `EXPECTED_BUILD_ID`, then checks that the page and its scripts and styles load, that a `?q=` link shows search results, that an unknown path answers 404, and that `WWW_URL` redirects to `BASE_URL` with the path and query. It makes one API request, far under the rate limit.
+The Deploy workflow runs `bun run test:production` after each apply. It waits until `BASE_URL` serves the build with `EXPECTED_BUILD_ID`, then checks that the page and its scripts and styles load, that a `?q=` link shows search results, that an unknown path answers 404, and that `WWW_URL` redirects to `BASE_URL` with the path and query. It makes one API request, far under the rate limit. The Monitor workflow runs the same suite against `https://riftkeeper.app` on a schedule without `EXPECTED_BUILD_ID`, so it accepts any build that serves the app.
 
 ```sh
 BASE_URL=https://riftkeeper.app WWW_URL=https://www.riftkeeper.app bun run test:production
