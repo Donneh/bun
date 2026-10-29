@@ -74,13 +74,20 @@ Numbers take `=`, `!=`, `<`, `<=`, `>` and `>=`. In a domain value, `,` means an
 
 `bun run benchmark:v8` bundles `scripts/benchmark.ts` and runs it under Node, which uses V8 like workerd. `bun run benchmark` runs it under Bun for a quicker look; Bun uses a different engine, so its numbers differ. The workspace root `bun run benchmark` runs the V8 version.
 
-For each query it warms up, then reports p50 and p99 of the search core (parse, match, sort, page, decompose) and p50, p95 and p99 of the full request through the Hono app, including JSON serialization, plus the response size. It also times the snapshot validation that runs on every cold start. It exits with an error when a query that should match returns nothing or a request does not return 200, so a broken query cannot produce a fast number.
+For each query it warms up, then reports p50 and p99 of the search core (parse, match, sort, page, decompose) and p50, p95 and p99 of the full request through the Hono app, including JSON serialization, plus the response size. It loads the cards the way the Worker does. It exits with an error when a query that should match returns nothing or a request does not return 200, so a broken query cannot produce a fast number.
 
 These are warm, in-process numbers. Production requests on lightly used Worker instances also pay for cold starts and unoptimized code; compare with CPU and wall time per route in Workers Observability.
 
+## Cold starts
+
+On a lightly used API almost every request lands on a new Worker instance, so startup and the first request matter more than the warm numbers above.
+
+- Startup: `node node_modules/wrangler/bin/wrangler.js check startup` from `apps/api` writes a CPU profile of the Worker's startup in workerd. In production, Cloudflare reports `startup_time_ms` for each Worker version.
+- First request: the app uses the `hono/quick` router, which does not compile a matcher on the first request.
+
 ## Card snapshot
 
-`src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker validates the snapshot once when it starts, and a snapshot that does not match fails with one message instead of a list of Zod issues.
+`src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker does not validate the snapshot when it starts. `bun run build` runs `scripts/validate-snapshot.ts` first, which fails the build when the snapshot does not match the card schema or has fields the schema does not know, with one message instead of a list of Zod issues. The unit tests check the same.
 
 ## Black-box tests
 

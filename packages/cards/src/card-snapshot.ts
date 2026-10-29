@@ -5,6 +5,7 @@ export const REBUILD_COMMAND = "bun run scrape --rebuild";
 
 export const CardSnapshotSchema = z
   .array(CardSchema)
+  .min(1, "The snapshot has no cards")
   .refine((cards) => new Set(cards.map((card) => card.id)).size === cards.length, "Card ids must be unique");
 
 export function parseCardSnapshot({ json, path }: { json: unknown; path: string }): Card[] {

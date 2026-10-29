@@ -3,6 +3,10 @@ import { makeCard } from "../test-support/fixtures.ts";
 import { parseCardSnapshot } from "./card-snapshot.ts";
 
 describe("card snapshot", () => {
+  test("rejects an empty snapshot", () => {
+    expect(() => parseCardSnapshot({ json: [], path: "cards.json" })).toThrow("The snapshot has no cards");
+  });
+
   test("rejects duplicate card ids", () => {
     const card = makeCard({ id: "abandon" });
 
