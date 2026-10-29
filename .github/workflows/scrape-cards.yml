@@ -58,12 +58,19 @@ jobs:
           name: card-changes
           path: ${{ steps.scrape.outputs.report }}
       - name: Open or update the snapshot pull request
+        id: pr
         if: steps.scrape.outputs.report != ''
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.SNAPSHOT_PR_TOKEN }}
           branch: automation/card-snapshot
           delete-branch: true
           add-paths: apps/api/data/cards.json
           commit-message: Update card snapshot from the Riftbound gallery
           title: Update card snapshot from the Riftbound gallery
           body-path: ${{ steps.scrape.outputs.pr-body }}
+      - name: Merge the snapshot pull request once checks pass
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.SNAPSHOT_PR_TOKEN }}
+        run: gh pr merge "${{ steps.pr.outputs.pull-request-number }}" --auto --squash --repo "$GITHUB_REPOSITORY"
