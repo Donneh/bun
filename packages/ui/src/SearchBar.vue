@@ -10,23 +10,21 @@ const emit = defineEmits<{ submit: [query: string] }>();
 </script>
 
 <template>
-  <search>
-    <form class="search" @submit.prevent="emit('submit', query.trim())">
-      <label class="field">
-        <span class="label">{{ label }}</span>
-        <input
-          v-model="query"
-          class="input"
-          :name="name"
-          type="search"
-          :placeholder="placeholder"
-          autocomplete="off"
-          spellcheck="false"
-        />
-      </label>
-      <button class="button" type="submit">Search</button>
-    </form>
-  </search>
+  <form class="search" role="search" @submit.prevent="emit('submit', query.trim())">
+    <label class="field">
+      <span class="label">{{ label }}</span>
+      <input
+        v-model="query"
+        class="input"
+        :name="name"
+        type="search"
+        :placeholder="placeholder"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </label>
+    <button class="button" type="submit">Search</button>
+  </form>
 </template>
 
 <style scoped>

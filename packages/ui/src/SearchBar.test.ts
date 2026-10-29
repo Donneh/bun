@@ -25,6 +25,7 @@ describe("SearchBar", () => {
   test("shows a labelled search box with the current query", () => {
     renderSearchBar("c:fury");
 
+    expect(screen.getByRole("search")).toBeTruthy();
     expect((screen.getByRole("searchbox", { name: "Search cards" }) as HTMLInputElement).value).toBe("c:fury");
   });
 

@@ -23,6 +23,10 @@
     {
       "includes": ["apps/web/app/pages/**"],
       "linter": { "rules": { "style": { "useVueMultiWordComponentNames": "off" } } }
+    },
+    {
+      "includes": ["packages/ui/src/SearchBar.vue"],
+      "linter": { "rules": { "a11y": { "useSemanticElements": "off" } } }
     }
   ]
 }
