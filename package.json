@@ -8,6 +8,8 @@
   ],
   "scripts": {
     "dev": "bun run --filter @riftkeeper/api dev",
+    "dev:web": "bun run --filter @riftkeeper/web dev",
+    "test:e2e": "bun run --filter @riftkeeper/web test:e2e",
     "scrape": "bun run --filter @riftkeeper/ingest scrape",
     "test": "bun run --filter \"*\" test",
     "test:api": "bun run --filter @riftkeeper/api test:api",
