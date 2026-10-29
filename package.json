@@ -10,11 +10,13 @@
     "dev": "bun run --filter @riftkeeper/api dev",
     "scrape": "bun run --filter @riftkeeper/ingest scrape",
     "test": "bun run --filter \"*\" test",
+    "test:api": "bun run --filter @riftkeeper/api test:api",
     "typecheck": "bun run --filter \"*\" typecheck",
     "build": "bun run --filter \"*\" build",
+    "deploy": "bun run --filter @riftkeeper/api build && tofu -chdir=infrastructure apply",
     "lint": "biome lint",
     "format": "biome format --write",
-    "check": "biome check && bun run typecheck && bun run test && bun run build"
+    "check": "biome check && bun run typecheck && bun run test && bun run test:api && bun run build"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3"

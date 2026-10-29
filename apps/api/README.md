@@ -33,6 +33,18 @@ A `Card` holds the gameplay facts shared by all printings: `id`, `name`, `subtit
 
 `src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker validates the snapshot once when it starts, and a snapshot that does not match fails with one message instead of a list of Zod issues.
 
+## Black-box tests
+
+`bun run test:api` starts the Worker with `wrangler dev` on a free port, runs `test-api/` against it over HTTP and stops it. These tests know nothing about the code. They see only responses, so they catch what the in-process tests in `src` cannot, such as code that works in Bun but not in workerd. They use the real card snapshot, so assert on shapes and relations, not on specific cards.
+
+Set `BASE_URL` to run the same tests against another server instead:
+
+```sh
+BASE_URL=https://api.example.com bun run test:api
+```
+
+The deploy workflow does this after every deploy, as a smoke test.
+
 ## Check
 
-From `apps/api`, `bun run test`, `bun run typecheck` and `bun run build` check only this package. Biome and the full `bun run check` run from the workspace root.
+From `apps/api`, `bun run test`, `bun run test:api`, `bun run typecheck` and `bun run build` check only this package. Biome and the full `bun run check` run from the workspace root.
