@@ -51,3 +51,13 @@ describe("CORS", () => {
     expect(response.headers.get("access-control-allow-methods")).toBe("GET");
   });
 });
+
+describe("routing", () => {
+  test.each(["/health/", "/cards/", "/search/"])("does not serve %s with a trailing slash", async (path) => {
+    const app = createApp({ cards: [makeCard()] });
+
+    const response = await app.request(path);
+
+    expect(response.status).toBe(404);
+  });
+});

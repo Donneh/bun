@@ -1,6 +1,6 @@
 import type { Card } from "@riftkeeper/cards";
 import { cors } from "hono/cors";
-import { Hono } from "hono/quick";
+import { Hono } from "hono";
 import { createCardsRoutes } from "./cards/cards.routes.ts";
 import { errorBody } from "./http/errors.ts";
 import { createSearchRoutes } from "./search/search.routes.ts";
