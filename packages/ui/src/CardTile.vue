@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, ref, useTemplateRef } from "vue";
 import type { CardOrientation } from "./card-summary.ts";
 
 defineProps<{
@@ -9,12 +10,30 @@ defineProps<{
   srcset?: string;
   sizes?: string;
 }>();
+
+const image = useTemplateRef<HTMLImageElement>("image");
+const loaded = ref(false);
+
+onMounted(() => {
+  if (image.value?.complete && image.value.naturalWidth > 0) loaded.value = true;
+});
 </script>
 
 <template>
   <figure class="tile" :class="orientation">
-    <div class="frame">
-      <img class="image" :src="imageUrl" :srcset="srcset" :sizes="sizes" :alt="name" loading="lazy" decoding="async" />
+    <div class="frame" :class="{ pending: !loaded }">
+      <img
+        ref="image"
+        class="image"
+        :class="{ loaded }"
+        :src="imageUrl"
+        :srcset="srcset"
+        :sizes="sizes"
+        :alt="name"
+        loading="lazy"
+        decoding="async"
+        @load="loaded = true"
+      />
     </div>
     <figcaption class="caption">
       <span class="name">{{ name }}</span>
@@ -39,6 +58,26 @@ defineProps<{
   box-shadow: var(--rk-shadow-card);
 }
 
+.frame.pending {
+  background: linear-gradient(
+      100deg,
+      var(--rk-color-placeholder) 30%,
+      var(--rk-color-placeholder-highlight) 50%,
+      var(--rk-color-placeholder) 70%
+    )
+    0 0 / 200% 100%;
+  animation: shimmer var(--rk-duration-shimmer) linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 .portrait .frame {
   aspect-ratio: 63 / 88;
 }
@@ -52,6 +91,22 @@ defineProps<{
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--rk-duration-fast) ease-out;
+}
+
+.image.loaded {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transition: none;
+  }
+
+  .frame.pending {
+    animation: none;
+  }
 }
 
 .caption {
