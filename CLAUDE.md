@@ -48,4 +48,6 @@ Cloudflare tokens and their permissions, GitHub secrets and variables, DNS recor
 
 `.mcp.json` adds the Cloudflare API and docs MCP servers. Use them to read the account and search the current docs instead of guessing dashboard labels.
 
+To debug production, query the Worker's logs and traces before guessing: `POST /accounts/{account_id}/workers/observability/telemetry/query` through the Cloudflare MCP `execute` tool, filtered on `$metadata.service` = `riftkeeper-api`. Cloudflare logs every request on its own, with method, path, status, wall and CPU time, outcome and Worker version, so the API has no request logger of its own. Unhandled errors are logged by `onError` in `apps/api/src/app.ts`. Logs and traces are kept for seven days.
+
 The OpenTofu state bucket `riftkeeper-tofu-state` is in R2's EU jurisdiction. The Cloudflare MCP cannot see EU buckets: its bucket list silently shows only the default jurisdiction. List them with `node node_modules/wrangler/bin/wrangler.js r2 bucket list --jurisdiction eu` from `apps/api`.
