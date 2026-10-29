@@ -10,5 +10,6 @@ export {
   type SortDirection,
   type SortKey,
 } from "./search.ts";
+export { searchCards } from "./search-cards.ts";
 export { setReleaseRank } from "./set-order.ts";
 export type { SearchWarning, SourceSpan, Token, TokenType } from "./syntax.ts";
