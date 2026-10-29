@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/vue";
+import { fireEvent, render, screen } from "@testing-library/vue";
 import { describe, expect, test } from "vitest";
 import CardTile from "./CardTile.vue";
 
@@ -54,5 +54,21 @@ describe("CardTile", () => {
     });
 
     expect(screen.getByRole("figure").querySelector("figcaption")?.textContent?.trim()).toBe("Abandon");
+  });
+
+  test("shows a loading skeleton until the image has loaded", async () => {
+    render(CardTile, {
+      props: { name: "Jinx", subtitle: null, imageUrl: "https://example.com/jinx.png", orientation: "portrait" },
+    });
+    const image = screen.getByRole("img", { name: "Jinx" });
+    const frame = image.parentElement;
+
+    expect(frame?.classList.contains("pending")).toBe(true);
+    expect(image.classList.contains("loaded")).toBe(false);
+
+    await fireEvent.load(image);
+
+    expect(frame?.classList.contains("pending")).toBe(false);
+    expect(image.classList.contains("loaded")).toBe(true);
   });
 });

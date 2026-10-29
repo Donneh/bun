@@ -16,6 +16,7 @@
   --rk-color-danger-border: #e07272;
   --rk-color-danger-text: #7a1414;
   --rk-color-placeholder: #e6e1d8;
+  --rk-color-placeholder-highlight: #f3efe8;
 
   --rk-space-1: 0.25rem;
   --rk-space-2: 0.5rem;
@@ -40,6 +41,9 @@
   --rk-shadow-card: 0 1px 2px rgb(0 0 0 / 0.08), 0 4px 12px rgb(0 0 0 / 0.06);
   --rk-content-width: 80rem;
   --rk-card-min-width: 11rem;
+
+  --rk-duration-fast: 150ms;
+  --rk-duration-shimmer: 1.4s;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -59,6 +63,7 @@
     --rk-color-danger-border: #9a3a3a;
     --rk-color-danger-text: #ffb4b4;
     --rk-color-placeholder: #2c2834;
+    --rk-color-placeholder-highlight: #3a3544;
     --rk-shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 12px rgb(0 0 0 / 0.3);
   }
 }
