@@ -4,18 +4,24 @@ Bun workspaces monorepo for a Riftbound card API. Production is `https://api.rif
 
 - `apps/api` is the Hono API on Cloudflare Workers. Its code in `src` must not use Bun APIs.
 - `apps/ingest` is the CLI that scrapes the card gallery into `apps/api/data/cards.json`.
+- `apps/web` is the Nuxt search page. It calls the API from the browser; the base URL is the runtime config `public.apiBase` (`NUXT_PUBLIC_API_BASE`), production by default. It is not deployed yet.
+- `packages/ui` (`@riftkeeper/ui`) is the Vue component library and the design tokens (CSS custom properties in `src/styles.css`). `apps/web` renders every element with it. Add or extend a component there instead of writing markup or colors in `apps/web`. Components take props and emit events; they never fetch data.
 - `packages/cards` holds the card schema shared by both apps.
 - `infrastructure/` is the OpenTofu configuration for Cloudflare. See `infrastructure/README.md`.
 
 ## Verify
 
-`bun run check` is the gate. Run it before every push. It runs Biome, the type checks, every unit test, `test:api` and the Worker build.
+`bun run check` is the gate. Run it before every push. It runs Biome, the type checks (including `vue-tsc` and `nuxt typecheck`), every unit and component test, `test:api`, the Worker build and the Nuxt build.
 
-- `bun run test` runs the unit tests in every workspace.
+- `bun run test` runs the unit tests in every workspace, and the Vitest component tests in `packages/ui`.
+- `bun run test:e2e` builds `apps/web` and runs the Playwright test in `apps/web/e2e/` against a local API on port 8787. It records a video and a screenshot per test in `apps/web/test-results/`. Run `bunx playwright install chromium` in `apps/web` once. CI runs it in the E2E workflow and uploads `test-results` as an artifact.
+- `bun run dev:web` serves the web app on port 3001 against production. Set `NUXT_PUBLIC_API_BASE=http://localhost:3000` to use the API from `bun run dev`.
 - `bun run test:api` starts the Worker in workerd and runs the black-box HTTP tests in `apps/api/test-api/` against it. Set `BASE_URL` to test another server, such as production.
 - `tofu -chdir=infrastructure validate` checks the infrastructure. CI also runs `tofu fmt -check -recursive`.
 
-Black-box tests run against the real card snapshot, which changes daily. Assert on shapes and relations between responses, never on specific cards.
+Black-box and end-to-end tests run against the real card snapshot, which changes daily. Assert on shapes and relations between responses, never on specific cards.
+
+`packages/ui` and `apps/web` pin TypeScript 6 because `vue-tsc` needs the TypeScript JavaScript API, which TypeScript 7 does not ship. The other workspaces use TypeScript 7.
 
 On Windows, `bun run check` sometimes hangs in the step that runs every workspace's tests in parallel. If it runs for more than a minute, stop it and run the steps one by one.
 
