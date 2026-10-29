@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run --outdir dist",
-    "test": "bun test",
+    "test": "bun test src",
+    "test:api": "bun scripts/test-api.ts",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.worker.json"
   },
   "dependencies": {

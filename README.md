@@ -7,7 +7,7 @@ Bun workspaces monorepo for Riftkeeper, a card API for the Riftbound trading car
 | `apps/api`        | `@riftkeeper/api`, the Hono API that serves the card snapshot ([README](apps/api/README.md))                     |
 | `apps/ingest`     | `@riftkeeper/ingest`, the CLI that scrapes the gallery and writes the snapshot ([README](apps/ingest/README.md)) |
 | `packages/cards`  | `@riftkeeper/cards`, the card schema, snapshot reader and test builders both apps share                          |
-| `infrastructure/` | OpenTofu configuration for Cloudflare                                                                            |
+| `infrastructure/` | OpenTofu configuration that deploys the API to Cloudflare Workers ([README](infrastructure/README.md))           |
 
 New apps go in `apps/` and shared packages in `packages/`. Both folders are workspaces.
 
@@ -29,8 +29,10 @@ Run these from this folder:
 bun run dev         # run the API in the local Workers runtime on http://localhost:3000
 bun run scrape      # refresh apps/api/data/cards.json, flags as in apps/ingest/README.md
 bun run test        # bun test in every workspace
+bun run test:api    # black-box HTTP tests against the API running in workerd
 bun run typecheck   # tsc in every workspace
 bun run build       # bundle the API Worker with wrangler deploy --dry-run, without deploying
+bun run deploy      # build the API and tofu apply it to Cloudflare, see infrastructure/README.md
 bun run lint        # biome lint over the whole repository
 bun run format      # biome format --write over the whole repository
 bun run check       # biome check, typecheck, test and build, as CI runs it
