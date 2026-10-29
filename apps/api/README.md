@@ -18,17 +18,55 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 
 ## Endpoints
 
-| Method | Path         | Response                                          |
-| ------ | ------------ | ------------------------------------------------- |
-| GET    | `/health`    | `200 { data: { status: "ok", cards: number } }`   |
-| GET    | `/cards`     | `200 { data: Card[] }`                            |
-| GET    | `/cards/:id` | `200 { data: Card }`, `400` bad id, `404` no card |
+| Method | Path              | Response                                                                 |
+| ------ | ----------------- | ------------------------------------------------------------------------ |
+| GET    | `/health`         | `200 { data: { status: "ok", cards: number } }`                          |
+| GET    | `/cards`          | `200 { data: Card[] }`                                                   |
+| GET    | `/cards/:id`      | `200 { data: Card }`, `400` bad id, `404` no card                        |
+| GET    | `/search`         | `200 { data: Card[], meta, warnings, parsed }`, `400` bad parameters     |
+| GET    | `/search/options` | `200 { data: { domains, types, supertypes, rarities, variants, sets } }` |
 
 Errors use the shape `{ error: { code, message } }`.
 
 A card id is a lowercase slug of the card name and subtitle with apostrophes removed, for example `agonys-embrace` or `jinx-rebel`.
 
 A `Card` holds the gameplay facts shared by all printings: `id`, `name`, `subtitle`, `type`, `supertype`, `domains` (can be empty), `energyCost`, `powerCost`, `might`, `mightBonus`, `ability`, `effect` and `tags`. Facts Riot does not give are `null`. Its `printings` array holds one entry per printed version with `id`, `publicCode`, `set`, `collectorNumber`, `variant`, `rarity`, `artist` (`null` when unknown), `imageUrl` and `orientation`. The schema lives in `packages/cards/src/card.ts`.
+
+## Search
+
+`GET /search` takes these query parameters:
+
+| Parameter   | Values                                                                | Default |
+| ----------- | --------------------------------------------------------------------- | ------- |
+| `q`         | A query in the syntax below, at most 512 characters                   | empty   |
+| `sort`      | `set`, `collector_number`, `name`, `rarity`, `cost`, `might`, `power` | `set`   |
+| `direction` | `asc`, `desc`                                                         | `asc`   |
+| `page`      | 1 or higher, 40 cards per page                                        | `1`     |
+
+A result is a card whose `printings` holds only the printings that matched. A card matches when one of its printings satisfies the whole query. `meta` holds `page`, `pageSize` and `total`. A malformed query never fails: the parts that could not be used come back in `warnings` (at most 20), each with a `message` and the `span` of the query it refers to. `parsed` lists the top-level filters a client can show as editable controls. The default sort is by set in release order: OGS, OGN, SFD, UNL, VEN, RAD.
+
+### Query syntax
+
+Bare words search the card name with its subtitle (`Annie, Fiery`) and match tags exactly. Words next to each other form one phrase.
+
+| Filter      | Keywords                    | Example                                           |
+| ----------- | --------------------------- | ------------------------------------------------- |
+| Energy cost | `cost`                      | `cost:3`, `cost:>=5`, `cost:!=2`                  |
+| Might       | `might`, `m`                | `m:<4`                                            |
+| Power cost  | `power`, `p`                | `p:2`                                             |
+| Domain      | `domain`, `d`, `c`, `color` | `c:fury,calm`, `c:fury+calm`, `c:-chaos`, `c:red` |
+| Tag         | `tag`, `t`                  | `t:Ionia`                                         |
+| Type        | `type`                      | `type:spell`                                      |
+| Supertype   | `supertype`                 | `supertype:champion`                              |
+| Rarity      | `rarity`, `r`               | `r:epic`                                          |
+| Variant     | `variant`                   | `variant:alt-art`                                 |
+| Set         | `set`, `s`                  | `s:ogn`, `s:origins`                              |
+| Artist      | `artist`, `a`               | `a:kudos`                                         |
+| Card text   | `ability`                   | `ability:"draw a card"`                           |
+
+Numbers take `=`, `!=`, `<`, `<=`, `>` and `>=`. In a domain value, `,` means any of, `+` means all of and `-` means none of. Quote values with spaces. Combine with `and` (or just a space), `or`, `not` (or `-`) and parentheses, for example `(c:fury or c:chaos) -type:spell cost:<=3`.
+
+`promo`, `owned`, `flavor`, `legal` and `keyword` existed in the old API; they are not supported yet and come back as warnings.
 
 ## Card snapshot
 
