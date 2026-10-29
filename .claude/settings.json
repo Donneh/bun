@@ -1,0 +1,61 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(bun install:*)",
+      "Bash(bun run:*)",
+      "Bash(bun test:*)",
+      "Bash(bunx biome:*)",
+      "Bash(tofu fmt:*)",
+      "Bash(tofu validate:*)",
+      "Bash(tofu -chdir=infrastructure fmt:*)",
+      "Bash(tofu -chdir=infrastructure validate:*)",
+      "Bash(tofu -chdir=infrastructure init -backend=false:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr diff:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run watch:*)",
+      "Bash(gh run rerun:*)",
+      "mcp__cloudflare__whoami",
+      "mcp__cloudflare__search",
+      "mcp__cloudflare__docs",
+      "mcp__cloudflare-docs__search_cloudflare_documentation"
+    ],
+    "ask": [
+      "Bash(bun run deploy:*)",
+      "Bash(tofu apply:*)",
+      "Bash(tofu destroy:*)",
+      "Bash(tofu -chdir=infrastructure apply:*)",
+      "Bash(tofu -chdir=infrastructure destroy:*)",
+      "Bash(gh secret:*)",
+      "Bash(gh variable:*)",
+      "Bash(gh api:*)",
+      "mcp__cloudflare__execute"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(wrangler deploy:*)",
+      "Bash(bunx wrangler deploy:*)",
+      "Bash(npx wrangler deploy:*)"
+    ]
+  }
+}
