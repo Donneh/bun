@@ -48,7 +48,13 @@ bunx playwright install chromium   # once
 bun run test:e2e                   # playwright test, which builds the app first
 ```
 
-Playwright starts the API with `wrangler dev` on port 8787. It then runs `nuxt generate` with `NUXT_PUBLIC_API_BASE` pointed at that API, and serves the build with `wrangler dev` on port 3100, so the test exercises the same static assets and not-found handling as production. The test never calls production. It runs against the real card snapshot, so it asserts relations, such as the result count matching the API's `meta.total`, never specific cards. The error and loading tests change the API response inside the browser with `page.route`.
+Playwright starts the API with `wrangler dev` on port 8787. It then runs `nuxt generate` with `NUXT_PUBLIC_API_BASE` pointed at that API, and serves the build with `wrangler dev` on port 3100, so the test exercises the same static assets and not-found handling as production. `E2E_API_PORT` and `E2E_WEB_PORT` override the two ports, so two checkouts can run the test at the same time:
+
+```sh
+E2E_API_PORT=8797 E2E_WEB_PORT=3197 bun run test:e2e
+```
+
+Outside CI, Playwright reuses an API that already listens on the API port, so a second run on the default ports would test against the other checkout's API. The test never calls production. It runs against the real card snapshot, so it asserts relations, such as the result count matching the API's `meta.total`, never specific cards. The error and loading tests change the API response inside the browser with `page.route`.
 
 Every test records a video and a final screenshot in `test-results/`. The E2E workflow uploads that folder as the `e2e-videos-and-screenshots` artifact.
 
