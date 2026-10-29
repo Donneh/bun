@@ -5,5 +5,7 @@ export interface CardSummary {
   readonly name: string;
   readonly subtitle: string | null;
   readonly imageUrl: string;
+  readonly srcset?: string;
+  readonly sizes?: string;
   readonly orientation: CardOrientation;
 }

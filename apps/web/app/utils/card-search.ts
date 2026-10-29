@@ -1,6 +1,7 @@
 import type { Card } from "@riftkeeper/cards";
 import type { SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
+import { responsiveImage } from "./card-images";
 
 interface SearchResponse {
   readonly data: readonly Card[];
@@ -42,6 +43,7 @@ function toCardSummaries(card: Card): CardSummary[] {
     subtitle: card.subtitle,
     imageUrl: printing.imageUrl,
     orientation: printing.orientation,
+    ...responsiveImage(printing.imageUrl, printing.orientation),
   }));
 }
 
