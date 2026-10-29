@@ -56,6 +56,11 @@ resource "cloudflare_worker_version" "api" {
   compatibility_date = local.wrangler_config.compatibility_date
   main_module        = "index.js"
 
+  bindings = [{
+    type = "version_metadata"
+    name = "CF_VERSION_METADATA"
+  }]
+
   modules = [{
     name         = "index.js"
     content_type = "application/javascript+module"

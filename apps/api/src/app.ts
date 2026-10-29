@@ -4,9 +4,15 @@ import { createCardsRoutes } from "./cards/cards.routes.ts";
 import { errorBody } from "./http/errors.ts";
 import { createSearchRoutes } from "./search/search.routes.ts";
 
+interface Bindings {
+  readonly CF_VERSION_METADATA?: { readonly id: string };
+}
+
 export function createApp({ cards }: { cards: readonly Card[] }) {
-  return new Hono()
-    .get("/health", (c) => c.json({ data: { status: "ok", cards: cards.length } }, 200))
+  return new Hono<{ Bindings: Bindings }>()
+    .get("/health", (c) =>
+      c.json({ data: { status: "ok", cards: cards.length, version: c.env?.CF_VERSION_METADATA?.id ?? null } }, 200),
+    )
     .route("/cards", createCardsRoutes({ cards }))
     .route("/search", createSearchRoutes({ cards }))
     .notFound((c) =>

@@ -9,6 +9,14 @@ describe("GET /health", () => {
     const response = await app.request("/health");
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ data: { status: "ok", cards: 2 } });
+    expect(await response.json()).toEqual({ data: { status: "ok", cards: 2, version: null } });
+  });
+
+  test("reports the deployed Worker version", async () => {
+    const app = createApp({ cards: [makeCard()] });
+
+    const response = await app.request("/health", {}, { CF_VERSION_METADATA: { id: "version-1" } });
+
+    expect(await response.json()).toMatchObject({ data: { version: "version-1" } });
   });
 });

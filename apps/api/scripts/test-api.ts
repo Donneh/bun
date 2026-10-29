@@ -10,10 +10,15 @@ async function freePort() {
   return port;
 }
 
+const expectedVersion = process.env.EXPECTED_VERSION;
+
 async function servesApi(baseUrl: URL) {
   try {
     const response = await fetch(new URL("/health", baseUrl));
-    return response.headers.get("content-type")?.startsWith("application/json") ?? false;
+    if (!response.headers.get("content-type")?.startsWith("application/json")) return false;
+    if (expectedVersion === undefined) return true;
+    const body = (await response.json()) as { data?: { version?: string | null } };
+    return body.data?.version === expectedVersion;
   } catch {
     return false;
   }
@@ -30,7 +35,9 @@ async function waitUntilServing(baseUrl: URL, timeoutMs: number, worker?: Subpro
     }
     await Bun.sleep(1_000);
   }
-  throw new Error(`${baseUrl.origin} did not serve the API within ${timeoutMs} ms`);
+  throw new Error(
+    `${baseUrl.origin} did not serve the API${expectedVersion ? ` at version ${expectedVersion}` : ""} within ${timeoutMs} ms`,
+  );
 }
 
 async function startLocalWorker() {
