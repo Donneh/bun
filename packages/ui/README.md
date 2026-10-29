@@ -15,17 +15,23 @@ The package ships its `.vue` sources. The app's Vite or Nuxt build compiles them
 
 ## Components
 
-| Component       | Props                                                      | Events          |
-| --------------- | ---------------------------------------------------------- | --------------- |
-| `AppShell`      | `title`, default slot for the page content                 |                 |
-| `SearchBar`     | `v-model` query, `label`, `placeholder`, `name` (`q`)      | `submit(query)` |
-| `WarningList`   | `warnings: { message }[]`, renders nothing when empty      |                 |
-| `StatusMessage` | `kind: "loading" \| "empty" \| "error"`, `title`, `detail` |                 |
-| `ResultSummary` | `shown`, `total`                                           |                 |
-| `CardGrid`      | `cards: CardSummary[]`, `label`                            |                 |
-| `CardTile`      | `name`, `subtitle`, `imageUrl`, `orientation`              |                 |
+| Component        | Props                                                         | Events                        |
+| ---------------- | ------------------------------------------------------------- | ----------------------------- |
+| `AppShell`       | `title`, default slot for the page content                    |                               |
+| `SearchBar`      | `v-model` query, `label`, `placeholder`, `name` (`q`)         | `submit(query)`               |
+| `WarningList`    | `warnings: { message }[]`, renders nothing when empty         |                               |
+| `StatusMessage`  | `kind: "loading" \| "empty" \| "error"`, `title`, `detail`    |                               |
+| `ResultSummary`  | `shown`, `total`                                              |                               |
+| `CardGrid`       | `cards: CardSummary[]`, `label`                               |                               |
+| `CardTile`       | `name`, `subtitle`, `imageUrl`, `orientation`                 |                               |
+| `FilterChips`    | `chips: FilterChipSummary[]`, `moreConditions`, `label`       | `remove(id)`                  |
+| `SortControl`    | `sort`, `direction: "asc" \| "desc"`, `options: SortOption[]` | `change({ sort, direction })` |
+| `LoadMoreButton` | `loading`                                                     | `load()`                      |
+| `Toolbar`        | default slot, laid out in a row that wraps                    |                               |
 
 `CardSummary` holds `id`, `name`, `subtitle`, `imageUrl` and `orientation`. `CardGrid` gives a landscape card, such as a battlefield, two columns so it keeps its shape.
+
+`FilterChipSummary` holds `id`, `label`, `value` and `removable`. `FilterChips` shows a remove button only on removable chips and renders nothing without chips. `moreConditions` adds a muted note that the query holds more than the chips show.
 
 Components take data through props and report user actions through events. They never call the API: data fetching belongs to the app.
 
