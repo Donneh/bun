@@ -20,7 +20,7 @@
     "deploy": "bun run --filter @riftkeeper/api build && bun run --filter @riftkeeper/scheduler build && bun run --filter @riftkeeper/web build && tofu -chdir=infrastructure apply",
     "lint": "biome lint",
     "format": "biome format --write",
-    "check": "biome check && bun run typecheck && bun run test && bun run test:api && bun run test:scheduler && bun run build"
+    "check": "bun install --frozen-lockfile && biome check && bun run typecheck && bun run test && bun run test:api && bun run test:scheduler && bun run build"
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.3"
