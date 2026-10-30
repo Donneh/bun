@@ -13,11 +13,13 @@ defineProps<{ warnings: readonly { readonly message: string }[] }>();
   margin: 0;
   padding: var(--rk-space-3) var(--rk-space-4);
   list-style: none;
-  border: 1px solid var(--rk-color-warning-border);
-  border-radius: var(--rk-radius-md);
+  border: var(--rk-border-width) solid var(--rk-color-warning-border);
+  border-radius: var(--rk-radius-lg);
   background: var(--rk-color-warning-surface);
   color: var(--rk-color-warning-text);
-  font-size: var(--rk-font-size-sm);
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
+  overflow-wrap: anywhere;
 }
 
 .warning + .warning {

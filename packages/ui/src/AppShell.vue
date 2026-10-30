@@ -1,45 +1,45 @@
-<script setup lang="ts">
-defineProps<{ title: string }>();
-</script>
-
 <template>
   <div class="shell">
-    <header class="header">
-      <h1 class="title">{{ title }}</h1>
-    </header>
     <main class="main">
       <slot />
     </main>
+    <footer v-if="$slots.footer" class="footer">
+      <slot name="footer" />
+    </footer>
   </div>
 </template>
 
 <style scoped>
 .shell {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: var(--rk-color-background);
   color: var(--rk-color-text);
 }
 
-.header {
-  border-bottom: 1px solid var(--rk-color-border);
-  background: var(--rk-color-surface);
-  padding: var(--rk-space-4) var(--rk-space-6);
-}
-
-.title {
-  margin: 0;
+.main,
+.footer {
+  width: calc(100% - 2 * var(--rk-gutter));
   max-width: var(--rk-content-width);
   margin-inline: auto;
-  font-size: var(--rk-font-size-lg);
-  font-weight: var(--rk-font-weight-bold);
 }
 
 .main {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: var(--rk-space-4);
-  max-width: var(--rk-content-width);
-  margin-inline: auto;
-  padding: var(--rk-space-6);
+  gap: var(--rk-space-5);
+  padding-block: 0 var(--rk-space-8);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rk-space-3);
+  padding-block: var(--rk-space-4) var(--rk-space-6);
+  border-top: var(--rk-border-width) solid var(--rk-color-border);
 }
 </style>

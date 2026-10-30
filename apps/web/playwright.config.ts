@@ -18,7 +18,10 @@ export default defineConfig({
     screenshot: "on",
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "mobile", use: { ...devices["Pixel 7"] } },
+  ],
   webServer: [
     {
       command: `node node_modules/wrangler/bin/wrangler.js dev --ip 127.0.0.1 --port ${apiPort} --show-interactive-dev-session=false`,

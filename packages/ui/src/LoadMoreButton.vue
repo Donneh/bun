@@ -15,33 +15,45 @@ const emit = defineEmits<{ load: [] }>();
 .load-more {
   display: flex;
   justify-content: center;
-  padding-block: var(--rk-space-4);
+  padding-block: var(--rk-space-2);
 }
 
 .button {
-  font: inherit;
-  font-weight: var(--rk-font-weight-bold);
-  padding: var(--rk-space-2) var(--rk-space-6);
-  border: 1px solid var(--rk-color-accent);
+  width: 100%;
+  min-height: var(--rk-control-height);
+  padding: 0 var(--rk-space-6);
+  border: var(--rk-border-width) solid var(--rk-color-border);
   border-radius: var(--rk-radius-md);
   background: var(--rk-color-surface);
   color: var(--rk-color-text);
+  font: var(--rk-font-weight-medium) var(--rk-font-size-sm) var(--rk-font-family-mono);
   cursor: pointer;
-  transition: background-color var(--rk-duration-fast) ease;
+  transition:
+    border-color var(--rk-duration-fast) ease,
+    color var(--rk-duration-fast) ease;
 }
 
-.button:hover:not(:disabled) {
-  background: var(--rk-color-placeholder-highlight);
-}
-
-.button:disabled {
-  cursor: progress;
-  color: var(--rk-color-text-muted);
-  border-color: var(--rk-color-border);
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    border-color: var(--rk-color-accent);
+    color: var(--rk-color-accent-text);
+  }
 }
 
 .button:focus-visible {
-  outline: 2px solid var(--rk-color-focus);
-  outline-offset: 2px;
+  border-color: var(--rk-color-accent);
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: var(--rk-focus-width);
+}
+
+.button:disabled {
+  color: var(--rk-color-text-muted);
+  cursor: progress;
+}
+
+@media (min-width: 40rem) {
+  .button {
+    width: auto;
+  }
 }
 </style>

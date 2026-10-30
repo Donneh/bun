@@ -36,12 +36,15 @@ const emit = defineEmits<{ remove: [id: string] }>();
   flex-wrap: wrap;
   align-items: center;
   gap: var(--rk-space-2) var(--rk-space-3);
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: var(--rk-space-2);
+  min-width: 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -50,16 +53,17 @@ const emit = defineEmits<{ remove: [id: string] }>();
 .chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--rk-space-1);
-  padding: var(--rk-space-1) var(--rk-space-3);
-  border: 1px solid var(--rk-color-border);
-  border-radius: var(--rk-radius-lg);
+  gap: var(--rk-space-2);
+  min-height: calc(var(--rk-control-height-sm) + 2 * var(--rk-border-width));
+  max-width: 100%;
+  padding: 0 var(--rk-space-3);
+  border: var(--rk-border-width) solid var(--rk-color-border);
+  border-radius: var(--rk-radius-md);
   background: var(--rk-color-surface);
-  font-size: var(--rk-font-size-sm);
 }
 
 .chip.removable {
-  padding-inline-end: var(--rk-space-1);
+  padding-inline-end: 0;
 }
 
 .label {
@@ -67,39 +71,44 @@ const emit = defineEmits<{ remove: [id: string] }>();
 }
 
 .value {
-  font-weight: var(--rk-font-weight-bold);
+  overflow-wrap: anywhere;
+  color: var(--rk-color-text);
 }
 
 .remove {
   display: inline-grid;
+  flex-shrink: 0;
   place-items: center;
-  width: var(--rk-space-6);
-  height: var(--rk-space-6);
+  align-self: stretch;
+  min-width: var(--rk-space-8);
   padding: 0;
   border: none;
-  border-radius: 50%;
+  border-left: var(--rk-border-width) solid var(--rk-color-border);
+  border-radius: 0 var(--rk-radius-md) var(--rk-radius-md) 0;
   background: transparent;
   color: var(--rk-color-text-muted);
   font: inherit;
+  font-size: var(--rk-font-size-md);
   cursor: pointer;
   transition:
     background-color var(--rk-duration-fast) ease,
     color var(--rk-duration-fast) ease;
 }
 
-.remove:hover {
-  background: var(--rk-color-placeholder);
-  color: var(--rk-color-text);
+@media (hover: hover) {
+  .remove:hover {
+    background: var(--rk-color-accent);
+    color: var(--rk-color-on-accent);
+  }
 }
 
 .remove:focus-visible {
-  outline: 2px solid var(--rk-color-focus);
-  outline-offset: 1px;
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: var(--rk-focus-width);
 }
 
 .more {
   margin: 0;
   color: var(--rk-color-text-muted);
-  font-size: var(--rk-font-size-sm);
 }
 </style>

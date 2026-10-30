@@ -1,18 +1,22 @@
 <script setup lang="ts">
 import {
   AppShell,
+  applyTheme,
   CardGrid,
   FilterChips,
+  Hero,
   LoadMoreButton,
   ResultSummary,
   SearchBar,
   SortControl,
   type SortSelection,
   StatusMessage,
+  type ThemePreference,
+  ThemeToggle,
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
-import { appendPage, type SearchView, searchCards } from "~/utils/card-search";
+import { appendPage, fetchCardCount, type SearchView, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
 import {
   parseSearchState,
@@ -23,11 +27,27 @@ import {
   searchStateKey,
   toRouteQuery,
 } from "~/utils/search-state";
+import { loadThemePreference, saveThemePreference } from "~/utils/theme-preference";
 
 type LoadMoreState = { readonly kind: "idle" } | { readonly kind: "loading" } | { readonly kind: "error"; readonly message: string };
 
+const LOADING_PLACEHOLDERS = 12;
+const LOAD_MORE_PLACEHOLDERS = 8;
+
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
+
+const browserStorage = () => window.localStorage;
+const theme = ref<ThemePreference>(loadThemePreference(browserStorage));
+watchEffect(() => applyTheme(theme.value));
+watch(theme, (preference) => saveThemePreference(browserStorage, preference));
+
+const { data: cardCount } = useLazyAsyncData("card-count", () => fetchCardCount(apiBase));
+const eyebrow = computed(() =>
+  ["Riftkeeper", cardCount.value ? `${cardCount.value.toLocaleString("en")} cards` : null, "updated nightly"]
+    .filter(Boolean)
+    .join(" · "),
+);
 
 const state = computed(() => parseSearchState(route.query));
 const stateKey = computed(() => searchStateKey(state.value));
@@ -58,6 +78,12 @@ const view = computed<SearchView>(() => {
   if (status.value === "pending" || !outcome.value) return { kind: "loading" };
   return outcome.value;
 });
+
+const loadMorePlaceholders = computed(() =>
+  view.value.kind === "results" && loadMore.value.kind === "loading"
+    ? Math.min(LOAD_MORE_PLACEHOLDERS, view.value.total - view.value.cards.length)
+    : 0,
+);
 
 const chips = computed(() => (view.value.kind === "results" ? view.value.parsed.filters.map(toChipSummary) : []));
 
@@ -103,7 +129,12 @@ async function loadNextPage() {
 </script>
 
 <template>
-  <AppShell title="Riftkeeper">
+  <AppShell>
+    <Hero
+      :eyebrow="eyebrow"
+      title="Search the whole set. Instantly."
+      subtitle="Find cards by name, domain, cost, rarity or card text."
+    />
     <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
     <FilterChips
       v-if="view.kind === 'results'"
@@ -115,10 +146,13 @@ async function loadNextPage() {
     <StatusMessage
       v-if="view.kind === 'idle'"
       kind="empty"
-      title="Search the Riftbound card list"
-      detail="Try c:fury cost:<=2 or type:battlefield."
+      title="Try a query"
+      detail="c:fury cost:<=2 or type:battlefield"
     />
-    <StatusMessage v-else-if="view.kind === 'loading'" kind="loading" title="Searching…" />
+    <template v-else-if="view.kind === 'loading'">
+      <StatusMessage kind="loading" title="Searching…" />
+      <CardGrid :cards="[]" :placeholders="LOADING_PLACEHOLDERS" label="Loading results" />
+    </template>
     <StatusMessage v-else-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
     <StatusMessage
       v-else-if="view.cards.length === 0"
@@ -136,7 +170,7 @@ async function loadNextPage() {
           @change="changeSort"
         />
       </Toolbar>
-      <CardGrid :cards="view.cards" label="Search results" />
+      <CardGrid :cards="view.cards" :placeholders="loadMorePlaceholders" label="Search results" />
       <StatusMessage
         v-if="loadMore.kind === 'error'"
         kind="error"
@@ -148,6 +182,9 @@ async function loadNextPage() {
         :loading="loadMore.kind === 'loading'"
         @load="loadNextPage"
       />
+    </template>
+    <template #footer>
+      <ThemeToggle v-model="theme" />
     </template>
   </AppShell>
 </template>
