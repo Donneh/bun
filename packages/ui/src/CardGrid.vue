@@ -3,15 +3,16 @@ import CardTile from "./CardTile.vue";
 import CardTileSkeleton from "./CardTileSkeleton.vue";
 import type { CardSummary } from "./card-summary.ts";
 
-withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeholders?: number }>(), {
+withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeholders?: number; stale?: boolean }>(), {
   label: "Cards",
   placeholders: 0,
+  stale: false,
 });
 </script>
 
 <template>
   <div class="container">
-    <ul class="grid" :aria-label="label">
+    <ul class="grid" :class="{ stale }" :aria-label="label" :aria-busy="stale">
       <li v-for="card in cards" :key="card.id" class="cell" :class="card.orientation">
         <CardTile v-bind="card" />
       </li>
@@ -41,6 +42,17 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeh
   margin: 0;
   padding: 0;
   list-style: none;
+  transition: opacity var(--rk-duration-fast) ease;
+}
+
+.grid.stale {
+  opacity: 0.45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid {
+    transition: none;
+  }
 }
 
 .cell {

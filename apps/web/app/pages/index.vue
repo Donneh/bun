@@ -17,7 +17,7 @@ import {
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
-import { appendPage, fetchCardCount, type SearchView, searchCards } from "~/utils/card-search";
+import { appendPage, fetchCardCount, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
 import {
   parseSearchState,
@@ -28,6 +28,7 @@ import {
   searchStateKey,
   toRouteQuery,
 } from "~/utils/search-state";
+import { type SearchResults, type SearchView, searchView } from "~/utils/search-view";
 import { loadThemePreference, saveThemePreference } from "~/utils/theme-preference";
 
 type NextPageState =
@@ -84,14 +85,25 @@ watch(stateKey, () => {
   nextPage.value = { kind: "idle" };
 });
 
+const kept = ref<SearchResults | null>(null);
+watch(
+  outcome,
+  (value) => {
+    if (value) kept.value = value.kind === "results" ? value : null;
+  },
+  { immediate: true },
+);
+
 const view = computed<SearchView>(() => {
-  if (status.value === "pending" || !outcome.value) return { kind: "loading" };
-  return outcome.value;
+  const settled = status.value === "pending" ? null : (outcome.value ?? null);
+  return searchView(settled, kept.value);
 });
 
+const current = computed(() => (view.value.kind === "results" && !view.value.stale ? view.value : null));
+
 const nextPagePlaceholders = computed(() =>
-  view.value.kind === "results" && nextPage.value.kind === "loading"
-    ? Math.min(NEXT_PAGE_PLACEHOLDERS, view.value.total - view.value.cards.length)
+  current.value && nextPage.value.kind === "loading"
+    ? Math.min(NEXT_PAGE_PLACEHOLDERS, current.value.total - current.value.cards.length)
     : 0,
 );
 
@@ -119,8 +131,8 @@ function changeSort({ sort, direction }: SortSelection) {
 }
 
 function removeFilter(id: string) {
-  if (view.value.kind !== "results") return;
-  const { parsed } = view.value;
+  if (!current.value) return;
+  const { parsed } = current.value;
   const chip = parsed.filters.find((filter) => chipId(filter.span) === id);
   if (chip) return search({ ...state.value, query: removeSpan(parsed.query, chip.span) });
 }
@@ -137,18 +149,18 @@ function continueScrolling() {
 }
 
 async function loadNextPage() {
-  const current = view.value;
-  if (current.kind !== "results" || !current.hasMore || nextPage.value.kind === "loading") return;
+  const shown = current.value;
+  if (!shown?.hasMore || nextPage.value.kind === "loading") return;
   const requestedFor = stateKey.value;
   nextPage.value = { kind: "loading" };
   nextPageAllowedAt = Date.now() + MIN_PAGE_INTERVAL_MS;
-  const next = await searchCards(apiBase, state.value, current.page + 1);
+  const next = await searchCards(apiBase, state.value, shown.page + 1);
   if (requestedFor !== stateKey.value) return;
   if (next.kind === "error") {
     nextPage.value = { kind: "error", message: next.message };
     return;
   }
-  outcome.value = appendPage(current, next);
+  outcome.value = appendPage(shown, next);
   nextPage.value = { kind: "idle" };
 }
 </script>
@@ -166,44 +178,46 @@ async function loadNextPage() {
     </Hero>
     <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
     <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
-    <FilterChips
-      v-if="view.kind === 'results'"
-      :chips="chips"
-      :more-conditions="view.parsed.hasAdvancedConditions"
-      @remove="removeFilter"
-    />
-    <WarningList v-if="view.kind === 'results'" :warnings="view.warnings" />
-    <template v-if="view.kind === 'loading'">
-      <StatusMessage kind="loading" title="Searching…" />
+    <StatusMessage v-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
+    <template v-else-if="view.kind === 'loading'">
+      <FilterChips :chips="[]" :placeholder="Boolean(state.query)" />
+      <Toolbar>
+        <ResultSummary searching />
+        <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
+      </Toolbar>
       <CardGrid :cards="[]" :placeholders="LOADING_PLACEHOLDERS" label="Loading results" />
     </template>
-    <StatusMessage v-else-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
-    <StatusMessage
-      v-else-if="view.cards.length === 0"
-      kind="empty"
-      title="No cards found"
-      detail="Check the query for typos or remove a filter."
-    />
     <template v-else>
+      <FilterChips :chips="chips" :more-conditions="view.parsed.hasAdvancedConditions" @remove="removeFilter" />
+      <WarningList :warnings="view.warnings" />
       <Toolbar>
-        <ResultSummary :shown="view.cards.length" :total="view.total" />
-        <SortControl
-          :sort="state.sort"
-          :direction="state.direction"
-          :options="SORT_OPTIONS"
-          @change="changeSort"
-        />
+        <ResultSummary :shown="view.cards.length" :total="view.total" :searching="view.stale" />
+        <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
       </Toolbar>
-      <CardGrid :cards="view.cards" :placeholders="nextPagePlaceholders" label="Search results" />
       <StatusMessage
-        v-if="nextPage.kind === 'error'"
-        kind="error"
-        title="Could not load more cards"
-        :detail="nextPage.message"
-        action="Try again"
-        @action="loadNextPage"
+        v-if="view.cards.length === 0 && !view.stale"
+        kind="empty"
+        title="No cards found"
+        detail="Check the query for typos or remove a filter."
       />
-      <InfiniteScrollSentinel v-else-if="view.hasMore" :key="stateKey" @change="nearEnd = $event" />
+      <CardGrid
+        v-else
+        :cards="view.cards"
+        :placeholders="view.stale ? 0 : nextPagePlaceholders"
+        :stale="view.stale"
+        label="Search results"
+      />
+      <template v-if="current">
+        <StatusMessage
+          v-if="nextPage.kind === 'error'"
+          kind="error"
+          title="Could not load more cards"
+          :detail="nextPage.message"
+          action="Try again"
+          @action="loadNextPage"
+        />
+        <InfiniteScrollSentinel v-else-if="current.hasMore" :key="stateKey" @change="nearEnd = $event" />
+      </template>
     </template>
   </AppShell>
 </template>
