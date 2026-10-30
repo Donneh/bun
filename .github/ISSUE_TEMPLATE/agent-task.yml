@@ -1,0 +1,47 @@
+name: Agent task
+description: A fully specified task an agent can complete without the owner.
+labels: ["agent-ready"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should be true when this is done, and who benefits.
+    validations:
+      required: true
+  - type: textarea
+    id: in-scope
+    attributes:
+      label: In scope
+      description: What to build or change. Name files, endpoints or components when you know them.
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What to leave alone, including follow-ups that belong in a separate issue.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: A checklist. Each item is something a reviewer can check.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: required-evidence
+    attributes:
+      label: Required evidence
+      description: What the pull request must show, such as a video of the page, before and after numbers with the method, or a passing test.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes for the implementer
+      description: Context, constraints and links. If a human must decide or provide something first (accounts, secrets, product decisions), use the needs-human label instead of agent-ready.
+    validations:
+      required: false

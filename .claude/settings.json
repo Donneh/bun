@@ -56,5 +56,19 @@
       "Bash(bunx wrangler deploy:*)",
       "Bash(npx wrangler deploy:*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const fs=require(\"fs\"),path=require(\"path\");try{const file=path.resolve(JSON.parse(fs.readFileSync(0,\"utf8\")).tool_input.file_path);let root=path.dirname(file);while(!fs.existsSync(path.join(root,\"biome.json\"))){const parent=path.dirname(root);if(parent===root)process.exit(0);root=parent}const biome=path.join(root,\"node_modules/@biomejs/biome/bin/biome\");if(fs.existsSync(biome))require(\"child_process\").execFileSync(process.execPath,[biome,\"format\",\"--write\",\"--files-ignore-unknown=true\",\"--no-errors-on-unmatched\",file],{cwd:root,stdio:\"ignore\",timeout:20000})}catch{}'",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
