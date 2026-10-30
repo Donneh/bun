@@ -1,17 +1,27 @@
 import { describe, expect, test } from "bun:test";
 import schedules from "../schedules.json";
-import { dispatchWorkflow, type Fetch, workflowFor } from "./dispatch.ts";
+import { dispatchWorkflow, type Fetch, retryDelaysMs, workflowFor } from "./dispatch.ts";
 
 type Request = { url: string; init: RequestInit };
 
-function recordingFetch(response: Response) {
+function recordingFetch(...outcomes: (Response | Error)[]) {
   const requests: Request[] = [];
   const fetcher: Fetch = async (url, init) => {
     requests.push({ url, init });
-    return response;
+    const outcome = outcomes[Math.min(requests.length, outcomes.length) - 1];
+    if (outcome instanceof Error) throw outcome;
+    return outcome as Response;
   };
   return { fetcher, requests };
 }
+
+function recordingWait() {
+  const waits: number[] = [];
+  return { wait: async (ms: number) => void waits.push(ms), waits };
+}
+
+const dispatched = () => new Response(null, { status: 204 });
+const unavailable = () => new Response("Service unavailable", { status: 503 });
 
 describe("workflowFor", () => {
   test("runs the production monitor every 15 minutes", () => {
@@ -62,7 +72,7 @@ describe("dispatchWorkflow", () => {
   test("throws with the status and body when GitHub does not answer 204", async () => {
     const { fetcher } = recordingFetch(new Response('{"message":"Bad credentials"}', { status: 401 }));
 
-    await expect(dispatchWorkflow("scrape-cards.yml", "expired", fetcher)).rejects.toThrow(
+    await expect(dispatchWorkflow("scrape-cards.yml", "expired", fetcher, recordingWait().wait)).rejects.toThrow(
       'Dispatching scrape-cards.yml on Donneh/bun failed with HTTP 401: {"message":"Bad credentials"}',
     );
   });
@@ -70,6 +80,48 @@ describe("dispatchWorkflow", () => {
   test("throws on a success status other than 204", async () => {
     const { fetcher } = recordingFetch(new Response("{}", { status: 200 }));
 
-    await expect(dispatchWorkflow("monitor.yml", "token-1", fetcher)).rejects.toThrow("failed with HTTP 200");
+    await expect(dispatchWorkflow("monitor.yml", "token-1", fetcher, recordingWait().wait)).rejects.toThrow(
+      "failed with HTTP 200",
+    );
+  });
+
+  test("does not retry a client error", async () => {
+    const { fetcher, requests } = recordingFetch(new Response("{}", { status: 401 }), dispatched());
+    const { wait, waits } = recordingWait();
+
+    await expect(dispatchWorkflow("monitor.yml", "expired", fetcher, wait)).rejects.toThrow("failed with HTTP 401");
+    expect(requests).toHaveLength(1);
+    expect(waits).toEqual([]);
+  });
+
+  test("retries a server error and succeeds", async () => {
+    const { fetcher, requests } = recordingFetch(unavailable(), dispatched());
+    const { wait, waits } = recordingWait();
+
+    await dispatchWorkflow("scrape-cards.yml", "token-1", fetcher, wait);
+    expect(requests).toHaveLength(2);
+    expect(waits).toEqual(retryDelaysMs.slice(0, 1));
+  });
+
+  test("retries a network error and succeeds", async () => {
+    const { fetcher, requests } = recordingFetch(new TypeError("Network connection lost"), dispatched());
+
+    await dispatchWorkflow("scrape-cards.yml", "token-1", fetcher, recordingWait().wait);
+    expect(requests).toHaveLength(2);
+  });
+
+  test("gives up after the last retry with the last error", async () => {
+    const { fetcher, requests } = recordingFetch(
+      unavailable(),
+      new TypeError("Network connection lost"),
+      new Response("Bad gateway", { status: 502 }),
+    );
+    const { wait, waits } = recordingWait();
+
+    await expect(dispatchWorkflow("monitor.yml", "token-1", fetcher, wait)).rejects.toThrow(
+      "Dispatching monitor.yml on Donneh/bun failed with HTTP 502: Bad gateway",
+    );
+    expect(requests).toHaveLength(retryDelaysMs.length + 1);
+    expect(waits).toEqual(retryDelaysMs);
   });
 });
