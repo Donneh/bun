@@ -78,6 +78,7 @@ module "api_deployment" {
   script_name     = cloudflare_worker.api.name
   version_id      = cloudflare_worker_version.api.id
   live_version_id = lookup(var.live_versions, cloudflare_worker.api.name, null)
+  rollback        = var.rollback
 }
 
 moved {
@@ -158,6 +159,7 @@ module "web_deployment" {
   script_name     = cloudflare_worker.web.name
   version_id      = cloudflare_worker_version.web.id
   live_version_id = lookup(var.live_versions, cloudflare_worker.web.name, null)
+  rollback        = var.rollback
 }
 
 moved {

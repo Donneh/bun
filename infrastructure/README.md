@@ -43,11 +43,11 @@ Do this once per Cloudflare account:
 
 ## Deploy from GitHub
 
-`.github/workflows/ci.yml` runs on every pull request. It runs `bun run check`, `tofu fmt -check` and `tofu validate`, and it needs no secrets.
+`.github/workflows/ci.yml` runs on every pull request. It runs `bun run check`, `tofu fmt -check`, `tofu validate` and the `tofu test` of the `deployment` module, and it needs no secrets.
 
-`.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch. It runs the same checks, bundles the API Worker, builds the web app and releases both Workers in the `production` environment, as [Release and rollback](#release-and-rollback) describes. Merging the daily card snapshot pull request therefore deploys the new cards.
+`.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch. Its `deploy` job runs only on `main`, so a dispatch from another branch runs the checks and deploys nothing. It runs the same checks, bundles the API Worker, builds the web app and releases both Workers in the `production` environment, as [Release and rollback](#release-and-rollback) describes. Merging the daily card snapshot pull request therefore deploys the new cards.
 
-The smoke tests are `test:api` and `test:production`. `test:api` waits until `/health` reports the expected version, then runs the black-box suite against the API. `test:production` in `apps/web` waits until the page serves the new build, then checks that the page and its scripts and styles load, that a `?q=` link shows search results with one API request, that an unknown path answers 404, and that `www` redirects to the apex.
+The smoke tests are `test:api` and `test:production`. `test:api` waits until `/health` reports the expected version, then runs the black-box suite against the API. `test:production` in `apps/web` waits until the page serves the new build, then checks that the page and its scripts and styles load, that a `?q=` link shows search results and that the API the page searched reports `EXPECTED_API_VERSION` on `/health`, that an unknown path answers 404, and that `www` redirects to the apex.
 
 Set these on the repository, or on the `production` environment:
 
@@ -65,18 +65,24 @@ Set these on the repository, or on the `production` environment:
 
 A deploy never sends users to a version that has not passed the smoke tests, and a failed deploy leaves production on the versions that served it before. The Deploy workflow releases both Workers in these steps:
 
-1. **Read the live versions.** `live-versions.ts` reads `tofu show -json` and prints the version that serves most traffic for each Worker, such as `{"riftkeeper-api":"<id>","riftkeeper-web":"<id>"}`.
+1. **Read the live versions.** `live-versions.ts` reads `tofu show -json` and prints the version that serves most traffic for each Worker, such as `{"riftkeeper-api":"<id>","riftkeeper-web":"<id>"}`. It skips deposed deployments. It fails when either Worker has no live version, because the stage would then send all traffic to that Worker's new version untested. See [First deploy](#first-deploy).
 2. **Stage.** `tofu apply` with `TF_VAR_live_versions` set to that map. OpenTofu uploads the new versions. Each `deployment` module keeps the live version at 99.99% and gives the new version 0.01%. The provider rejects 0%, so 0.01% is the smallest share. A Worker whose version did not change stays at 100%.
-3. **Smoke test the staged versions.** Both test suites send the `Cloudflare-Workers-Version-Overrides` header from the `version_overrides` output, so their requests reach the new versions while users stay on the live ones. `test:api` reads it from `VERSION_OVERRIDES` through `apps/api/scripts/version-overrides.ts`, and `test:production` sets it as a Playwright header. The page test therefore runs the new page against the new API. Cloudflare ignores an override for a version that is not in the deployment, so the tests wait for the expected version and fail if they never see it.
-4. **Promote.** `tofu apply` without `live_versions` moves all traffic to the new versions.
+3. **Smoke test the staged versions.** Both test suites send the `Cloudflare-Workers-Version-Overrides` header from the `version_overrides` output, so their requests reach the new versions while users stay on the live ones. `test:api` reads it from `VERSION_OVERRIDES` through `apps/api/scripts/version-overrides.ts`, and `test:production` sets it as a Playwright header. The page test therefore runs the new page against the new API, and it checks that the API the page searched reports the new version. Cloudflare ignores an override for a version that is not in the deployment, so the tests wait for the expected version and fail if they never see it.
+4. **Promote.** `tofu apply` without `live_versions` moves all traffic to the new versions. The step fails if this apply released other versions than the ones the smoke tests passed for (`worker_version_id` and `web_version_id`).
 5. **Smoke test again** without the header, the way users reach production.
-6. **Roll back** if any step from staging onward fails. The workflow runs `tofu apply` with the live versions from step 1 again, which restores the split from step 2, and marks the run failed with a `Rolled back` error. After a failure before promotion, this apply changes nothing. After a failure after promotion, it moves traffic back to the old versions.
+6. **Roll back** if any step from staging onward fails or the run is cancelled. The workflow runs `tofu apply` with the live versions from step 1 and `TF_VAR_rollback=true`, which sends all traffic of each Worker to its live version and none to the new one, and marks the run failed with a `Rolled back` error. It retries the apply once. If both attempts fail, it reports a `Rollback failed` error with the live versions and this run's versions; then run the same apply by hand.
 
-The state always matches what Cloudflare serves: every traffic change is a `tofu apply`. A staged version that failed stays in the deployment at 0.01% until the next deploy replaces it. The next deploy reads the live versions from the state again, so it stages next to the version that served traffic, not next to the failed one.
+The state always matches what Cloudflare serves: every traffic change is a `tofu apply`. After a rollback, the failed version gets no traffic. The next deploy reads the live versions from the state again, so it stages next to the version that served traffic, not next to the failed one.
+
+Every apply waits up to 60 seconds for the state lock (`-lock-timeout=60s`), so a rollback does not fail on a lock that a cancelled apply has not released yet.
+
+Staging covers the Worker versions only. The stage apply applies every other change in `infrastructure/` in full, such as a Worker setting, a custom domain or a ruleset, and the rollback does not undo it.
 
 `create_before_destroy` on the deployment keeps the old deployment in the state when Cloudflare rejects a new one. Without it, OpenTofu would drop the deployment from the state first, and the next deploy would not know the live version.
 
-The very first deploy, with an empty state, has no live versions. It sends all traffic to the new versions at once, and the rollback step has nothing to return to.
+### First deploy
+
+The very first deploy, with an empty state, has no live versions, so the read step fails. Run the Deploy workflow by hand with **bootstrap** checked, or `gh workflow run deploy.yml -f bootstrap=true`. A Worker without a live version then gets all traffic at once, and the rollback has nothing to return it to. The workflow refuses `bootstrap` together with `break_api`.
 
 ### Exercise the rollback
 

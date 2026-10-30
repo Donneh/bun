@@ -11,7 +11,7 @@
     "dev:web": "bun run --filter @riftkeeper/web dev",
     "test:e2e": "bun run --filter @riftkeeper/web test:e2e",
     "scrape": "bun run --filter @riftkeeper/ingest scrape",
-    "test": "bun run --filter \"*\" --sequential test",
+    "test": "bun run --filter \"*\" --sequential test && bun test ./infrastructure",
     "test:api": "bun run --filter @riftkeeper/api test:api",
     "benchmark": "bun run --filter @riftkeeper/api benchmark:v8",
     "typecheck": "bun run --filter \"*\" typecheck",
