@@ -9,13 +9,40 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
+  target:
+    name: Find the live commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      deploying: ${{ steps.target.outputs.deploying }}
+      sha: ${{ steps.target.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - id: target
+        name: Skip during a deploy, otherwise pick the deployed commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          gh run list --workflow deploy.yml --branch main --limit 50 \
+            --json status,conclusion,startedAt,updatedAt,headSha,url |
+            bun infrastructure/monitor-target.ts
+
   api:
+    needs: target
+    if: ${{ needs.target.outputs.deploying == 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.target.outputs.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
@@ -26,10 +53,14 @@ jobs:
           BASE_URL: https://api.riftkeeper.app
 
   web:
+    needs: target
+    if: ${{ needs.target.outputs.deploying == 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.target.outputs.sha }}
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
