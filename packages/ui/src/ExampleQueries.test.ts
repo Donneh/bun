@@ -4,15 +4,22 @@ import { describe, expect, test } from "vitest";
 import ExampleQueries from "./ExampleQueries.vue";
 
 describe("ExampleQueries", () => {
-  test("lists each query as a button", () => {
-    render(ExampleQueries, { props: { queries: ["c:fury cost:<=2", "type:battlefield"] } });
+  test("lists each query as a button after the lead", () => {
+    const { container } = render(ExampleQueries, { props: { queries: ["c:fury cost:<=2", "type:battlefield"] } });
 
     const list = screen.getByRole("list", { name: "Example queries" });
     expect(
       within(list)
         .getAllByRole("button")
-        .map((button) => button.textContent?.replace("›", "").trim()),
+        .map((button) => button.textContent?.trim()),
     ).toEqual(["c:fury cost:<=2", "type:battlefield"]);
+    expect(container.textContent).toMatch(/^\s*Try ›/);
+  });
+
+  test("takes another lead", () => {
+    const { container } = render(ExampleQueries, { props: { queries: ["ability:draw"], lead: "For example" } });
+
+    expect(container.textContent).toMatch(/^\s*For example ›/);
   });
 
   test("reports the clicked query", async () => {

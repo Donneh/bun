@@ -3,9 +3,13 @@ import { computed } from "vue";
 
 const props = defineProps<{ shown: number; total: number }>();
 
+const count = (value: number) => value.toLocaleString("en");
+
 const text = computed(() => {
   const noun = props.total === 1 ? "card" : "cards";
-  return props.shown < props.total ? `Showing ${props.shown} of ${props.total} ${noun}` : `${props.total} ${noun}`;
+  return props.shown < props.total
+    ? `Showing ${count(props.shown)} of ${count(props.total)} ${noun}`
+    : `${count(props.total)} ${noun}`;
 });
 </script>
 
