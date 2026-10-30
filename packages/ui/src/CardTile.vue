@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onBeforeUnmount } from "vue";
 import CardImage from "./CardImage.vue";
 import type { CardOrientation } from "./card-summary.ts";
 import { isPlainLeftClick } from "./link-click.ts";
@@ -14,7 +14,21 @@ const props = defineProps<{
   sizes?: string | undefined;
 }>();
 
-const emit = defineEmits<{ navigate: [href: string] }>();
+const emit = defineEmits<{ navigate: [href: string]; intent: [] }>();
+
+const HOVER_INTENT_MS = 80;
+let hoverTimer: ReturnType<typeof setTimeout> | undefined;
+
+function startHoverIntent() {
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(() => emit("intent"), HOVER_INTENT_MS);
+}
+
+function cancelHoverIntent() {
+  clearTimeout(hoverTimer);
+}
+
+onBeforeUnmount(cancelHoverIntent);
 
 const linkName = computed(() => (props.subtitle ? `${props.name}, ${props.subtitle}` : props.name));
 
@@ -26,7 +40,16 @@ function followLink(event: MouseEvent) {
 </script>
 
 <template>
-  <a class="tile" :href="href" :aria-label="linkName" @click="followLink">
+  <a
+    class="tile"
+    :href="href"
+    :aria-label="linkName"
+    @click="followLink"
+    @pointerenter="startHoverIntent"
+    @pointerleave="cancelHoverIntent"
+    @focus="emit('intent')"
+    @touchstart.passive="emit('intent')"
+  >
     <figure class="figure">
       <CardImage
         class="frame"

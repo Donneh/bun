@@ -1,6 +1,7 @@
 import type { Card } from "@riftkeeper/cards";
 import type { Decomposition, SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
+import { rememberCards } from "./card-cache";
 import { cardHref } from "./card-detail";
 import { responsiveImage } from "./card-images";
 import type { SearchState } from "./search-state";
@@ -28,6 +29,7 @@ export async function searchCards(apiBase: string, state: SearchState, page = 1)
       baseURL: apiBase,
       query: { q: state.query, sort: state.sort, direction: state.direction, page },
     });
+    rememberCards(response.data);
     return {
       kind: "results",
       cards: response.data.flatMap(toCardSummaries),

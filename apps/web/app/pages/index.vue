@@ -16,8 +16,12 @@ import {
   WarningList,
 } from "@riftkeeper/ui";
 import { useTheme } from "~/composables/theme";
+import { rememberedCard } from "~/utils/card-cache";
+import { selectedPrinting } from "~/utils/card-detail";
+import { responsiveImage } from "~/utils/card-images";
 import { appendPage, fetchCardCount, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
+import { preloadImage } from "~/utils/preload-image";
 import {
   parseSearchState,
   parseSortDirection,
@@ -119,6 +123,13 @@ async function search(next: SearchState) {
   await navigateTo({ query: toRouteQuery(next) });
 }
 
+function preloadCardDetail(id: string) {
+  const card = rememberedCard(id);
+  if (!card) return;
+  const { imageUrl, orientation } = selectedPrinting(card, undefined);
+  preloadImage({ src: imageUrl, ...responsiveImage(imageUrl, orientation, "detail") });
+}
+
 function submit(query: string) {
   return search({ ...state.value, query });
 }
@@ -204,6 +215,7 @@ async function loadNextPage() {
         :stale="view.stale"
         label="Search results"
         @navigate="navigateTo"
+        @intent="preloadCardDetail"
       />
       <template v-if="current">
         <StatusMessage

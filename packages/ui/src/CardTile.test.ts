@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event";
 import { fireEvent, render, screen } from "@testing-library/vue";
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import CardTile from "./CardTile.vue";
 
 const jinx = {
@@ -92,5 +92,43 @@ describe("CardTile", () => {
 
     expect(frame?.classList.contains("pending")).toBe(false);
     expect(image.classList.contains("loaded")).toBe(true);
+  });
+
+  describe("intent to open", () => {
+    afterEach(() => vi.useRealTimers());
+
+    test("is reported once the pointer rests on the card", async () => {
+      vi.useFakeTimers();
+      const { emitted } = render(CardTile, { props: jinx });
+      const link = screen.getByRole("link", { name: "Jinx, Loose Cannon" });
+
+      await fireEvent.pointerEnter(link);
+      expect(emitted("intent")).toBeUndefined();
+      vi.advanceTimersByTime(100);
+
+      expect(emitted("intent")).toHaveLength(1);
+    });
+
+    test("is not reported when the pointer only passes over the card", async () => {
+      vi.useFakeTimers();
+      const { emitted } = render(CardTile, { props: jinx });
+      const link = screen.getByRole("link", { name: "Jinx, Loose Cannon" });
+
+      await fireEvent.pointerEnter(link);
+      await fireEvent.pointerLeave(link);
+      vi.advanceTimersByTime(100);
+
+      expect(emitted("intent")).toBeUndefined();
+    });
+
+    test("is reported at once on keyboard focus and on touch", async () => {
+      const { emitted } = render(CardTile, { props: jinx });
+      const link = screen.getByRole("link", { name: "Jinx, Loose Cannon" });
+
+      await fireEvent.focus(link);
+      await fireEvent.touchStart(link);
+
+      expect(emitted("intent")).toHaveLength(2);
+    });
   });
 });
