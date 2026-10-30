@@ -31,7 +31,7 @@ The scheduler Worker, `riftkeeper-scheduler`, has no hostname. It starts the sch
 | `cloudflare_workers_deployment`   | Sends all events to the latest version.                                                                                        |
 | `cloudflare_workers_cron_trigger` | Runs the Worker on every cron in `apps/scheduler/schedules.json`. Each event dispatches the workflow that the file maps it to. |
 
-`apps/scheduler/schedules.json` is the one list of schedules. OpenTofu reads its crons for the trigger and the Worker reads it to pick the workflow, so add or change a schedule there and nowhere else. The workflows themselves have only `workflow_dispatch`. A dispatch that GitHub does not answer with 204 throws, so it shows in Workers Observability for `riftkeeper-scheduler` with the status and response body.
+`apps/scheduler/schedules.json` is the one list of schedules. OpenTofu reads its crons for the trigger and the Worker reads it to pick the workflow, so add or change a schedule there and nowhere else. The workflows themselves have only `workflow_dispatch`. A dispatch that GitHub answers with a 5xx, or that fails on the network, is retried after 2 and again after 20 seconds. Any other answer than 204, or a third failure, throws, so it shows in Workers Observability for `riftkeeper-scheduler` with the status and response body. A successful dispatch logs when the token expires, from GitHub's `github-authentication-token-expiration` header. Nobody watches those logs, so the [scheduler watchdog](#scheduler-watchdog) alerts when dispatches stop.
 
 The scheduler deploys at 100% on every apply. A cron event cannot carry a version override, so a staged version would never be tested before it runs.
 
@@ -79,10 +79,21 @@ The deploy passes `WORKFLOW_DISPATCH_TOKEN` to OpenTofu as the sensitive variabl
 
 ### Rotate the GitHub dispatch token
 
+The current `WORKFLOW_DISPATCH_TOKEN` was stored on 2026-10-30. Its expiry date is not recorded yet: read it from the scheduler's `Dispatched ... the token expires ...` log line, or from the token's page in GitHub's developer settings, and write it here. Rotate the token before that date; the [scheduler watchdog](#scheduler-watchdog) opens an issue within about an hour if it expires anyway.
+
 1. Create a new fine-grained token with **Actions** read and write on this repository only.
 2. Replace the repository secret `WORKFLOW_DISPATCH_TOKEN` with it.
 3. Run the Deploy workflow (`gh workflow run deploy.yml`). The changed secret makes a new scheduler version.
 4. Confirm that the next scheduled run of `monitor.yml` starts, with `gh run list --workflow monitor.yml --event workflow_dispatch`, then revoke the old token.
+5. Write the new token's expiry date above.
+
+### Scheduler watchdog
+
+Nobody watches Workers Observability, so `.github/workflows/scheduler-watchdog.yml` checks from GitHub that the scheduler still dispatches. It is the one workflow on GitHub's own `schedule:` trigger, at minutes 11 and 41, because it must not depend on the scheduler it watches. GitHub drops some of its runs, which only delays an alert. `apps/scheduler/scripts/watchdog.ts` looks up the latest `workflow_dispatch` run of every workflow in `apps/scheduler/schedules.json` and fails when one is older than its maximum age in `apps/scheduler/src/watchdog.ts`: 60 minutes for `monitor.yml`, 26 hours for `scrape-cards.yml`. A unit test fails when a scheduled workflow has no maximum age.
+
+When the check fails, the run fails, which GitHub emails to the person who last changed the watchdog's cron, and it opens the issue **Scheduler stopped dispatching workflows**, or comments on it when it is already open. The issue lists each late workflow with its latest run and where to look for the cause. The first run that finds every workflow on time comments on the issue and closes it.
+
+The watchdog uses the workflow's own `GITHUB_TOKEN` (`actions: read`, `issues: write`), not the dispatch token. It keeps working when the dispatch token expires, and it does not change when the scheduler moves to another credential: it checks that runs start, not how they were started.
 
 ## Release and rollback
 
