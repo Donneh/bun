@@ -31,6 +31,7 @@ jobs:
       TF_VAR_zone_id: ${{ vars.CLOUDFLARE_ZONE_ID }}
       TF_VAR_hostname: ${{ vars.API_HOSTNAME }}
       TF_VAR_web_hostname: ${{ vars.WEB_HOSTNAME }}
+      TF_VAR_github_dispatch_token: ${{ secrets.WORKFLOW_DISPATCH_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -38,6 +39,7 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run --filter @riftkeeper/api build
+      - run: bun run --filter @riftkeeper/scheduler build
       - id: web
         run: |
           bun run --filter @riftkeeper/web build

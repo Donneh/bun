@@ -35,6 +35,15 @@
         "typescript": "^7.0.2",
       },
     },
+    "apps/scheduler": {
+      "name": "@riftkeeper/scheduler",
+      "devDependencies": {
+        "@cloudflare/workers-types": "5.20261027.1",
+        "@types/bun": "^1.4.4",
+        "typescript": "^7.0.2",
+        "wrangler": "4.154.0",
+      },
+    },
     "apps/web": {
       "name": "@riftkeeper/web",
       "dependencies": {
@@ -381,6 +390,8 @@
     "@riftkeeper/cards": ["@riftkeeper/cards@workspace:packages/cards"],
 
     "@riftkeeper/ingest": ["@riftkeeper/ingest@workspace:apps/ingest"],
+
+    "@riftkeeper/scheduler": ["@riftkeeper/scheduler@workspace:apps/scheduler"],
 
     "@riftkeeper/search": ["@riftkeeper/search@workspace:packages/search"],
 

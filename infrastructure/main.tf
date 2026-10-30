@@ -30,6 +30,10 @@ locals {
 
   web_wrangler_config = jsondecode(file("${path.module}/../apps/web/wrangler.jsonc"))
   www_hostname        = "www.${var.web_hostname}"
+
+  scheduler_wrangler_config = jsondecode(file("${path.module}/../apps/scheduler/wrangler.jsonc"))
+  scheduler_bundle          = "${path.module}/../apps/scheduler/dist/index.js"
+  scheduler_schedules       = jsondecode(file("${path.module}/../apps/scheduler/schedules.json"))
 }
 
 resource "cloudflare_worker" "api" {
@@ -191,4 +195,60 @@ resource "cloudflare_ruleset" "redirect_www" {
       }
     }
   }]
+}
+
+resource "cloudflare_worker" "scheduler" {
+  account_id = var.account_id
+  name       = local.scheduler_wrangler_config.name
+
+  subdomain = {
+    enabled          = false
+    previews_enabled = false
+  }
+
+  observability = {
+    enabled = true
+    logs = {
+      enabled         = true
+      invocation_logs = true
+    }
+  }
+}
+
+resource "cloudflare_worker_version" "scheduler" {
+  account_id         = var.account_id
+  worker_id          = cloudflare_worker.scheduler.id
+  compatibility_date = local.scheduler_wrangler_config.compatibility_date
+  main_module        = "index.js"
+
+  bindings = [{
+    type = "secret_text"
+    name = "GITHUB_DISPATCH_TOKEN"
+    text = var.github_dispatch_token
+  }]
+
+  modules = [{
+    name         = "index.js"
+    content_type = "application/javascript+module"
+    content_file = local.scheduler_bundle
+  }]
+}
+
+resource "cloudflare_workers_deployment" "scheduler" {
+  account_id  = var.account_id
+  script_name = cloudflare_worker.scheduler.name
+  strategy    = "percentage"
+
+  versions = [{
+    version_id = cloudflare_worker_version.scheduler.id
+    percentage = 100
+  }]
+}
+
+resource "cloudflare_workers_cron_trigger" "scheduler" {
+  account_id  = var.account_id
+  script_name = cloudflare_worker.scheduler.name
+  schedules   = [for cron in keys(local.scheduler_schedules) : { cron = cron }]
+
+  depends_on = [cloudflare_workers_deployment.scheduler]
 }
