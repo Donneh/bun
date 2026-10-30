@@ -7,6 +7,7 @@ const emit = defineEmits<{ action: [] }>();
   <section class="status" :class="kind" :role="kind === 'error' ? 'alert' : 'status'" :aria-busy="kind === 'loading'">
     <p class="title">{{ title }}</p>
     <p v-if="detail" class="detail">{{ detail }}</p>
+    <slot />
     <button v-if="action" class="action" type="button" @click="emit('action')">{{ action }}</button>
   </section>
 </template>

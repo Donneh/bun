@@ -36,4 +36,13 @@ describe("StatusMessage", () => {
 
     expect(emitted("action")).toHaveLength(1);
   });
+
+  test("renders extra content, such as suggestions, below the detail", () => {
+    render(StatusMessage, {
+      props: { kind: "empty", title: "Try a query" },
+      slots: { default: "<p>Suggestions</p>" },
+    });
+
+    expect(screen.getByRole("status").textContent).toContain("Suggestions");
+  });
 });

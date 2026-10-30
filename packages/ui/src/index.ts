@@ -5,6 +5,7 @@ export { default as CardTileSkeleton } from "./CardTileSkeleton.vue";
 export type { CardOrientation, CardSummary } from "./card-summary.ts";
 export { default as Dither } from "./Dither.vue";
 export type { DitherColor, DitherPattern } from "./dither.ts";
+export { default as ExampleQueries } from "./ExampleQueries.vue";
 export { default as FilterChips } from "./FilterChips.vue";
 export type { FilterChipSummary } from "./filter-chip.ts";
 export { default as Hero } from "./Hero.vue";
