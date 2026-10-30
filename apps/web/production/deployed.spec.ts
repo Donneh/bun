@@ -1,5 +1,6 @@
-import { type APIRequestContext, expect, test } from "@playwright/test";
+import type { APIRequestContext } from "@playwright/test";
 import { expectedApiVersion, expectedBuildId, webUrl, wwwUrl } from "../playwright.production.config.ts";
+import { expect, test } from "./staged-version.ts";
 
 const READY_TIMEOUT_MS = 180_000;
 const query = "c:fury cost:<=2";
@@ -45,15 +46,11 @@ test("the home page and its scripts and styles load", async ({ request }) => {
 });
 
 test("a shared search link shows its cards", async ({ page }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-
   const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
   await page.goto(`/?q=${encodeURIComponent(query)}`);
 
   await expect(page.getByRole("searchbox", { name: "Search cards" })).toHaveValue(query);
   await expect(page.getByRole("list", { name: "Search results" }).getByRole("listitem").first()).toBeVisible();
-  expect(errors).toEqual([]);
 
   const apiOrigin = new URL((await searchResponse).url()).origin;
   if (expectedApiVersion) {
@@ -66,8 +63,6 @@ test("a shared search link shows its cards", async ({ page }) => {
 });
 
 test("a card link opened directly serves the app and shows the card", async ({ page, request }) => {
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
   const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
   await page.goto(`/?q=${encodeURIComponent(query)}`);
   const { data } = (await (await searchResponse).json()) as { data: { id: string; name: string }[] };
@@ -86,7 +81,6 @@ test("a card link opened directly serves the app and shows the card", async ({ p
 
   await expect(page.getByRole("heading", { level: 1, name: card.name, exact: true })).toBeVisible();
   await expect(page.getByRole("article").getByRole("img", { name: card.name, exact: true })).toBeVisible();
-  expect(errors).toEqual([]);
 });
 
 test("an unknown path serves the app, which says the page was not found", async ({ page, request }) => {
