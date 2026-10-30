@@ -1,5 +1,5 @@
 export const maxRunAgeMinutes: Readonly<Record<string, number>> = {
-  "monitor.yml": 1,
+  "monitor.yml": 60,
   "scrape-cards.yml": 26 * 60,
 };
 

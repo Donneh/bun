@@ -41,7 +41,7 @@ jobs:
           if [ ! -f "$RUNNER_TEMP/alert.md" ]; then
             echo "The watchdog failed before it could check the workflows: $RUN_URL" > "$RUNNER_TEMP/alert.md"
           fi
-          echo "Found by [Scheduler watchdog]($RUN_URL)." >> "$RUNNER_TEMP/alert.md"
+          printf '\nFound by [Scheduler watchdog](%s).\n' "$RUN_URL" >> "$RUNNER_TEMP/alert.md"
           issue=$(gh issue list --state open --search "\"$ALERT_TITLE\" in:title" --json number,title \
             --jq "map(select(.title == env.ALERT_TITLE)) | first | .number // empty")
           if [ -n "$issue" ]; then
