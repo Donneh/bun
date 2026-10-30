@@ -23,7 +23,7 @@ export interface SearchResults {
 
 export type SearchOutcome = SearchResults | { readonly kind: "error"; readonly message: string };
 
-export type SearchView = { readonly kind: "idle" } | { readonly kind: "loading" } | SearchOutcome;
+export type SearchView = { readonly kind: "loading" } | SearchOutcome;
 
 const UNREACHABLE_MESSAGE = "The card API could not be reached. Try again in a moment.";
 
