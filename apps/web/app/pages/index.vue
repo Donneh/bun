@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   AppShell,
-  applyTheme,
   CardGrid,
   ExampleQueries,
   FilterChips,
@@ -13,10 +12,10 @@ import {
   type SortSelection,
   StatusMessage,
   ThemeButton,
-  type ThemePreference,
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
+import { useTheme } from "~/composables/theme";
 import { appendPage, fetchCardCount, type SearchView, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
 import {
@@ -28,7 +27,6 @@ import {
   searchStateKey,
   toRouteQuery,
 } from "~/utils/search-state";
-import { loadThemePreference, saveThemePreference } from "~/utils/theme-preference";
 
 type NextPageState =
   | { readonly kind: "idle" }
@@ -43,10 +41,9 @@ const EXAMPLE_QUERIES = ["c:fury cost:<=2", "r:epic might:>=5", "ability:draw"];
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
 
-const browserStorage = () => window.localStorage;
-const theme = ref<ThemePreference>(loadThemePreference(browserStorage));
-watchEffect(() => applyTheme(theme.value));
-watch(theme, (preference) => saveThemePreference(browserStorage, preference));
+definePageMeta({ keepalive: true });
+
+const theme = useTheme();
 
 const { data: cardCount } = useLazyAsyncData("card-count", () => fetchCardCount(apiBase));
 const eyebrow = computed(() =>
@@ -197,7 +194,12 @@ async function loadNextPage() {
           @change="changeSort"
         />
       </Toolbar>
-      <CardGrid :cards="view.cards" :placeholders="nextPagePlaceholders" label="Search results" />
+      <CardGrid
+        :cards="view.cards"
+        :placeholders="nextPagePlaceholders"
+        label="Search results"
+        @navigate="navigateTo"
+      />
       <StatusMessage
         v-if="nextPage.kind === 'error'"
         kind="error"

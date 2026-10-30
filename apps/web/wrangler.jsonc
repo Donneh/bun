@@ -4,7 +4,7 @@
   "compatibility_date": "2026-10-23",
   "assets": {
     "directory": ".output/public",
-    "not_found_handling": "404-page"
+    "not_found_handling": "single-page-application"
   },
   "dev": {
     "port": 3002

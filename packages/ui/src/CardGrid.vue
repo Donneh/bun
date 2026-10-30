@@ -7,13 +7,15 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeh
   label: "Cards",
   placeholders: 0,
 });
+
+const emit = defineEmits<{ navigate: [href: string] }>();
 </script>
 
 <template>
   <div class="container">
     <ul class="grid" :aria-label="label">
       <li v-for="card in cards" :key="card.id" class="cell" :class="card.orientation">
-        <CardTile v-bind="card" />
+        <CardTile v-bind="card" @navigate="emit('navigate', $event)" />
       </li>
       <li v-for="index in placeholders" :key="`placeholder-${index}`" class="cell" aria-hidden="true">
         <CardTileSkeleton />

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { resizedWebpUrl, responsiveImage } from "../app/utils/card-images.ts";
+import { type ImageLayout, resizedWebpUrl, responsiveImage } from "../app/utils/card-images.ts";
 
 const cdnUrl = "https://cdn.example.com/images/abc-744x1039.png";
 
-const widths = (orientation: "portrait" | "landscape") =>
-  [...responsiveImage(cdnUrl, orientation).srcset.matchAll(/ (\d+)w/g)].map((match) => Number(match[1]));
+const widths = (orientation: "portrait" | "landscape", layout: ImageLayout = "grid") =>
+  [...responsiveImage(cdnUrl, orientation, layout).srcset.matchAll(/ (\d+)w/g)].map((match) => Number(match[1]));
 
 describe("resizedWebpUrl", () => {
   test("requests the width as WebP", () => {
@@ -34,5 +34,16 @@ describe("responsiveImage", () => {
   test("describes the grid column in sizes", () => {
     expect(responsiveImage(cdnUrl, "portrait").sizes).toContain("14rem");
     expect(responsiveImage(cdnUrl, "landscape").sizes).toContain("28rem");
+  });
+});
+
+describe("responsiveImage for the card page", () => {
+  test("offers larger widths than the grid", () => {
+    expect(Math.max(...widths("portrait", "detail"))).toBeGreaterThan(Math.max(...widths("portrait")));
+  });
+
+  test("describes the art column in sizes", () => {
+    expect(responsiveImage(cdnUrl, "portrait", "detail").sizes).toContain("22rem");
+    expect(responsiveImage(cdnUrl, "landscape", "detail").sizes).toContain("30rem");
   });
 });
