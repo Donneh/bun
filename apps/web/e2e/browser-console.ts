@@ -44,6 +44,8 @@ function describeFailedRequest(request: Request) {
   return `${request.failure()?.errorText ?? "failed"} ${request.method()} ${request.url()}`;
 }
 
+const wasAbortedByTheBrowser = (request: Request) => request.failure()?.errorText === "net::ERR_ABORTED";
+
 const matches = (expected: ExpectedMessage, message: BrowserMessage) =>
   expected.kind === message.kind && expected.pattern.test(message.text);
 
@@ -58,9 +60,10 @@ export const test = base.extend<{ browserConsole: BrowserConsole }>({
           if (kind) recorded.push({ kind, text: describeConsoleMessage(message) });
         });
         page.on("pageerror", (error) => recorded.push({ kind: "page error", text: error.message }));
-        page.on("requestfailed", (request) =>
-          recorded.push({ kind: "failed request", text: describeFailedRequest(request) }),
-        );
+        page.on("requestfailed", (request) => {
+          if (!wasAbortedByTheBrowser(request))
+            recorded.push({ kind: "failed request", text: describeFailedRequest(request) });
+        });
       };
       for (const page of context.pages()) watch(page);
       context.on("page", watch);
