@@ -34,6 +34,10 @@ A change is done when it is live and verified, not when it is merged.
 2. Open a pull request. CI runs the `check` and `infrastructure` jobs.
 3. Squash-merge when both are green.
 4. The merge starts the Deploy workflow: the same checks, then `tofu apply` stages the new versions at 0.01% next to the live ones, `test:api` and `test:production` test the staged versions through a version override header, a second `tofu apply` promotes them, and both suites run again. On any failure the workflow moves production back to the versions that were live before the run and fails. See "Release and rollback" in `infrastructure/README.md`. Watch it with `gh run watch`.
+   - Find the run by the merge commit, `gh run list --workflow deploy.yml --commit <merge-sha>`, never by taking the latest run: right after the merge the latest is still the previous deploy. The run can take a few seconds to appear; retry for up to two minutes.
+   - If no run appears, the merge started no workflow, and its `Closes #N` lines closed nothing. Start the deploy with `gh workflow run deploy.yml --ref main`, find that run by the commit `main` points at, say that you started it, and close the issues the PR names with a comment.
+   - If a run fails only in the "Set up job" step of its jobs, such as `Unable to resolve action`, it is a runner fault: rerun it once with `gh run rerun <run-id> --failed`. Any other failure is real; never rerun it.
+   - The `ship` skill in `.claude/skills/ship/SKILL.md` has these steps as commands.
 5. Confirm the change on `https://api.riftkeeper.app` and `https://riftkeeper.app` yourself. `GET /health` reports the number of loaded cards.
 
 After a new or changed custom domain, Cloudflare answers with an empty, cacheable 404 for about a minute. The smoke test waits for `/health`; a manual check should wait too.
