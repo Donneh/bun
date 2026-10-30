@@ -1,14 +1,15 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { expect, test } from "@playwright/test";
 import { DEFAULT_LOAD_TIMEOUT_MS } from "../verify-live/arguments.ts";
 import { checkPage, checkSite, type PageCheck, problems } from "../verify-live/verify-live.ts";
+import { expect, test } from "./browser-console.ts";
 
 const FIXTURE_LOAD_TIMEOUT_MS = 2_000;
 
 const FIXTURE_PAGES: Record<string, string> = {
   "/clean": "<h1>Clean</h1>",
   "/console-error": '<h1>Console error</h1><script>console.error("fixture broke")</script>',
+  "/console-warning": '<h1>Console warning</h1><script>console.warn("fixture warned")</script>',
   "/page-error": '<h1>Page error</h1><script>throw new Error("fixture threw")</script>',
   "/missing-image": '<h1>Missing image</h1><img src="/no-such-image.png" alt="">',
   "/too-wide": '<h1>Too wide</h1><div style="width: 3000px; height: 10px"></div>',
@@ -53,6 +54,7 @@ test.describe("verify:live", () => {
 
   const failures = {
     "/console-error": "console error: fixture broke",
+    "/console-warning": "console warning: fixture warned",
     "/page-error": "page error: fixture threw",
     "/missing-image": "failed request: 404 GET",
     "/too-wide": "the page scrolls sideways",

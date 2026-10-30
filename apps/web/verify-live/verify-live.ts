@@ -36,6 +36,7 @@ export interface PageReport {
   readonly finishedLoading: boolean;
   readonly loadTimeoutMs: number;
   readonly consoleErrors: readonly string[];
+  readonly consoleWarnings: readonly string[];
   readonly pageErrors: readonly string[];
   readonly failedRequests: readonly string[];
   readonly scrollsSideways: boolean;
@@ -47,6 +48,7 @@ export function problems(report: PageReport): string[] {
     ...(report.status === null || report.status >= 400 ? [`page answered ${report.status ?? "nothing"}`] : []),
     ...(report.finishedLoading ? [] : [`did not finish loading within ${report.loadTimeoutMs} ms`]),
     ...report.consoleErrors.map((message) => `console error: ${message}`),
+    ...report.consoleWarnings.map((message) => `console warning: ${message}`),
     ...report.pageErrors.map((message) => `page error: ${message}`),
     ...report.failedRequests.map((request) => `failed request: ${request}`),
     ...(report.scrollsSideways ? ["the page scrolls sideways"] : []),
@@ -101,10 +103,13 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
   try {
     const page = await context.newPage();
     const consoleErrors: string[] = [];
+    const consoleWarnings: string[] = [];
     const pageErrors: string[] = [];
     const failedRequests: string[] = [];
     page.on("console", (message) => {
-      if (message.type() === "error") consoleErrors.push(`${message.text()} (${message.location().url})`);
+      const text = `${message.text()} (${message.location().url})`;
+      if (message.type() === "error") consoleErrors.push(text);
+      if (message.type() === "warning") consoleWarnings.push(text);
     });
     page.on("pageerror", (error) => pageErrors.push(error.message));
     page.on("requestfailed", (request) =>
@@ -143,6 +148,7 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
       finishedLoading,
       loadTimeoutMs: check.loadTimeoutMs,
       consoleErrors,
+      consoleWarnings,
       pageErrors,
       failedRequests,
       scrollsSideways,

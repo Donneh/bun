@@ -1,5 +1,6 @@
-import { type APIRequestContext, expect, type Page, type Response, test } from "@playwright/test";
+import type { APIRequestContext, Page, Response } from "@playwright/test";
 import { apiBase } from "../playwright.config.ts";
+import { expect, failedResponse, test } from "./browser-console.ts";
 
 const searchBox = (page: Page) => page.getByRole("searchbox", { name: "Search cards" });
 const results = (page: Page) => page.getByRole("list", { name: "Search results" });
@@ -242,8 +243,6 @@ test("the page works when the browser blocks storage", async ({ page }) => {
       },
     });
   });
-  const errors: string[] = [];
-  page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
 
   await expect(searchBox(page)).toBeVisible();
@@ -251,7 +250,6 @@ test("the page works when the browser blocks storage", async ({ page }) => {
   await themeButton(page).click();
 
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  expect(errors).toEqual([]);
 });
 
 test("a query shows its matching cards and survives a reload", async ({ page, request }) => {
@@ -406,7 +404,8 @@ test("a query change does not shift the layout", async ({ page }) => {
   expect(shifts, JSON.stringify(shifts, null, 2)).toEqual([]);
 });
 
-test("a search with nothing to keep holds the space of the toolbar and chips", async ({ page }) => {
+test("a search with nothing to keep holds the space of the toolbar and chips", async ({ page, browserConsole }) => {
+  browserConsole.expect(failedResponse(503, "/search"));
   await page.route(isSearchRequest, (route) => route.fulfill({ status: 503, json: {} }));
   await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
   await expect(page.getByRole("alert")).toContainText("Search failed");
@@ -425,7 +424,8 @@ test("a search with nothing to keep holds the space of the toolbar and chips", a
   expect(await gridTop(page)).toBe(top);
 });
 
-test("a failed search shows the error and can be retried", async ({ page }) => {
+test("a failed search shows the error and can be retried", async ({ page, browserConsole }) => {
+  browserConsole.expect(failedResponse(500, "/search"));
   await page.route(isSearchRequest, (route) =>
     route.fulfill({
       status: 500,
@@ -553,7 +553,8 @@ test("the next page shows placeholder tiles while it loads", async ({ page }) =>
   expect(await results(page).getByRole("listitem").count()).toBeGreaterThan(firstPage);
 });
 
-test("a failed page shows the error and can be retried", async ({ page }) => {
+test("a failed page shows the error and can be retried", async ({ page, browserConsole }) => {
+  browserConsole.expect(failedResponse(500, "/search"));
   await page.route(isNextPageRequest, (route) =>
     route.fulfill({
       status: 500,
