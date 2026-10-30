@@ -10,7 +10,7 @@ const text = computed(() => {
 </script>
 
 <template>
-  <p class="summary">{{ text }}</p>
+  <p class="summary" aria-live="polite" aria-atomic="true">{{ text }}</p>
 </template>
 
 <style scoped>

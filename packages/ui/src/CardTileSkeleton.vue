@@ -23,16 +23,12 @@ withDefaults(defineProps<{ orientation?: CardOrientation }>(), { orientation: "p
   flex-direction: column;
   gap: var(--rk-space-2);
   height: 100%;
-  padding: var(--rk-space-2);
-  border: var(--rk-border-width) solid var(--rk-color-border);
-  border-radius: var(--rk-radius-lg);
-  background: var(--rk-color-surface);
 }
 
 .frame {
   position: relative;
   overflow: hidden;
-  border-radius: var(--rk-radius-sm);
+  border-radius: var(--rk-radius-lg);
   background: var(--rk-color-surface-muted);
 }
 
@@ -48,7 +44,7 @@ withDefaults(defineProps<{ orientation?: CardOrientation }>(), { orientation: "p
   display: flex;
   flex-direction: column;
   gap: var(--rk-space-2);
-  padding: var(--rk-space-1);
+  padding-block: var(--rk-space-1);
 }
 
 .line {

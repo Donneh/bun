@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/vue";
+import userEvent from "@testing-library/user-event";
+import { render, screen, within } from "@testing-library/vue";
 import { describe, expect, test } from "vitest";
 import StatusMessage from "./StatusMessage.vue";
 
@@ -23,5 +24,16 @@ describe("StatusMessage", () => {
 
     expect(screen.getByRole("alert").textContent).toContain("Search failed");
     expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
+  test("offers an action, such as a retry, and reports a click on it", async () => {
+    const { emitted } = render(StatusMessage, {
+      props: { kind: "error", title: "Could not load more cards", action: "Try again" },
+    });
+
+    await userEvent.click(within(screen.getByRole("alert")).getByRole("button", { name: "Try again" }));
+
+    expect(emitted("action")).toHaveLength(1);
   });
 });

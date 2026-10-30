@@ -1,11 +1,13 @@
 <script setup lang="ts">
-defineProps<{ kind: "loading" | "empty" | "error"; title: string; detail?: string }>();
+defineProps<{ kind: "loading" | "empty" | "error"; title: string; detail?: string; action?: string }>();
+const emit = defineEmits<{ action: [] }>();
 </script>
 
 <template>
   <section class="status" :class="kind" :role="kind === 'error' ? 'alert' : 'status'" :aria-busy="kind === 'loading'">
     <p class="title">{{ title }}</p>
     <p v-if="detail" class="detail">{{ detail }}</p>
+    <button v-if="action" class="action" type="button" @click="emit('action')">{{ action }}</button>
   </section>
 </template>
 
@@ -54,5 +56,34 @@ defineProps<{ kind: "loading" | "empty" | "error"; title: string; detail?: strin
   margin: 0;
   font-family: var(--rk-font-family-detail);
   font-size: var(--rk-font-size-xs);
+}
+
+.action {
+  align-self: flex-start;
+  min-height: var(--rk-control-height-sm);
+  margin-top: var(--rk-space-2);
+  padding: 0 var(--rk-space-4);
+  border: var(--rk-border-width) solid currentColor;
+  border-radius: var(--rk-radius-md);
+  background: var(--rk-color-surface);
+  color: inherit;
+  font: var(--rk-font-weight-medium) var(--rk-font-size-sm) var(--rk-font-family-mono);
+  cursor: pointer;
+  transition:
+    border-color var(--rk-duration-fast) ease,
+    color var(--rk-duration-fast) ease;
+}
+
+@media (hover: hover) {
+  .action:hover {
+    border-color: var(--rk-color-accent);
+    color: var(--rk-color-text);
+  }
+}
+
+.action:focus-visible {
+  border-color: var(--rk-color-accent);
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: var(--rk-focus-width);
 }
 </style>

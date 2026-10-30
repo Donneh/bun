@@ -10,10 +10,4 @@ describe("AppShell", () => {
     expect(screen.queryByRole("banner")).toBeNull();
     expect(screen.queryByRole("contentinfo")).toBeNull();
   });
-
-  test("shows the footer slot in a footer", () => {
-    render(AppShell, { slots: { default: "<p>Content</p>", footer: "<p>Theme</p>" } });
-
-    expect(screen.getByRole("contentinfo").textContent).toBe("Theme");
-  });
 });

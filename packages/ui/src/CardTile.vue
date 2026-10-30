@@ -51,24 +51,24 @@ onMounted(() => {
   gap: var(--rk-space-2);
   height: 100%;
   margin: 0;
-  padding: var(--rk-space-2);
-  border: var(--rk-border-width) solid var(--rk-color-border);
-  border-radius: var(--rk-radius-lg);
-  background: var(--rk-color-surface);
-  transition: border-color var(--rk-duration-fast) ease;
-}
-
-@media (hover: hover) {
-  .tile:hover {
-    border-color: var(--rk-color-accent);
-  }
 }
 
 .frame {
   position: relative;
   overflow: hidden;
-  border-radius: var(--rk-radius-sm);
+  border-radius: var(--rk-radius-lg);
   background: var(--rk-color-surface-muted);
+  transition: transform var(--rk-duration-fast) ease-out;
+}
+
+@media (hover: hover) {
+  .tile:hover .frame {
+    transform: translateY(calc(-1 * var(--rk-space-1)));
+  }
+
+  .tile:hover .name {
+    color: var(--rk-color-accent-text);
+  }
 }
 
 .portrait .frame {
@@ -94,8 +94,13 @@ onMounted(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .frame,
   .image {
     transition: none;
+  }
+
+  .tile:hover .frame {
+    transform: none;
   }
 }
 
@@ -103,11 +108,11 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding-inline: var(--rk-space-1);
 }
 
 .name {
   overflow-wrap: anywhere;
+  transition: color var(--rk-duration-fast) ease;
   font-size: var(--rk-font-size-md);
   font-weight: var(--rk-font-weight-bold);
 }
