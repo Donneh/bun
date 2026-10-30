@@ -1,4 +1,4 @@
-import { SORT_DIRECTIONS, SORT_KEYS, type SortDirection, type SortKey } from "@riftkeeper/search";
+import { SORT_DIRECTIONS, SORT_KEYS, type SortDirection, type SortKey } from "@riftkeeper/search/request";
 import type { SortOption } from "@riftkeeper/ui";
 
 export interface SearchState {

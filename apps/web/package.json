@@ -9,7 +9,9 @@
     "typecheck": "nuxt typecheck",
     "test": "bun test unit",
     "test:e2e": "playwright test",
-    "test:production": "playwright test --config playwright.production.config.ts"
+    "test:dev": "playwright test --config playwright.dev.config.ts",
+    "test:production": "playwright test --config playwright.production.config.ts",
+    "verify:live": "node verify-live/cli.ts"
   },
   "dependencies": {
     "@riftkeeper/ui": "workspace:*",

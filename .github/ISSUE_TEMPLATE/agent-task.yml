@@ -27,7 +27,7 @@ body:
     id: acceptance-criteria
     attributes:
       label: Acceptance criteria
-      description: A checklist. Each item is something a reviewer can check.
+      description: A checklist. Each item is something a reviewer can check. Every task also requires a clean browser console, with no errors or warnings, in the production build and on the dev server.
       placeholder: "- [ ] ..."
     validations:
       required: true
