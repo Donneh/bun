@@ -23,6 +23,18 @@ variable "web_hostname" {
   }
 }
 
+variable "live_versions" {
+  type        = map(string)
+  default     = {}
+  description = "The version that serves traffic now, by Worker name. A Worker listed here keeps that version at 99.99% and gets its new version at 0.01%. A Worker missing from it moves all traffic to its new version."
+}
+
+variable "rollback" {
+  type        = bool
+  default     = false
+  description = "Send all traffic of each Worker listed in live_versions back to that version, and none to the new one."
+}
+
 variable "github_dispatch_token" {
   type        = string
   sensitive   = true

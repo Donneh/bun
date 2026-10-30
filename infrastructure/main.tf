@@ -75,15 +75,19 @@ resource "cloudflare_worker_version" "api" {
   }]
 }
 
-resource "cloudflare_workers_deployment" "api" {
-  account_id  = var.account_id
-  script_name = cloudflare_worker.api.name
-  strategy    = "percentage"
+module "api_deployment" {
+  source = "./deployment"
 
-  versions = [{
-    version_id = cloudflare_worker_version.api.id
-    percentage = 100
-  }]
+  account_id      = var.account_id
+  script_name     = cloudflare_worker.api.name
+  version_id      = cloudflare_worker_version.api.id
+  live_version_id = lookup(var.live_versions, cloudflare_worker.api.name, null)
+  rollback        = var.rollback
+}
+
+moved {
+  from = cloudflare_workers_deployment.api
+  to   = module.api_deployment.cloudflare_workers_deployment.this
 }
 
 resource "cloudflare_workers_custom_domain" "api" {
@@ -92,7 +96,7 @@ resource "cloudflare_workers_custom_domain" "api" {
   hostname   = var.hostname
   service    = cloudflare_worker.api.name
 
-  depends_on = [cloudflare_workers_deployment.api]
+  depends_on = [module.api_deployment]
 }
 
 resource "cloudflare_zone_setting" "always_use_https" {
@@ -152,15 +156,19 @@ resource "cloudflare_worker_version" "web" {
   }
 }
 
-resource "cloudflare_workers_deployment" "web" {
-  account_id  = var.account_id
-  script_name = cloudflare_worker.web.name
-  strategy    = "percentage"
+module "web_deployment" {
+  source = "./deployment"
 
-  versions = [{
-    version_id = cloudflare_worker_version.web.id
-    percentage = 100
-  }]
+  account_id      = var.account_id
+  script_name     = cloudflare_worker.web.name
+  version_id      = cloudflare_worker_version.web.id
+  live_version_id = lookup(var.live_versions, cloudflare_worker.web.name, null)
+  rollback        = var.rollback
+}
+
+moved {
+  from = cloudflare_workers_deployment.web
+  to   = module.web_deployment.cloudflare_workers_deployment.this
 }
 
 resource "cloudflare_workers_custom_domain" "web" {
@@ -171,7 +179,7 @@ resource "cloudflare_workers_custom_domain" "web" {
   hostname   = each.value
   service    = cloudflare_worker.web.name
 
-  depends_on = [cloudflare_workers_deployment.web]
+  depends_on = [module.web_deployment]
 }
 
 resource "cloudflare_ruleset" "redirect_www" {

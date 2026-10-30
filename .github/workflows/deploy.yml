@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      break_api:
+        description: Stage an API that answers 503 to every request, to exercise the rollback. Production keeps its live versions and the run fails.
+        type: boolean
+        default: false
+      bootstrap:
+        description: Deploy although the state has no live version for a Worker, which sends all traffic to the new version at once. Only for the first deploy of a Worker.
+        type: boolean
+        default: false
 
 concurrency:
   group: deploy
@@ -18,10 +27,11 @@ jobs:
 
   deploy:
     needs: check
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: ${{ steps.apply.outputs.api_url }}
+      url: ${{ steps.stage.outputs.api_url }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -33,6 +43,11 @@ jobs:
       TF_VAR_web_hostname: ${{ vars.WEB_HOSTNAME }}
       TF_VAR_github_dispatch_token: ${{ secrets.WORKFLOW_DISPATCH_TOKEN }}
     steps:
+      - name: Refuse to break the API without live versions to roll back to
+        if: ${{ inputs.bootstrap && inputs.break_api }}
+        run: |
+          echo "::error title=Conflicting inputs::bootstrap sends all traffic to the new versions at once, so break_api would take the API down. Run them separately."
+          exit 1
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
         with:
@@ -40,6 +55,10 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run --filter @riftkeeper/api build
       - run: bun run --filter @riftkeeper/scheduler build
+      - name: Replace the API with one that fails the smoke test
+        if: ${{ inputs.break_api }}
+        run: |
+          echo 'export default { fetch: () => new Response("Broken on purpose", { status: 503 }) };' > apps/api/dist/index.js
       - id: web
         run: |
           bun run --filter @riftkeeper/web build
@@ -50,28 +69,97 @@ jobs:
           tofu_wrapper: false
       - run: tofu init -input=false
         working-directory: infrastructure
-      - id: apply
+      - id: live
+        name: Read the live versions from the state
         working-directory: infrastructure
+        env:
+          BOOTSTRAP_FLAG: ${{ inputs.bootstrap && '--bootstrap' || '' }}
         run: |
-          tofu apply -auto-approve -input=false
-          echo "api_url=$(tofu output -raw api_url)" >> "$GITHUB_OUTPUT"
-          echo "version=$(tofu output -raw worker_version_id)" >> "$GITHUB_OUTPUT"
-          echo "web_url=$(tofu output -raw web_url)" >> "$GITHUB_OUTPUT"
-          echo "www_url=$(tofu output -raw www_url)" >> "$GITHUB_OUTPUT"
-      - name: Smoke test the deployed API
+          set -o pipefail
+          versions=$(tofu show -json | bun live-versions.ts $BOOTSTRAP_FLAG riftkeeper-api riftkeeper-web)
+          echo "Live versions: $versions"
+          echo "versions=$versions" >> "$GITHUB_OUTPUT"
+      - id: stage
+        name: Stage the new versions next to the live ones
+        working-directory: infrastructure
+        env:
+          TF_VAR_live_versions: ${{ steps.live.outputs.versions }}
+        run: |
+          tofu apply -auto-approve -input=false -lock-timeout=60s
+          api_url=$(tofu output -raw api_url)
+          version=$(tofu output -raw worker_version_id)
+          web_version=$(tofu output -raw web_version_id)
+          version_overrides=$(tofu output -raw version_overrides)
+          web_url=$(tofu output -raw web_url)
+          www_url=$(tofu output -raw www_url)
+          {
+            echo "api_url=$api_url"
+            echo "version=$version"
+            echo "web_version=$web_version"
+            echo "version_overrides=$version_overrides"
+            echo "web_url=$web_url"
+            echo "www_url=$www_url"
+          } >> "$GITHUB_OUTPUT"
+      - name: Smoke test the deployed API at the staged version
         run: bun run test:api
         env:
-          BASE_URL: ${{ steps.apply.outputs.api_url }}
-          EXPECTED_VERSION: ${{ steps.apply.outputs.version }}
+          BASE_URL: ${{ steps.stage.outputs.api_url }}
+          EXPECTED_VERSION: ${{ steps.stage.outputs.version }}
+          VERSION_OVERRIDES: ${{ steps.stage.outputs.version_overrides }}
       - run: bunx playwright install --with-deps chromium
         working-directory: apps/web
-      - name: Smoke test the deployed web app
+      - name: Smoke test the deployed web app at the staged version
         run: bun run test:production
         working-directory: apps/web
         env:
-          BASE_URL: ${{ steps.apply.outputs.web_url }}
-          WWW_URL: ${{ steps.apply.outputs.www_url }}
+          BASE_URL: ${{ steps.stage.outputs.web_url }}
+          WWW_URL: ${{ steps.stage.outputs.www_url }}
           EXPECTED_BUILD_ID: ${{ steps.web.outputs.build_id }}
+          EXPECTED_API_VERSION: ${{ steps.stage.outputs.version }}
+          VERSION_OVERRIDES: ${{ steps.stage.outputs.version_overrides }}
+      - name: Promote the new versions to all traffic
+        working-directory: infrastructure
+        env:
+          STAGED_API_VERSION: ${{ steps.stage.outputs.version }}
+          STAGED_WEB_VERSION: ${{ steps.stage.outputs.web_version }}
+        run: |
+          tofu apply -auto-approve -input=false -lock-timeout=60s
+          api_version=$(tofu output -raw worker_version_id)
+          web_version=$(tofu output -raw web_version_id)
+          if [ "$api_version" != "$STAGED_API_VERSION" ] || [ "$web_version" != "$STAGED_WEB_VERSION" ]; then
+            echo "::error title=Promoted untested versions::The smoke tests passed for API $STAGED_API_VERSION and web $STAGED_WEB_VERSION, but the promotion released API $api_version and web $web_version."
+            exit 1
+          fi
+      - name: Smoke test the deployed API after promotion
+        run: bun run test:api
+        env:
+          BASE_URL: ${{ steps.stage.outputs.api_url }}
+          EXPECTED_VERSION: ${{ steps.stage.outputs.version }}
+      - name: Smoke test the deployed web app after promotion
+        run: bun run test:production
+        working-directory: apps/web
+        env:
+          BASE_URL: ${{ steps.stage.outputs.web_url }}
+          WWW_URL: ${{ steps.stage.outputs.www_url }}
+          EXPECTED_BUILD_ID: ${{ steps.web.outputs.build_id }}
+          EXPECTED_API_VERSION: ${{ steps.stage.outputs.version }}
+      - name: Roll back to the versions that were live before this run
+        if: ${{ (failure() || cancelled()) && steps.stage.outcome != 'skipped' && steps.live.outputs.versions != '{}' }}
+        working-directory: infrastructure
+        env:
+          TF_VAR_live_versions: ${{ steps.live.outputs.versions }}
+          TF_VAR_rollback: "true"
+          RUN_VERSIONS: ${{ steps.stage.outputs.version_overrides }}
+        run: |
+          for attempt in 1 2; do
+            if tofu apply -auto-approve -input=false -lock-timeout=60s; then
+              echo "::error title=Rolled back::The deploy failed, so production serves the versions that were live before this run: $TF_VAR_live_versions"
+              exit 0
+            fi
+            echo "::warning title=Rollback attempt $attempt failed::tofu apply with TF_VAR_rollback=true failed."
+          done
+          echo "::error title=Rollback failed::Production may still serve this run's versions ($RUN_VERSIONS) instead of the live ones ($TF_VAR_live_versions). Run tofu apply in infrastructure with TF_VAR_rollback=true and TF_VAR_live_versions set to the live ones; if the state lock is held, run tofu force-unlock first."
+          exit 1
       - name: Upload smoke test screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4

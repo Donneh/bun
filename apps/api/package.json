@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "bun scripts/validate-snapshot.ts && wrangler deploy --dry-run --outdir dist",
-    "test": "bun test src",
+    "test": "bun test src scripts",
     "test:api": "bun scripts/test-api.ts",
     "benchmark": "bun scripts/benchmark.ts",
     "benchmark:v8": "bun build scripts/benchmark.ts --target node --outfile dist/benchmark.mjs && node dist/benchmark.mjs",

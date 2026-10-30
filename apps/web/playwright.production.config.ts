@@ -9,6 +9,8 @@ function requiredUrl(name: string) {
 export const webUrl = requiredUrl("BASE_URL");
 export const wwwUrl = requiredUrl("WWW_URL");
 export const expectedBuildId = process.env.EXPECTED_BUILD_ID;
+export const expectedApiVersion = process.env.EXPECTED_API_VERSION;
+const versionOverrides = process.env.VERSION_OVERRIDES;
 
 export default defineConfig({
   testDir: "production",
@@ -19,6 +21,7 @@ export default defineConfig({
   reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {
     baseURL: webUrl,
+    extraHTTPHeaders: versionOverrides ? { "Cloudflare-Workers-Version-Overrides": versionOverrides } : {},
     screenshot: "on",
     trace: "retain-on-failure",
   },

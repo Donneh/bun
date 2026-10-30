@@ -32,3 +32,5 @@ jobs:
       - run: tofu fmt -check -recursive
       - run: tofu init -backend=false -input=false
       - run: tofu validate
+      - run: tofu -chdir=deployment init -backend=false -input=false
+      - run: tofu -chdir=deployment test

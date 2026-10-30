@@ -1,5 +1,5 @@
 import { type APIRequestContext, expect, test } from "@playwright/test";
-import { expectedBuildId, webUrl, wwwUrl } from "../playwright.production.config.ts";
+import { expectedApiVersion, expectedBuildId, webUrl, wwwUrl } from "../playwright.production.config.ts";
 
 const READY_TIMEOUT_MS = 180_000;
 const query = "c:fury cost:<=2";
@@ -48,11 +48,21 @@ test("a shared search link shows its cards", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
 
+  const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
   await page.goto(`/?q=${encodeURIComponent(query)}`);
 
   await expect(page.getByRole("searchbox", { name: "Search cards" })).toHaveValue(query);
   await expect(page.getByRole("list", { name: "Search results" }).getByRole("listitem").first()).toBeVisible();
   expect(errors).toEqual([]);
+
+  const apiOrigin = new URL((await searchResponse).url()).origin;
+  if (expectedApiVersion) {
+    const apiVersion = await page.evaluate(async (healthUrl) => {
+      const health = (await (await fetch(healthUrl, { cache: "no-store" })).json()) as { data: { version: unknown } };
+      return health.data.version;
+    }, `${apiOrigin}/health`);
+    expect(apiVersion, `the API the page searched, ${apiOrigin}, runs the new version`).toBe(expectedApiVersion);
+  }
 });
 
 test("an unknown path answers 404", async ({ request }) => {
