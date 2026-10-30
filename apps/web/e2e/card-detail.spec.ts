@@ -1,5 +1,6 @@
-import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
+import type { APIRequestContext, Page } from "@playwright/test";
 import { apiBase } from "../playwright.config.ts";
+import { expect, failedResponse, test, unknownCardResponse } from "./browser-console.ts";
 
 interface ApiPrinting {
   readonly id: string;
@@ -213,8 +214,9 @@ test("a slow card shows a skeleton of the page", async ({ page, request }) => {
   await expect(page.getByRole("article", { name: "Loading card" })).toHaveCount(0);
 });
 
-test("a failed card shows the error and can be retried", async ({ page, request }) => {
+test("a failed card shows the error and can be retried", async ({ page, request, browserConsole }) => {
   const card = await cardWithPrintings(request, 1);
+  browserConsole.expect(failedResponse(500, `/cards/${card.id}`));
   await page.route(isCardRequest, (route) =>
     route.fulfill({ status: 500, json: { error: { code: "internal_error", message: "Internal server error" } } }),
   );
@@ -228,7 +230,8 @@ test("a failed card shows the error and can be retried", async ({ page, request 
   await expect(page.getByRole("heading", { level: 1, name: card.name, exact: true })).toBeVisible();
 });
 
-test("an unknown card says so", async ({ page }) => {
+test("an unknown card says so", async ({ page, browserConsole }) => {
+  browserConsole.expect(unknownCardResponse("no-such-card"));
   await page.goto("/cards/no-such-card");
 
   await expect(page.getByRole("heading", { level: 1, name: "Card not found" })).toBeAttached();

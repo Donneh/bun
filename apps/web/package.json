@@ -9,6 +9,7 @@
     "typecheck": "nuxt typecheck",
     "test": "bun test unit",
     "test:e2e": "playwright test",
+    "test:dev": "playwright test --config playwright.dev.config.ts",
     "test:production": "playwright test --config playwright.production.config.ts"
   },
   "dependencies": {

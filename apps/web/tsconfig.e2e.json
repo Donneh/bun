@@ -7,6 +7,7 @@
   },
   "include": [
     "e2e",
+    "dev-server",
     "production",
     "unit",
     "app/utils/card-detail.ts",
@@ -16,6 +17,7 @@
     "app/utils/search-view.ts",
     "app/utils/theme-preference.ts",
     "playwright.config.ts",
+    "playwright.dev.config.ts",
     "playwright.production.config.ts"
   ]
 }
