@@ -14,7 +14,7 @@ These instructions apply to every coding agent. `CLAUDE.md` imports this file fo
 
 ## Verify
 
-`bun run check` is the gate. Run it before every push. It runs Biome, the type checks (including `vue-tsc` and `nuxt typecheck`), every unit and component test, `test:api`, the Worker build and the Nuxt build.
+`bun run check` is the gate. Run it before every push. It first runs `bun install --frozen-lockfile`, so the installed packages match `bun.lock`, then Biome, the type checks (including `vue-tsc` and `nuxt typecheck`), every unit and component test, `test:api`, `test:scheduler`, the Worker build and the Nuxt build.
 
 - `bun run test` runs the unit tests in every workspace, one workspace after another, and the Vitest component tests in `packages/ui`. Keep it sequential: Bun's parallel `--filter` is suspected of hanging on Windows.
 - `bun run test:e2e` builds `apps/web` against a local API on port 8787, serves the static build with `wrangler dev` the way production serves it, and runs the Playwright test in `apps/web/e2e/`. It records a video and a screenshot per test in `apps/web/test-results/`. Run `bunx playwright install chromium` in `apps/web` once. CI runs it in the E2E workflow and uploads `test-results` as an artifact. When another agent may run it too, set `E2E_API_PORT` and `E2E_WEB_PORT` to free ports (defaults 8787 and 3100).
