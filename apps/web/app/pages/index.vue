@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   AppShell,
-  applyTheme,
   CardGrid,
   ExampleQueries,
   FilterChips,
@@ -13,10 +12,10 @@ import {
   type SortSelection,
   StatusMessage,
   ThemeButton,
-  type ThemePreference,
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
+import { useTheme } from "~/composables/theme";
 import { appendPage, fetchCardCount, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
 import {
@@ -29,7 +28,6 @@ import {
   toRouteQuery,
 } from "~/utils/search-state";
 import { type SearchResults, type SearchView, searchView } from "~/utils/search-view";
-import { loadThemePreference, saveThemePreference } from "~/utils/theme-preference";
 
 type NextPageState =
   | { readonly kind: "idle" }
@@ -44,10 +42,9 @@ const EXAMPLE_QUERIES = ["c:fury cost:<=2", "r:epic might:>=5", "ability:draw"];
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
 
-const browserStorage = () => window.localStorage;
-const theme = ref<ThemePreference>(loadThemePreference(browserStorage));
-watchEffect(() => applyTheme(theme.value));
-watch(theme, (preference) => saveThemePreference(browserStorage, preference));
+definePageMeta({ keepalive: true });
+
+const theme = useTheme();
 
 const { data: cardCount } = useLazyAsyncData("card-count", () => fetchCardCount(apiBase));
 const eyebrow = computed(() =>
@@ -206,6 +203,7 @@ async function loadNextPage() {
         :placeholders="view.stale ? 0 : nextPagePlaceholders"
         :stale="view.stale"
         label="Search results"
+        @navigate="navigateTo"
       />
       <template v-if="current">
         <StatusMessage

@@ -33,4 +33,11 @@ describe("Hero", () => {
     const button = screen.getByRole("button", { name: "Theme: system" });
     expect(container.querySelector("section")?.contains(button)).toBe(true);
   });
+
+  test("leaves the page heading to the page when it has no title", () => {
+    const { container } = render(Hero, { props: { eyebrow: "Riftkeeper", compact: true } });
+
+    expect(screen.queryByRole("heading")).toBeNull();
+    expect(container.querySelector("section")?.classList.contains("compact")).toBe(true);
+  });
 });

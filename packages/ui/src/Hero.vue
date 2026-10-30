@@ -2,7 +2,9 @@
 import { useTemplateRef } from "vue";
 import Dither from "./Dither.vue";
 
-defineProps<{ eyebrow: string; title: string; subtitle?: string }>();
+withDefaults(defineProps<{ eyebrow: string; title?: string | undefined; subtitle?: string; compact?: boolean }>(), {
+  compact: false,
+});
 
 const eyebrowText = useTemplateRef<HTMLElement>("eyebrowText");
 const actions = useTemplateRef<HTMLElement>("actions");
@@ -10,7 +12,7 @@ const content = useTemplateRef<HTMLElement>("content");
 </script>
 
 <template>
-  <section class="hero">
+  <section class="hero" :class="{ compact }">
     <div class="corner">
       <Dither pattern="corner" :intensity="0.5" :avoid="[eyebrowText, actions, content]" />
     </div>
@@ -21,7 +23,7 @@ const content = useTemplateRef<HTMLElement>("content");
       </div>
     </div>
     <div ref="content" class="content" aria-hidden="true" />
-    <h1 class="visually-hidden">{{ title }}</h1>
+    <h1 v-if="title" class="visually-hidden">{{ title }}</h1>
     <p v-if="subtitle" class="visually-hidden">{{ subtitle }}</p>
   </section>
 </template>
@@ -84,11 +86,19 @@ const content = useTemplateRef<HTMLElement>("content");
   white-space: nowrap;
 }
 
+.hero.compact {
+  padding-top: var(--rk-space-8);
+}
+
 @media (min-width: 48rem) {
   .hero {
     --corner-height: 15rem;
 
     padding-top: calc(2 * var(--rk-space-10));
+  }
+
+  .hero.compact {
+    padding-top: var(--rk-space-10);
   }
 }
 </style>

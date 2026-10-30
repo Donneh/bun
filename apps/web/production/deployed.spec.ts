@@ -65,9 +65,38 @@ test("a shared search link shows its cards", async ({ page }) => {
   }
 });
 
-test("an unknown path answers 404", async ({ request }) => {
-  const response = await request.get("/no-such-page");
-  expect(response.status()).toBe(404);
+test("a card link opened directly serves the app and shows the card", async ({ page, request }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
+  await page.goto(`/?q=${encodeURIComponent(query)}`);
+  const { data } = (await (await searchResponse).json()) as { data: { id: string; name: string }[] };
+  const [card] = data;
+  if (!card) throw new Error(`${query} finds no card`);
+  const path = `/cards/${card.id}`;
+
+  const response = await request.get(path, { headers: { "cache-control": "no-cache" } });
+  expect(response.status(), path).toBe(200);
+  expect(
+    servesTheApp(await response.text()),
+    `${path} serves the app${expectedBuildId ? ` at build ${expectedBuildId}` : ""}`,
+  ).toBe(true);
+
+  await page.goto(path);
+
+  await expect(page.getByRole("heading", { level: 1, name: card.name, exact: true })).toBeVisible();
+  await expect(page.getByRole("article").getByRole("img", { name: card.name, exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
+test("an unknown path serves the app, which says the page was not found", async ({ page, request }) => {
+  const response = await request.get("/no-such-page", { headers: { "cache-control": "no-cache" } });
+  expect(response.status()).toBe(200);
+  expect(servesTheApp(await response.text())).toBe(true);
+
+  await page.goto("/no-such-page");
+
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeAttached();
 });
 
 test("www redirects to the apex and keeps the path and query", async ({ request }) => {

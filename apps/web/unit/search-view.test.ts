@@ -4,7 +4,16 @@ import { type SearchResults, searchView } from "../app/utils/search-view.ts";
 function results(name: string): SearchResults {
   return {
     kind: "results",
-    cards: [{ id: name, name, subtitle: null, imageUrl: `https://example.com/${name}.png`, orientation: "portrait" }],
+    cards: [
+      {
+        id: name,
+        name,
+        subtitle: null,
+        imageUrl: `https://example.com/${name}.png`,
+        orientation: "portrait",
+        href: `/cards/${name}`,
+      },
+    ],
     page: 1,
     total: 1,
     hasMore: false,

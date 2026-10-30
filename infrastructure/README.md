@@ -14,13 +14,13 @@ The API Worker, `riftkeeper-api` on `hostname`:
 
 The web Worker, `riftkeeper-web` on `web_hostname`. It has no code, only static assets, so a page view never runs a Worker script:
 
-| Resource                           | Purpose                                                                                                                           |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off.                                                                                |
-| `cloudflare_worker_version`        | Uploads `apps/web/.output/public`, the output of `nuxt generate`. An unknown path gets `404.html` with status 404.                |
-| `cloudflare_workers_deployment`    | Splits traffic between the live and the new version. See [Release and rollback](#release-and-rollback).                           |
-| `cloudflare_workers_custom_domain` | Serves the Worker on `web_hostname` and `www.<web_hostname>`. Cloudflare creates the DNS records.                                 |
-| `cloudflare_ruleset`               | Redirects `www.<web_hostname>` to `web_hostname` with a 301 that keeps the path and query, before the request reaches the Worker. |
+| Resource                           | Purpose                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off.                                                                                                                       |
+| `cloudflare_worker_version`        | Uploads `apps/web/.output/public`, the output of `nuxt generate`. An unknown path gets `index.html` with status 200, so the app routes deep links such as `/cards/<id>`. |
+| `cloudflare_workers_deployment`    | Splits traffic between the live and the new version. See [Release and rollback](#release-and-rollback).                                                                  |
+| `cloudflare_workers_custom_domain` | Serves the Worker on `web_hostname` and `www.<web_hostname>`. Cloudflare creates the DNS records.                                                                        |
+| `cloudflare_ruleset`               | Redirects `www.<web_hostname>` to `web_hostname` with a 301 that keeps the path and query, before the request reaches the Worker.                                        |
 
 The scheduler Worker, `riftkeeper-scheduler`, has no hostname. It starts the scheduled GitHub workflows, because GitHub's own `schedule:` trigger drops most runs (issue #43):
 
@@ -60,7 +60,7 @@ Do this once per Cloudflare account:
 
 `.github/workflows/deploy.yml` runs on every push to `main` and on manual dispatch. Its `deploy` job runs only on `main`, so a dispatch from another branch runs the checks and deploys nothing. It runs the same checks, bundles the API Worker, builds the web app and releases both Workers in the `production` environment, as [Release and rollback](#release-and-rollback) describes. Merging the daily card snapshot pull request therefore deploys the new cards.
 
-The smoke tests are `test:api` and `test:production`. `test:api` waits until `/health` reports the expected version, then runs the black-box suite against the API. `test:production` in `apps/web` waits until the page serves the new build, then checks that the page and its scripts and styles load, that a `?q=` link shows search results and that the API the page searched reports `EXPECTED_API_VERSION` on `/health`, that an unknown path answers 404, and that `www` redirects to the apex.
+The smoke tests are `test:api` and `test:production`. `test:api` waits until `/health` reports the expected version, then runs the black-box suite against the API. `test:production` in `apps/web` waits until the page serves the new build, then checks that the page and its scripts and styles load, that a `?q=` link shows search results and that the API the page searched reports `EXPECTED_API_VERSION` on `/health`, that a card page opened directly by its URL and an unknown path both serve that build and render in the browser, and that `www` redirects to the apex.
 
 Set these on the repository, or on the `production` environment:
 

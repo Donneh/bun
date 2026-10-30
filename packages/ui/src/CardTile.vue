@@ -1,51 +1,59 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from "vue";
+import { computed } from "vue";
+import CardImage from "./CardImage.vue";
 import type { CardOrientation } from "./card-summary.ts";
-import Dither from "./Dither.vue";
+import { isPlainLeftClick } from "./link-click.ts";
 
-defineProps<{
+const props = defineProps<{
   name: string;
   subtitle: string | null;
   imageUrl: string;
   orientation: CardOrientation;
-  srcset?: string;
-  sizes?: string;
+  href: string;
+  srcset?: string | undefined;
+  sizes?: string | undefined;
 }>();
 
-const image = useTemplateRef<HTMLImageElement>("image");
-const loaded = ref(false);
+const emit = defineEmits<{ navigate: [href: string] }>();
 
-onMounted(() => {
-  if (image.value?.complete && image.value.naturalWidth > 0) loaded.value = true;
-});
+const linkName = computed(() => (props.subtitle ? `${props.name}, ${props.subtitle}` : props.name));
+
+function followLink(event: MouseEvent) {
+  if (!isPlainLeftClick(event)) return;
+  event.preventDefault();
+  emit("navigate", props.href);
+}
 </script>
 
 <template>
-  <figure class="tile" :class="orientation">
-    <div class="frame" :class="{ pending: !loaded }">
-      <Dither v-if="!loaded" pattern="sweep" color="ink" :intensity="1" />
-      <img
-        ref="image"
-        class="image"
-        :class="{ loaded }"
-        :src="imageUrl"
+  <a class="tile" :href="href" :aria-label="linkName" @click="followLink">
+    <figure class="figure">
+      <CardImage
+        class="frame"
+        :name="name"
+        :image-url="imageUrl"
+        :orientation="orientation"
         :srcset="srcset"
         :sizes="sizes"
-        :alt="name"
-        loading="lazy"
-        decoding="async"
-        @load="loaded = true"
       />
-    </div>
-    <figcaption class="caption">
-      <span class="name">{{ name }}</span>
-      <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
-    </figcaption>
-  </figure>
+      <figcaption class="caption">
+        <span class="name">{{ name }}</span>
+        <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
+      </figcaption>
+    </figure>
+  </a>
 </template>
 
 <style scoped>
 .tile {
+  display: block;
+  height: 100%;
+  border-radius: var(--rk-radius-lg);
+  color: inherit;
+  text-decoration: none;
+}
+
+.figure {
   display: flex;
   flex-direction: column;
   gap: var(--rk-space-2);
@@ -54,10 +62,6 @@ onMounted(() => {
 }
 
 .frame {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--rk-radius-lg);
-  background: var(--rk-color-surface-muted);
   transition: transform var(--rk-duration-fast) ease-out;
 }
 
@@ -71,32 +75,17 @@ onMounted(() => {
   }
 }
 
-.portrait .frame {
-  aspect-ratio: 63 / 88;
+.tile:focus-visible {
+  outline: none;
 }
 
-.landscape .frame {
-  height: var(--rk-card-frame-height, auto);
-  aspect-ratio: 88 / 63;
-}
-
-.image {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity var(--rk-duration-fast) ease-out;
-}
-
-.image.loaded {
-  opacity: 1;
+.tile:focus-visible .frame {
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: var(--rk-focus-width);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frame,
-  .image {
+  .frame {
     transition: none;
   }
 
@@ -121,5 +110,9 @@ onMounted(() => {
 .subtitle {
   color: var(--rk-color-text-muted);
   font-size: var(--rk-font-size-sm);
+}
+
+.tile:focus-visible .name {
+  color: var(--rk-color-accent-text);
 }
 </style>

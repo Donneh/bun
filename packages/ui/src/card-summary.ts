@@ -7,5 +7,6 @@ export interface CardSummary {
   readonly imageUrl: string;
   readonly srcset?: string;
   readonly sizes?: string;
+  readonly href: string;
   readonly orientation: CardOrientation;
 }

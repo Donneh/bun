@@ -1,3 +1,4 @@
+import userEvent from "@testing-library/user-event";
 import { render, screen, within } from "@testing-library/vue";
 import { describe, expect, test } from "vitest";
 import CardGrid from "./CardGrid.vue";
@@ -10,6 +11,7 @@ const cards: CardSummary[] = [
     subtitle: "Loose Cannon",
     imageUrl: "https://example.com/jinx.png",
     orientation: "portrait",
+    href: "/cards/jinx",
   },
   {
     id: "arena",
@@ -17,6 +19,7 @@ const cards: CardSummary[] = [
     subtitle: null,
     imageUrl: "https://example.com/arena.png",
     orientation: "landscape",
+    href: "/cards/arena",
   },
 ];
 
@@ -37,6 +40,14 @@ describe("CardGrid", () => {
     expect(items).toHaveLength(5);
     expect(items.slice(2).every((item) => item.getAttribute("aria-hidden") === "true")).toBe(true);
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  test("reports the card a reader opens", async () => {
+    const { emitted } = render(CardGrid, { props: { cards, label: "Search results" } });
+
+    await userEvent.click(screen.getByRole("link", { name: "Grand Arena" }));
+
+    expect(emitted("navigate")).toEqual([["/cards/arena"]]);
   });
 
   test("marks stale cards as busy and keeps showing them", () => {

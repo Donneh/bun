@@ -1,6 +1,7 @@
 import type { Card } from "@riftkeeper/cards";
 import type { Decomposition, SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
+import { cardHref } from "./card-detail";
 import { responsiveImage } from "./card-images";
 import type { SearchState } from "./search-state";
 import type { SearchOutcome, SearchResults } from "./search-view";
@@ -11,6 +12,13 @@ interface SearchResponse {
   readonly warnings: readonly SearchWarning[];
   readonly parsed: Decomposition;
 }
+
+export type CardOutcome =
+  | { readonly kind: "card"; readonly card: Card }
+  | { readonly kind: "not-found" }
+  | { readonly kind: "error"; readonly message: string };
+
+export type CardView = { readonly kind: "loading" } | CardOutcome;
 
 const UNREACHABLE_MESSAGE = "The card API could not be reached. Try again in a moment.";
 
@@ -30,6 +38,16 @@ export async function searchCards(apiBase: string, state: SearchState, page = 1)
       parsed: response.parsed,
     };
   } catch (error) {
+    return { kind: "error", message: apiErrorMessage(error) ?? UNREACHABLE_MESSAGE };
+  }
+}
+
+export async function fetchCard(apiBase: string, id: string): Promise<CardOutcome> {
+  try {
+    const response = await $fetch<{ data: Card }>(`/cards/${encodeURIComponent(id)}`, { baseURL: apiBase });
+    return { kind: "card", card: response.data };
+  } catch (error) {
+    if (isUnknownCard(error)) return { kind: "not-found" };
     return { kind: "error", message: apiErrorMessage(error) ?? UNREACHABLE_MESSAGE };
   }
 }
@@ -61,8 +79,14 @@ function toCardSummaries(card: Card): CardSummary[] {
     subtitle: card.subtitle,
     imageUrl: printing.imageUrl,
     orientation: printing.orientation,
+    href: cardHref(card.id),
     ...responsiveImage(printing.imageUrl, printing.orientation),
   }));
+}
+
+function isUnknownCard(error: unknown) {
+  const status = (error as { statusCode?: unknown } | null)?.statusCode;
+  return status === 404 || status === 400;
 }
 
 function apiErrorMessage(error: unknown) {
