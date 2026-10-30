@@ -10,14 +10,15 @@ const options = [
 ];
 
 const sortBy = () => screen.getByRole("combobox", { name: "Sort by" }) as HTMLSelectElement;
-const direction = () => screen.getByRole("combobox", { name: "Direction" }) as HTMLSelectElement;
+const direction = () => screen.getByRole("button", { name: /^Direction:/ });
 
 describe("SortControl", () => {
   test("shows the current sort and direction", () => {
     render(SortControl, { props: { sort: "name", direction: "desc", options } });
 
     expect(sortBy().value).toBe("name");
-    expect(direction().value).toBe("desc");
+    expect(direction().getAttribute("aria-label")).toBe("Direction: Descending");
+    expect(direction().textContent).toContain("Desc");
     expect([...sortBy().options].map((option) => option.text)).toEqual(["Set", "Name", "Cost"]);
   });
 
@@ -29,11 +30,19 @@ describe("SortControl", () => {
     expect(emitted("change")).toEqual([[{ sort: "cost", direction: "desc" }]]);
   });
 
-  test("reports a new direction with the current sort key", async () => {
+  test("flips the direction with the current sort key when the user presses the direction button", async () => {
     const { emitted } = render(SortControl, { props: { sort: "name", direction: "asc", options } });
 
-    await userEvent.selectOptions(direction(), "Descending");
+    await userEvent.click(direction());
 
     expect(emitted("change")).toEqual([[{ sort: "name", direction: "desc" }]]);
+  });
+
+  test("flips a descending sort back to ascending", async () => {
+    const { emitted } = render(SortControl, { props: { sort: "cost", direction: "desc", options } });
+
+    await userEvent.click(direction());
+
+    expect(emitted("change")).toEqual([[{ sort: "cost", direction: "asc" }]]);
   });
 });

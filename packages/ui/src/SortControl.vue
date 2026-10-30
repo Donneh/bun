@@ -1,20 +1,24 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import type { SortDirection, SortOption, SortSelection } from "./sort-option.ts";
 
 const props = defineProps<{ sort: string; direction: SortDirection; options: readonly SortOption[] }>();
 const emit = defineEmits<{ change: [selection: SortSelection] }>();
 
-const DIRECTIONS: readonly { readonly value: SortDirection; readonly label: string }[] = [
-  { value: "asc", label: "Ascending" },
-  { value: "desc", label: "Descending" },
-];
+const DIRECTIONS: Record<SortDirection, { readonly label: string; readonly short: string; readonly arrow: string }> = {
+  asc: { label: "Ascending", short: "Asc", arrow: "↑" },
+  desc: { label: "Descending", short: "Desc", arrow: "↓" },
+};
+
+const current = computed(() => DIRECTIONS[props.direction]);
+const opposite = computed<SortDirection>(() => (props.direction === "asc" ? "desc" : "asc"));
 
 function changeSort(event: Event) {
   emit("change", { sort: (event.target as HTMLSelectElement).value, direction: props.direction });
 }
 
-function changeDirection(event: Event) {
-  emit("change", { sort: props.sort, direction: (event.target as HTMLSelectElement).value as SortDirection });
+function toggleDirection() {
+  emit("change", { sort: props.sort, direction: opposite.value });
 }
 </script>
 
@@ -22,48 +26,102 @@ function changeDirection(event: Event) {
   <div class="sort">
     <label class="field">
       <span class="label">Sort by</span>
-      <select class="select" name="sort" :value="sort" @change="changeSort">
-        <option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option>
-      </select>
+      <span class="select-wrap">
+        <select class="control select" name="sort" :value="sort" @change="changeSort">
+          <option v-for="option in options" :key="option.value" :value="option.value">{{ option.label }}</option>
+        </select>
+      </span>
     </label>
-    <label class="field">
-      <span class="label">Direction</span>
-      <select class="select" name="direction" :value="direction" @change="changeDirection">
-        <option v-for="option in DIRECTIONS" :key="option.value" :value="option.value">{{ option.label }}</option>
-      </select>
-    </label>
+    <button
+      class="control direction"
+      type="button"
+      :aria-label="`Direction: ${current.label}`"
+      :title="`Switch to ${DIRECTIONS[opposite].label.toLowerCase()}`"
+      @click="toggleDirection"
+    >
+      <span aria-hidden="true">{{ current.arrow }} {{ current.short }}</span>
+    </button>
   </div>
 </template>
 
 <style scoped>
 .sort {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--rk-space-3);
+  align-items: center;
+  gap: var(--rk-space-2);
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
 }
 
 .field {
-  display: inline-flex;
+  display: flex;
+  flex: 1;
   align-items: center;
   gap: var(--rk-space-2);
-  font-size: var(--rk-font-size-sm);
+  min-width: 0;
 }
 
 .label {
-  color: var(--rk-color-text-muted);
-}
-
-.select {
-  font: inherit;
-  padding: var(--rk-space-1) var(--rk-space-2);
-  border: 1px solid var(--rk-color-border);
-  border-radius: var(--rk-radius-sm);
-  background: var(--rk-color-surface);
+  flex-shrink: 0;
   color: var(--rk-color-text);
 }
 
-.select:focus-visible {
-  outline: 2px solid var(--rk-color-focus);
-  outline-offset: 2px;
+.select-wrap {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.select-wrap::after {
+  content: "▾";
+  position: absolute;
+  top: 50%;
+  right: var(--rk-space-3);
+  transform: translateY(-50%);
+  color: var(--rk-color-text);
+  pointer-events: none;
+}
+
+.control {
+  min-height: var(--rk-control-height-sm);
+  border: var(--rk-border-width) solid var(--rk-color-border);
+  border-radius: var(--rk-radius-md);
+  background: var(--rk-color-surface);
+  color: var(--rk-color-text);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--rk-duration-fast) ease;
+}
+
+.select {
+  width: 100%;
+  padding: 0 calc(var(--rk-space-3) + var(--rk-space-4)) 0 var(--rk-space-3);
+  appearance: none;
+}
+
+.direction {
+  flex-shrink: 0;
+  padding: 0 var(--rk-space-3);
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .control:hover {
+    border-color: var(--rk-color-accent);
+  }
+}
+
+.control:focus-visible {
+  border-color: var(--rk-color-accent);
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: var(--rk-focus-width);
+}
+
+@media (min-width: 40rem) {
+  .field,
+  .select-wrap {
+    flex: initial;
+  }
 }
 </style>

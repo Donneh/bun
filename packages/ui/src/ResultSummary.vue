@@ -17,6 +17,7 @@ const text = computed(() => {
 .summary {
   margin: 0;
   color: var(--rk-color-text-muted);
-  font-size: var(--rk-font-size-sm);
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
 }
 </style>

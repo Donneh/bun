@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef } from "vue";
 import type { CardOrientation } from "./card-summary.ts";
+import Dither from "./Dither.vue";
 
 defineProps<{
   name: string;
@@ -22,6 +23,7 @@ onMounted(() => {
 <template>
   <figure class="tile" :class="orientation">
     <div class="frame" :class="{ pending: !loaded }">
+      <Dither v-if="!loaded" pattern="sweep" color="ink" :intensity="1" />
       <img
         ref="image"
         class="image"
@@ -47,35 +49,26 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--rk-space-2);
-  margin: 0;
   height: 100%;
+  margin: 0;
+  padding: var(--rk-space-2);
+  border: var(--rk-border-width) solid var(--rk-color-border);
+  border-radius: var(--rk-radius-lg);
+  background: var(--rk-color-surface);
+  transition: border-color var(--rk-duration-fast) ease;
+}
+
+@media (hover: hover) {
+  .tile:hover {
+    border-color: var(--rk-color-accent);
+  }
 }
 
 .frame {
+  position: relative;
   overflow: hidden;
-  border-radius: var(--rk-radius-lg);
-  background: var(--rk-color-placeholder);
-  box-shadow: var(--rk-shadow-card);
-}
-
-.frame.pending {
-  background: linear-gradient(
-      100deg,
-      var(--rk-color-placeholder) 30%,
-      var(--rk-color-placeholder-highlight) 50%,
-      var(--rk-color-placeholder) 70%
-    )
-    0 0 / 200% 100%;
-  animation: shimmer var(--rk-duration-shimmer) linear infinite;
-}
-
-@keyframes shimmer {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: -100% 0;
-  }
+  border-radius: var(--rk-radius-sm);
+  background: var(--rk-color-surface-muted);
 }
 
 .portrait .frame {
@@ -87,6 +80,7 @@ onMounted(() => {
 }
 
 .image {
+  position: relative;
   display: block;
   width: 100%;
   height: 100%;
@@ -103,19 +97,18 @@ onMounted(() => {
   .image {
     transition: none;
   }
-
-  .frame.pending {
-    animation: none;
-  }
 }
 
 .caption {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   padding-inline: var(--rk-space-1);
 }
 
 .name {
+  overflow-wrap: anywhere;
+  font-size: var(--rk-font-size-md);
   font-weight: var(--rk-font-weight-bold);
 }
 

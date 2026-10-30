@@ -5,7 +5,8 @@ const searchBox = (page: Page) => page.getByRole("searchbox", { name: "Search ca
 const results = (page: Page) => page.getByRole("list", { name: "Search results" });
 const filters = (page: Page) => page.getByRole("list", { name: "Filters" });
 const sortBy = (page: Page) => page.getByRole("combobox", { name: "Sort by" });
-const sortDirection = (page: Page) => page.getByRole("combobox", { name: "Direction" });
+const sortDirection = (page: Page) => page.getByRole("button", { name: /^Direction:/ });
+const themeToggle = (page: Page) => page.getByRole("group", { name: "Theme" });
 const shownNames = (page: Page) =>
   results(page)
     .getByRole("img")
@@ -38,13 +39,80 @@ async function search(page: Page, query: string) {
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe(query);
 }
 
-test("an empty page invites a search", async ({ page }) => {
+test("an empty page invites a search", async ({ page, request }) => {
+  const health = await request.get(`${apiBase}/health`);
+  const { data } = (await health.json()) as { data: { cards: number } };
+
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { level: 1, name: "Riftkeeper" })).toBeVisible();
+  await expect(page).toHaveTitle("Riftkeeper");
+  await expect(page.getByRole("heading", { level: 1, name: "Search the whole set. Instantly." })).toBeVisible();
+  await expect(page.getByText(`Riftkeeper · ${data.cards.toLocaleString("en")} cards · updated nightly`)).toBeVisible();
   await expect(searchBox(page)).toHaveValue("");
-  await expect(page.getByText("Search the Riftbound card list")).toBeVisible();
+  await expect(page.getByText("Try a query")).toBeVisible();
   await expect(results(page)).toHaveCount(0);
+});
+
+test("the page fits the screen without scrolling sideways", async ({ page }) => {
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
+  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+});
+
+test("every control is a comfortable tap target on a phone", async ({ page, isMobile }) => {
+  test.skip(!isMobile, "tap target size applies to touch screens");
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2 type:unit")}`);
+  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+
+  const controls = page.locator("button:visible, select:visible, input:visible");
+  const heights = await controls.evaluateAll((elements) =>
+    elements.map((element) => ({
+      control: element.getAttribute("aria-label") ?? element.textContent?.trim() ?? element.tagName,
+      height: element.getBoundingClientRect().height,
+    })),
+  );
+  expect(heights.length).toBeGreaterThan(0);
+  for (const { control, height } of heights) expect(height, control).toBeGreaterThanOrEqual(44);
+});
+
+test("the theme toggle switches the theme and remembers it", async ({ page }) => {
+  await page.goto("/");
+  const background = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+  const light = await background();
+
+  await themeToggle(page).getByRole("button", { name: "Dark" }).click();
+
+  await expect(themeToggle(page).getByRole("button", { name: "Dark" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  expect(await background()).not.toBe(light);
+
+  await page.reload();
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await themeToggle(page).getByRole("button", { name: "System" }).click();
+  await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
+  expect(await background()).toBe(light);
+});
+
+test("the page works when the browser blocks storage", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", {
+      get() {
+        throw new DOMException("Storage is disabled", "SecurityError");
+      },
+    });
+  });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/");
+
+  await expect(searchBox(page)).toBeVisible();
+  await themeToggle(page).getByRole("button", { name: "Dark" }).click();
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  expect(errors).toEqual([]);
 });
 
 test("a query shows its matching cards and survives a reload", async ({ page, request }) => {
@@ -199,7 +267,8 @@ test("sorting reorders the results and is kept in the URL", async ({ page, reque
 
   await sortBy(page).selectOption({ label: "Might" });
   await expect.poll(() => new URL(page.url()).searchParams.get("sort")).toBe("might");
-  await sortDirection(page).selectOption({ label: "Descending" });
+  await expect(sortDirection(page)).toHaveAccessibleName("Direction: Ascending");
+  await sortDirection(page).click();
 
   await expect.poll(() => new URL(page.url()).searchParams.get("direction")).toBe("desc");
   expect(new URL(page.url()).searchParams.get("q")).toBe(query);
@@ -237,7 +306,7 @@ test("a shared URL with a sort opens its first page in that order", async ({ pag
 
   await expect(searchBox(page)).toHaveValue(query);
   await expect(sortBy(page)).toHaveValue("name");
-  await expect(sortDirection(page)).toHaveValue("desc");
+  await expect(sortDirection(page)).toHaveAccessibleName("Direction: Descending");
   await expect(results(page).getByRole("listitem")).toHaveCount(Math.min(meta.total, meta.pageSize));
   await expect.poll(() => shownNames(page)).toEqual(data.map((card) => card.name));
 });

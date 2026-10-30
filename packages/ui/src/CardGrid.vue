@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import CardTile from "./CardTile.vue";
+import CardTileSkeleton from "./CardTileSkeleton.vue";
 import type { CardSummary } from "./card-summary.ts";
 
-withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string }>(), { label: "Cards" });
+withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeholders?: number }>(), {
+  label: "Cards",
+  placeholders: 0,
+});
 </script>
 
 <template>
@@ -10,6 +14,9 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string }>(), {
     <ul class="grid" :aria-label="label">
       <li v-for="card in cards" :key="card.id" class="cell" :class="card.orientation">
         <CardTile v-bind="card" />
+      </li>
+      <li v-for="index in placeholders" :key="`placeholder-${index}`" class="cell" aria-hidden="true">
+        <CardTileSkeleton />
       </li>
     </ul>
   </div>
@@ -21,22 +28,39 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string }>(), {
 }
 
 .grid {
+  --column-gap: var(--rk-space-3);
+  --row-gap: var(--rk-space-3);
+
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--rk-card-min-width), 1fr));
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(var(--rk-card-min-width), calc((100% - var(--column-gap)) / 2)), 1fr)
+  );
   grid-auto-flow: row dense;
-  gap: var(--rk-space-6) var(--rk-space-4);
+  gap: var(--row-gap) var(--column-gap);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.cell {
+  min-width: 0;
 }
 
 .cell.landscape {
   grid-column: span 2;
 }
 
-@container (max-width: 23rem) {
+@container (max-width: 40rem) {
   .cell.landscape {
-    grid-column: auto;
+    grid-column: 1 / -1;
+  }
+}
+
+@container (min-width: 40rem) {
+  .grid {
+    --column-gap: var(--rk-space-4);
+    --row-gap: var(--rk-space-5);
   }
 }
 </style>

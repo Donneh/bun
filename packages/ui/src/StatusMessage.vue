@@ -4,7 +4,6 @@ defineProps<{ kind: "loading" | "empty" | "error"; title: string; detail?: strin
 
 <template>
   <section class="status" :class="kind" :role="kind === 'error' ? 'alert' : 'status'" :aria-busy="kind === 'loading'">
-    <span v-if="kind === 'loading'" class="spinner" aria-hidden="true" />
     <p class="title">{{ title }}</p>
     <p v-if="detail" class="detail">{{ detail }}</p>
   </section>
@@ -14,50 +13,46 @@ defineProps<{ kind: "loading" | "empty" | "error"; title: string; detail?: strin
 .status {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--rk-space-2);
-  padding: var(--rk-space-8) var(--rk-space-4);
-  border: 1px dashed var(--rk-color-border);
+  gap: var(--rk-space-1);
+  padding: var(--rk-space-6) var(--rk-space-4);
+  border: var(--rk-border-width) dashed var(--rk-color-border);
   border-radius: var(--rk-radius-lg);
-  text-align: center;
   color: var(--rk-color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.loading {
+  padding: 0;
+  border: none;
 }
 
 .error {
-  border: 1px solid var(--rk-color-danger-border);
+  border: var(--rk-border-width) solid var(--rk-color-danger-border);
   background: var(--rk-color-danger-surface);
   color: var(--rk-color-danger-text);
 }
 
 .title {
   margin: 0;
-  font-size: var(--rk-font-size-lg);
+  color: var(--rk-color-text);
+  font-size: var(--rk-font-size-body);
   font-weight: var(--rk-font-weight-bold);
+}
+
+.error .title {
+  color: inherit;
+}
+
+.loading .title {
+  color: var(--rk-color-text-muted);
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
+  font-weight: var(--rk-font-weight-regular);
 }
 
 .detail {
   margin: 0;
-  font-size: var(--rk-font-size-sm);
-}
-
-.spinner {
-  width: var(--rk-space-6);
-  height: var(--rk-space-6);
-  border: 3px solid var(--rk-color-border);
-  border-top-color: var(--rk-color-accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .spinner {
-    animation-duration: 2.4s;
-  }
+  font-family: var(--rk-font-family-detail);
+  font-size: var(--rk-font-size-xs);
 }
 </style>

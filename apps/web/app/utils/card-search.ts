@@ -47,6 +47,15 @@ export async function searchCards(apiBase: string, state: SearchState, page = 1)
   }
 }
 
+export async function fetchCardCount(apiBase: string): Promise<number | null> {
+  try {
+    const response = await $fetch<{ data: { cards: number } }>("/health", { baseURL: apiBase });
+    return response.data.cards;
+  } catch {
+    return null;
+  }
+}
+
 export function appendPage(results: SearchResults, next: SearchResults): SearchResults {
   const seen = new Set(results.cards.map((card) => card.id));
   return {
