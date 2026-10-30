@@ -4,8 +4,6 @@ on:
   schedule:
     - cron: "11,41 * * * *"
   workflow_dispatch:
-  push:
-    branches: [scheduler-alerts]
 
 concurrency:
   group: scheduler-watchdog
