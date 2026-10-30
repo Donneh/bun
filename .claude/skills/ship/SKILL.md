@@ -105,7 +105,14 @@ curl -s https://api.riftkeeper.app/health
 curl -s -o /dev/null -w "%{http_code}\n" https://riftkeeper.app
 ```
 
-`/health` must answer `status: "ok"`, a card count above zero, and `version` equal to the `EXPECTED_VERSION` from step 7. `https://riftkeeper.app` must answer `200`. Then check the change itself on the live API or page, for example the endpoint or query it changed. After a new custom domain, Cloudflare answers with an empty 404 for about a minute; wait and retry before calling it a failure.
+`/health` must answer `status: "ok"`, a card count above zero, and `version` equal to the `EXPECTED_VERSION` from step 7. `https://riftkeeper.app` must answer `200`. Then check the pages with `verify:live`, adding the paths the change touched after the base URL:
+
+```sh
+cd apps/web
+MSYS_NO_PATHCONV=1 bun run verify:live https://riftkeeper.app / <changed paths>
+```
+
+It must end with `All N pages passed`. Look at the screenshots of the changed pages in `apps/web/test-results/verify-live/` yourself and attach them as evidence. Then check the change itself on the live API, for example the endpoint or query it changed. After a new custom domain, Cloudflare answers with an empty 404 for about a minute; wait and retry before calling it a failure.
 
 ## Report
 
