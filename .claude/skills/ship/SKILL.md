@@ -96,7 +96,7 @@ gh run view <run-id>
 gh run view <run-id> --log | grep -E "Smoke test the deployed" | grep -E "EXPECTED_|[0-9]+ pass|[0-9]+ fail|passed|failed"
 ```
 
-Both smoke steps must pass: "Smoke test the deployed API" (`test:api`, prints `N pass` and `0 fail`) and "Smoke test the deployed web app" (`test:production`, prints `N passed`). Note `EXPECTED_VERSION` from the log. On a failure, run `gh run view <run-id> --log-failed`, report it and stop. The screenshots are the `production-smoke-screenshots` artifact on the run.
+Each suite runs twice, at the staged version and after promotion, and all four steps must pass: "Smoke test the deployed API ..." (`test:api`, prints `N pass` and `0 fail`) and "Smoke test the deployed web app ..." (`test:production`, prints `N passed`). Note `EXPECTED_VERSION` from the log. On a failure, the workflow rolls production back to the versions that were live before the run and reports a `Rolled back` error (see `infrastructure/README.md`). Run `gh run view <run-id> --log-failed`, report it and stop. The screenshots are the `production-smoke-screenshots` artifact on the run.
 
 ## 8. Verify live
 

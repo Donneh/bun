@@ -68,10 +68,13 @@ async function startLocalWorker() {
 
 async function runSuite(baseUrl: URL) {
   console.log(`Running API tests against ${baseUrl.origin}`);
-  const suite = Bun.spawn(["bun", "test", "--preload", "./scripts/version-overrides.ts", "./test-api", ...process.argv.slice(2)], {
-    stdio: ["inherit", "inherit", "inherit"],
-    env: { ...process.env, BASE_URL: baseUrl.origin },
-  });
+  const suite = Bun.spawn(
+    ["bun", "test", "--preload", "./scripts/version-overrides.ts", "./test-api", ...process.argv.slice(2)],
+    {
+      stdio: ["inherit", "inherit", "inherit"],
+      env: { ...process.env, BASE_URL: baseUrl.origin },
+    },
+  );
   return suite.exited;
 }
 

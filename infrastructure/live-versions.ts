@@ -11,7 +11,8 @@ function deployments(module: StateModule): StateResource[] {
 }
 
 function servingVersion(versions: DeploymentVersion[]) {
-  return versions.reduce((serving, version) => (version.percentage > serving.percentage ? version : serving)).version_id;
+  return versions.reduce((serving, version) => (version.percentage > serving.percentage ? version : serving))
+    .version_id;
 }
 
 const state = (await Bun.stdin.json()) as State;

@@ -30,7 +30,7 @@ A change is done when it is live and verified, not when it is merged.
 1. Work on a branch. GitHub rejects direct pushes to `main`.
 2. Open a pull request. CI runs the `check` and `infrastructure` jobs.
 3. Squash-merge when both are green.
-4. The merge starts the Deploy workflow: the same checks, `tofu apply`, then `test:api` against the API and `test:production` in `apps/web` against the page. Watch it with `gh run watch`.
+4. The merge starts the Deploy workflow: the same checks, then `tofu apply` stages the new versions at 0.01% next to the live ones, `test:api` and `test:production` test the staged versions through a version override header, a second `tofu apply` promotes them, and both suites run again. On any failure the workflow moves production back to the versions that were live before the run and fails. See "Release and rollback" in `infrastructure/README.md`. Watch it with `gh run watch`.
 5. Confirm the change on `https://api.riftkeeper.app` and `https://riftkeeper.app` yourself. `GET /health` reports the number of loaded cards.
 
 After a new or changed custom domain, Cloudflare answers with an empty, cacheable 404 for about a minute. The smoke test waits for `/health`; a manual check should wait too.
