@@ -93,7 +93,9 @@ Nobody watches Workers Observability, so `.github/workflows/scheduler-watchdog.y
 
 When the check fails, the run fails, which GitHub emails to the person who last changed the watchdog's cron, and it opens the issue **Scheduler stopped dispatching workflows**, or comments on it when it is already open. The issue lists each late workflow with its latest run and where to look for the cause. The first run that finds every workflow on time comments on the issue and closes it.
 
-The watchdog uses the workflow's own `GITHUB_TOKEN` (`actions: read`, `issues: write`), not the dispatch token. It keeps working when the dispatch token expires, and it does not change when the scheduler moves to another credential: it checks that runs start, not how they were started.
+The watchdog uses the workflow's own `GITHUB_TOKEN` (`actions: read`, `issues: write`), not the dispatch token. It keeps working when the dispatch token expires, and it does not depend on the scheduler's credential: it checks that runs start, not how they were started.
+
+It counts every `workflow_dispatch` run, so a run started by hand resets the clock and can delay an alert by up to one maximum age. The scheduler's dispatches and a person's look the same while the scheduler uses the owner's personal token. Once it dispatches as a GitHub App (#77), the watchdog can count only runs whose triggering actor is the app.
 
 ## Release and rollback
 

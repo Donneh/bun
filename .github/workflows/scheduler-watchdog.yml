@@ -35,6 +35,7 @@ jobs:
         run: bun scripts/watchdog.ts --alert-body "$RUNNER_TEMP/alert.md"
       - name: Open or update the alert issue
         if: ${{ failure() }}
+        shell: bash
         run: |
           if [ ! -f "$RUNNER_TEMP/alert.md" ]; then
             echo "The watchdog failed before it could check the workflows: $RUN_URL" > "$RUNNER_TEMP/alert.md"
@@ -49,6 +50,7 @@ jobs:
           fi
       - name: Close the alert issue
         if: ${{ success() }}
+        shell: bash
         run: |
           echo "The scheduled workflows run on time again, found by [Scheduler watchdog]($RUN_URL)." > "$RUNNER_TEMP/resolved.md"
           gh issue list --state open --search "\"$ALERT_TITLE\" in:title" --json number,title \
