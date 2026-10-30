@@ -29,7 +29,7 @@ variable "github_dispatch_token" {
   description = "A fine-grained GitHub token with Actions read and write on the repository. The scheduler Worker uses it to dispatch the scheduled workflows."
 
   validation {
-    condition     = length(var.github_dispatch_token) > 0
+    condition     = length(trimspace(var.github_dispatch_token)) > 0
     error_message = "Set github_dispatch_token (the WORKFLOW_DISPATCH_TOKEN secret in GitHub) to a GitHub token with Actions read and write."
   }
 }
