@@ -1,7 +1,10 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { expect, test } from "@playwright/test";
+import { DEFAULT_LOAD_TIMEOUT_MS } from "../verify-live/arguments.ts";
 import { checkPage, checkSite, type PageCheck, problems } from "../verify-live/verify-live.ts";
+
+const FIXTURE_LOAD_TIMEOUT_MS = 2_000;
 
 const FIXTURE_PAGES: Record<string, string> = {
   "/clean": "<h1>Clean</h1>",
@@ -39,6 +42,7 @@ test.describe("verify:live", () => {
     colorScheme: "light",
     headers: {},
     outDir: test.info().outputPath("verify-live"),
+    loadTimeoutMs: FIXTURE_LOAD_TIMEOUT_MS,
   });
 
   test("passes a clean page and saves its screenshot", async ({ browser }) => {
@@ -57,7 +61,6 @@ test.describe("verify:live", () => {
   };
   for (const [path, problem] of Object.entries(failures))
     test(`fails ${path}`, async ({ browser }) => {
-      test.setTimeout(60_000);
       const report = await checkPage(browser, fixtureCheck(path));
       expect(problems(report).join("\n")).toContain(problem);
     });
@@ -66,7 +69,13 @@ test.describe("verify:live", () => {
     test.setTimeout(180_000);
     const reports = await checkSite(
       browser,
-      { baseUrl: baseURL ?? "", paths: [], outDir: test.info().outputPath("verify-live"), headers: {} },
+      {
+        baseUrl: baseURL ?? "",
+        paths: [],
+        outDir: test.info().outputPath("verify-live"),
+        headers: {},
+        loadTimeoutMs: DEFAULT_LOAD_TIMEOUT_MS,
+      },
       () => undefined,
     );
     expect(reports).toHaveLength(16);

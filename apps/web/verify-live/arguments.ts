@@ -2,14 +2,16 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
 export const DEFAULT_BASE_URL = "https://riftkeeper.app";
+export const DEFAULT_LOAD_TIMEOUT_MS = 30_000;
 export const DEFAULT_OUT_DIR = resolve(import.meta.dirname, "../test-results/verify-live");
 
-export const USAGE = `Usage: bun run verify:live [base-url] [path...] [--out <dir>] [--header "<Name>: <value>"]...
+export const USAGE = `Usage: bun run verify:live [base-url] [path...] [--out <dir>] [--timeout <ms>] [--header "<Name>: <value>"]...
 
   base-url  the deployed site, default ${DEFAULT_BASE_URL}
   path      pages to check, each starting with "/"; default the home page, a search,
             a card page picked from that search and an unknown path
   --out     directory for the screenshots, default ${DEFAULT_OUT_DIR}
+  --timeout how long a page may take to finish loading, in milliseconds, default ${DEFAULT_LOAD_TIMEOUT_MS}
   --header  an HTTP header for every request, such as
             "Cloudflare-Workers-Version-Overrides: riftkeeper-web=\\"<version id>\\""`;
 
@@ -18,12 +20,13 @@ export interface VerifyOptions {
   readonly paths: readonly string[];
   readonly outDir: string;
   readonly headers: Readonly<Record<string, string>>;
+  readonly loadTimeoutMs: number;
 }
 
 export function parseArguments(args: readonly string[]): VerifyOptions {
   const { values, positionals } = parseArgs({
     args: [...args],
-    options: { out: { type: "string" }, header: { type: "string", multiple: true } },
+    options: { out: { type: "string" }, timeout: { type: "string" }, header: { type: "string", multiple: true } },
     allowPositionals: true,
     strict: true,
   });
@@ -37,7 +40,15 @@ export function parseArguments(args: readonly string[]): VerifyOptions {
     paths,
     outDir: values.out === undefined ? DEFAULT_OUT_DIR : resolve(values.out),
     headers: Object.fromEntries((values.header ?? []).map(parseHeader)),
+    loadTimeoutMs: values.timeout === undefined ? DEFAULT_LOAD_TIMEOUT_MS : parseTimeout(values.timeout),
   };
+}
+
+function parseTimeout(timeout: string): number {
+  const milliseconds = Number(timeout);
+  if (!Number.isInteger(milliseconds) || milliseconds <= 0)
+    throw new Error(`"${timeout}" is not a timeout in whole milliseconds above zero`);
+  return milliseconds;
 }
 
 function parseHeader(header: string): [string, string] {

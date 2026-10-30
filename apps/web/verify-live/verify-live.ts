@@ -5,7 +5,6 @@ import type { VerifyOptions } from "./arguments.ts";
 
 export const SEARCH_QUERY = "c:fury cost:<=2";
 export const UNKNOWN_PATH = "/no-such-page";
-const READY_TIMEOUT_MS = 30_000;
 const SCROLL_PAUSE_MS = 150;
 
 export const VIEWPORTS = {
@@ -25,6 +24,7 @@ export interface PageCheck {
   readonly colorScheme: ColorScheme;
   readonly headers: Readonly<Record<string, string>>;
   readonly outDir: string;
+  readonly loadTimeoutMs: number;
 }
 
 export interface PageReport {
@@ -34,6 +34,7 @@ export interface PageReport {
   readonly status: number | null;
   readonly heading: string | null;
   readonly finishedLoading: boolean;
+  readonly loadTimeoutMs: number;
   readonly consoleErrors: readonly string[];
   readonly pageErrors: readonly string[];
   readonly failedRequests: readonly string[];
@@ -44,7 +45,7 @@ export interface PageReport {
 export function problems(report: PageReport): string[] {
   return [
     ...(report.status === null || report.status >= 400 ? [`page answered ${report.status ?? "nothing"}`] : []),
-    ...(report.finishedLoading ? [] : [`did not finish loading within ${READY_TIMEOUT_MS / 1000} s`]),
+    ...(report.finishedLoading ? [] : [`did not finish loading within ${report.loadTimeoutMs} ms`]),
     ...report.consoleErrors.map((message) => `console error: ${message}`),
     ...report.pageErrors.map((message) => `page error: ${message}`),
     ...report.failedRequests.map((request) => `failed request: ${request}`),
@@ -116,10 +117,10 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
 
     const response = await page.goto(check.path);
     const viewportHeight = await page.evaluate(() => window.innerHeight);
-    const firstScreenLoaded = await waitUntilLoaded(page, viewportHeight);
+    const firstScreenLoaded = await waitUntilLoaded(page, viewportHeight, check.loadTimeoutMs);
     const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
     await scrollThrough(page, pageHeight, viewportHeight);
-    const finishedLoading = firstScreenLoaded && (await waitUntilLoaded(page, pageHeight));
+    const finishedLoading = firstScreenLoaded && (await waitUntilLoaded(page, pageHeight, check.loadTimeoutMs));
     await page.evaluate(() => window.scrollTo(0, 0));
     const heading = await page
       .locator("h1")
@@ -140,6 +141,7 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
       status: response?.status() ?? null,
       heading: heading?.trim() ?? null,
       finishedLoading,
+      loadTimeoutMs: check.loadTimeoutMs,
       consoleErrors,
       pageErrors,
       failedRequests,
@@ -172,7 +174,7 @@ async function scrollThrough(page: Page, pageHeight: number, viewportHeight: num
   }
 }
 
-async function waitUntilLoaded(page: Page, imagesAbove: number): Promise<boolean> {
+async function waitUntilLoaded(page: Page, imagesAbove: number, timeoutMs: number): Promise<boolean> {
   return page
     .waitForFunction(
       (imagesAbove) => {
@@ -195,7 +197,7 @@ async function waitUntilLoaded(page: Page, imagesAbove: number): Promise<boolean
         );
       },
       imagesAbove,
-      { timeout: READY_TIMEOUT_MS, polling: 100 },
+      { timeout: timeoutMs, polling: 100 },
     )
     .then(() => true)
     .catch(() => false);
