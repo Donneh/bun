@@ -76,6 +76,7 @@ onMounted(() => {
 }
 
 .landscape .frame {
+  height: var(--rk-card-frame-height, auto);
   aspect-ratio: 88 / 63;
 }
 

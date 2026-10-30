@@ -316,6 +316,25 @@ test("landscape cards keep their landscape shape", async ({ page }) => {
   expect(box?.width).toBeGreaterThan(box?.height ?? Number.POSITIVE_INFINITY);
 });
 
+test("landscape and portrait cards are equally tall", async ({ page }) => {
+  await page.goto(`/?q=${encodeURIComponent("type:battlefield or c:fury cost:<=2")}&sort=name`);
+  await expect(results(page).getByRole("img").first()).toBeVisible();
+
+  const heights = await results(page)
+    .getByRole("img")
+    .evaluateAll((images) =>
+      images.map((image) => ({
+        landscape: image.getBoundingClientRect().width > image.getBoundingClientRect().height,
+        height: image.getBoundingClientRect().height,
+      })),
+    );
+  const landscape = heights.filter((card) => card.landscape).map((card) => card.height);
+  const portrait = heights.filter((card) => !card.landscape).map((card) => card.height);
+  expect(landscape.length).toBeGreaterThan(0);
+  expect(portrait.length).toBeGreaterThan(0);
+  for (const height of landscape) expect(height).toBeCloseTo(portrait[0] ?? 0, 0);
+});
+
 test("scrolling loads every result page by page and keeps the URL shareable", async ({ page, request }) => {
   const query = "c:fury cost:<=2";
   const { meta } = await apiSearch(request, { q: query });
