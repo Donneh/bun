@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import Hero from "./Hero.vue";
 
 describe("Hero", () => {
-  test("shows the eyebrow, the headline as the page heading and the subtitle", () => {
+  test("shows the eyebrow and keeps the headline as the page heading and the subtitle for assistive technology", () => {
     render(Hero, {
       props: {
         eyebrow: "Riftkeeper · 1,103 cards · updated nightly",

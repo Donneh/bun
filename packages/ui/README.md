@@ -18,7 +18,7 @@ The package ships its `.vue` sources. The app's Vite or Nuxt build compiles them
 | Component          | Props                                                                                     | Events                        |
 | ------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- |
 | `AppShell`         | default slot for the page content, `footer` slot                                          |                               |
-| `Hero`             | `eyebrow`, `title` (the page `h1`), `subtitle`                                            |                               |
+| `Hero`             | `eyebrow`, `title` (the page `h1`, visually hidden), `subtitle` (visually hidden)         |                               |
 | `Dither`           | `pattern: "corner" \| "sweep"`, `intensity` (0 to 1), `color: "accent" \| "ink"`, `scale` |                               |
 | `SearchBar`        | `v-model` query, `label`, `placeholder`, `name` (`q`), `prompt` (`›`)                     | `submit(query)`               |
 | `WarningList`      | `warnings: { message }[]`, renders nothing when empty                                     |                               |

@@ -93,6 +93,16 @@ describe("Dither", () => {
     expect(pendingFrames.size).toBe(0);
   });
 
+  test("keeps most of a loading tile empty at every moment of the sweep", () => {
+    preferReducedMotion(false);
+    render(Dither, { props: { pattern: "sweep", color: "ink", intensity: 1 } });
+
+    for (let second = 0; second < 6; second++) runFrame(second * 1_000);
+
+    const pixels = 96 * 96;
+    for (const frame of context.frames) expect(litPixels(frame) / pixels).toBeLessThan(0.3);
+  });
+
   test("animates frame after frame", () => {
     preferReducedMotion(false);
     render(Dither, { props: { pattern: "sweep" } });
