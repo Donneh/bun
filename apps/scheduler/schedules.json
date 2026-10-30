@@ -1,0 +1,4 @@
+{
+  "7,22,37,52 * * * *": "monitor.yml",
+  "17 5 * * *": "scrape-cards.yml"
+}

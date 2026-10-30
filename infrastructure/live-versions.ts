@@ -35,7 +35,7 @@ export function liveVersions(state: State, workers: string[], { bootstrap = fals
       `The state has no live version for ${missing.join(", ")}. Without one, the deploy would send all traffic to the new version untested. Run the Deploy workflow with bootstrap only when the Worker does not exist yet.`,
     );
   }
-  return versions;
+  return Object.fromEntries(Object.entries(versions).filter(([worker]) => workers.includes(worker)));
 }
 
 if (import.meta.main) {

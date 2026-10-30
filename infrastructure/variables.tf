@@ -34,3 +34,14 @@ variable "rollback" {
   default     = false
   description = "Send all traffic of each Worker listed in live_versions back to that version, and none to the new one."
 }
+
+variable "github_dispatch_token" {
+  type        = string
+  sensitive   = true
+  description = "A fine-grained GitHub token with Actions read and write on the repository. The scheduler Worker uses it to dispatch the scheduled workflows."
+
+  validation {
+    condition     = length(trimspace(var.github_dispatch_token)) > 0
+    error_message = "Set github_dispatch_token (the WORKFLOW_DISPATCH_TOKEN secret in GitHub) to a GitHub token with Actions read and write."
+  }
+}

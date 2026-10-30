@@ -36,6 +36,15 @@ describe("liveVersions", () => {
     expect(liveVersions(withDeposed, workers)).toEqual({ "riftkeeper-api": "live", "riftkeeper-web": "web-live" });
   });
 
+  test("returns only the requested Workers", () => {
+    const withScheduler = state(
+      deployment("riftkeeper-api", [["live", 100]]),
+      deployment("riftkeeper-web", [["web-live", 100]]),
+      deployment("riftkeeper-scheduler", [["scheduler-live", 100]]),
+    );
+    expect(liveVersions(withScheduler, workers)).toEqual({ "riftkeeper-api": "live", "riftkeeper-web": "web-live" });
+  });
+
   test("refuses a state without a live version for every Worker", () => {
     expect(() => liveVersions({}, workers)).toThrow("riftkeeper-api, riftkeeper-web");
     expect(() => liveVersions(state(deployment("riftkeeper-api", [["live", 100]])), workers)).toThrow(
