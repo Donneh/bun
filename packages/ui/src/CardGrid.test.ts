@@ -38,4 +38,18 @@ describe("CardGrid", () => {
     expect(items.slice(2).every((item) => item.getAttribute("aria-hidden") === "true")).toBe(true);
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(2);
   });
+
+  test("marks stale cards as busy and keeps showing them", () => {
+    render(CardGrid, { props: { cards, label: "Search results", stale: true } });
+
+    const list = screen.getByRole("list", { name: "Search results" });
+    expect(list.getAttribute("aria-busy")).toBe("true");
+    expect(within(list).getAllByRole("listitem")).toHaveLength(2);
+  });
+
+  test("is not busy with current cards", () => {
+    render(CardGrid, { props: { cards, label: "Search results" } });
+
+    expect(screen.getByRole("list", { name: "Search results" }).getAttribute("aria-busy")).toBe("false");
+  });
 });

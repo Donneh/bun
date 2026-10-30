@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { FilterChipSummary } from "./filter-chip.ts";
 
-withDefaults(defineProps<{ chips: readonly FilterChipSummary[]; moreConditions?: boolean; label?: string }>(), {
-  moreConditions: false,
-  label: "Filters",
-});
+withDefaults(
+  defineProps<{ chips: readonly FilterChipSummary[]; moreConditions?: boolean; label?: string; placeholder?: boolean }>(),
+  {
+    moreConditions: false,
+    label: "Filters",
+    placeholder: false,
+  },
+);
 
 const emit = defineEmits<{ remove: [id: string] }>();
 </script>
@@ -27,6 +31,9 @@ const emit = defineEmits<{ remove: [id: string] }>();
       </li>
     </ul>
     <p v-if="moreConditions" class="more">Plus other conditions in the query</p>
+  </div>
+  <div v-else-if="placeholder" class="filters" aria-hidden="true">
+    <span class="chip skeleton" />
   </div>
 </template>
 
@@ -60,6 +67,11 @@ const emit = defineEmits<{ remove: [id: string] }>();
   border: var(--rk-border-width) solid var(--rk-color-border);
   border-radius: var(--rk-radius-md);
   background: var(--rk-color-surface);
+}
+
+.chip.skeleton {
+  width: 8rem;
+  background: var(--rk-color-surface-muted);
 }
 
 .chip.removable {

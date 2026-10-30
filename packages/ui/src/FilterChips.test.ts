@@ -47,4 +47,17 @@ describe("FilterChips", () => {
 
     expect(container.textContent).toBe("");
   });
+
+  test("holds the space of a chip row while it waits for filters", () => {
+    const { container } = render(FilterChips, { props: { chips: [], placeholder: true } });
+
+    expect(screen.queryByRole("list")).toBeNull();
+    expect(container.querySelector("[aria-hidden='true']")).not.toBeNull();
+  });
+
+  test("shows the filters instead of the placeholder once they are known", () => {
+    render(FilterChips, { props: { chips, placeholder: true } });
+
+    expect(within(screen.getByRole("list", { name: "Filters" })).getAllByRole("listitem")).toHaveLength(2);
+  });
 });

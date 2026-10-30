@@ -15,6 +15,18 @@ describe("ResultSummary", () => {
     expect(screen.getByText("1 card")).toBeTruthy();
   });
 
+  test("says it is searching in the same place", () => {
+    render(ResultSummary, { props: { shown: 40, total: 312, searching: true } });
+
+    expect(screen.getByRole("status").textContent).toBe("Searching…");
+  });
+
+  test("says it is searching before the first count is known", () => {
+    render(ResultSummary);
+
+    expect(screen.getByRole("status").textContent).toBe("Searching…");
+  });
+
   test("announces a new count to screen readers", () => {
     render(ResultSummary, { props: { shown: 80, total: 312 } });
 

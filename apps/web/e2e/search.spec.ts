@@ -256,6 +256,126 @@ test("a slow search shows the loading state", async ({ page }) => {
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
 });
 
+async function delaySearches(page: Page, ms: number) {
+  await page.route(
+    (url) => isSearchRequest(url) && !isNextPageRequest(url),
+    async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, ms));
+      await route.continue();
+    },
+  );
+}
+
+async function gridTop(page: Page) {
+  return results(page).evaluate((grid) => grid.getBoundingClientRect().top + window.scrollY);
+}
+
+async function expectSteadyWhileLoading(page: Page, top: number, act: () => Promise<void>) {
+  await page.evaluate(() => {
+    const frames: { gridTop: number | null; toolbar: boolean }[] = [];
+    const sample = () => {
+      const grid = document.querySelector("ul[aria-label='Search results']");
+      const summary = [...document.querySelectorAll("[role='status']")].find((element) =>
+        /Searching…| cards?$/.test(element.textContent ?? ""),
+      );
+      frames.push({
+        gridTop: grid ? grid.getBoundingClientRect().top + window.scrollY : null,
+        toolbar: Boolean(summary?.checkVisibility()),
+      });
+      if (!(window as unknown as { stopSampling?: boolean }).stopSampling) requestAnimationFrame(sample);
+    };
+    Object.assign(window, { frames, stopSampling: false });
+    requestAnimationFrame(sample);
+  });
+
+  await act();
+  await expect(results(page)).toHaveAttribute("aria-busy", "true");
+  await expect(page.getByRole("status").getByText("Searching…")).toBeVisible();
+  await expect(sortBy(page)).toBeEnabled();
+  await expect(results(page)).toHaveAttribute("aria-busy", "false", { timeout: 10_000 });
+  await expect(page.getByRole("status").getByText(/ cards?$/)).toBeVisible();
+
+  const frames = await page.evaluate(() => {
+    Object.assign(window, { stopSampling: true });
+    return (window as unknown as { frames: { gridTop: number | null; toolbar: boolean }[] }).frames;
+  });
+  expect(frames.length).toBeGreaterThan(10);
+  expect(new Set(frames.map((frame) => frame.gridTop))).toEqual(new Set([top]));
+  expect(frames.every((frame) => frame.toolbar)).toBe(true);
+}
+
+test("the toolbar, chips and grid stay in place while new results load", async ({ page }) => {
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
+  await expect(results(page)).toHaveAttribute("aria-busy", "false");
+  await expect(filters(page).getByRole("listitem")).toHaveCount(2);
+  const top = await gridTop(page);
+  await delaySearches(page, 1_500);
+
+  await expectSteadyWhileLoading(page, top, async () => {
+    await searchBox(page).fill("c:calm cost:<=3");
+    await searchBox(page).press("Enter");
+  });
+  await expectSteadyWhileLoading(page, top, () =>
+    sortBy(page)
+      .selectOption({ label: "Name" })
+      .then(() => {}),
+  );
+  await expectSteadyWhileLoading(page, top, () =>
+    filters(page).getByRole("button", { name: "Remove Cost ≤ 3" }).click(),
+  );
+
+  expect(new URL(page.url()).searchParams.get("q")).toBe("c:calm");
+  expect(new URL(page.url()).searchParams.get("sort")).toBe("name");
+});
+
+test("a query change does not shift the layout", async ({ page }) => {
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
+  await expect(results(page)).toHaveAttribute("aria-busy", "false");
+  await expectFirstImageLoaded(page);
+  await page.evaluate(() => {
+    const shifts: { value: number; sources: string[] }[] = [];
+    Object.assign(window, { layoutShifts: shifts });
+    new PerformanceObserver((list) => {
+      for (const entry of list.getEntries() as (PerformanceEntry & { value: number; sources: { node?: Node }[] })[])
+        shifts.push({
+          value: entry.value,
+          sources: entry.sources.map((source) => (source.node as Element | undefined)?.outerHTML?.slice(0, 80) ?? ""),
+        });
+    }).observe({ type: "layout-shift" });
+  });
+  await delaySearches(page, 1_500);
+
+  await searchBox(page).fill("c:calm cost:<=3");
+  await searchBox(page).press("Enter");
+  await expect(results(page)).toHaveAttribute("aria-busy", "true");
+  await expect(results(page)).toHaveAttribute("aria-busy", "false", { timeout: 10_000 });
+  await expectFirstImageLoaded(page);
+
+  const shifts = await page.evaluate(
+    () => (window as unknown as { layoutShifts: { value: number; sources: string[] }[] }).layoutShifts,
+  );
+  expect(shifts, JSON.stringify(shifts, null, 2)).toEqual([]);
+});
+
+test("a search with nothing to keep holds the space of the toolbar and chips", async ({ page }) => {
+  await page.route(isSearchRequest, (route) => route.fulfill({ status: 503, json: {} }));
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
+  await expect(page.getByRole("alert")).toContainText("Search failed");
+  await page.unrouteAll();
+  await delaySearches(page, 1_500);
+
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+
+  const loading = page.getByRole("list", { name: "Loading results" });
+  await expect(loading).toBeVisible();
+  await expect(page.getByRole("status").getByText("Searching…")).toBeVisible();
+  const top = await loading.evaluate((grid) => grid.getBoundingClientRect().top + window.scrollY);
+
+  await expect(results(page)).toBeVisible({ timeout: 10_000 });
+
+  expect(await gridTop(page)).toBe(top);
+});
+
 test("a failed search shows the error and can be retried", async ({ page }) => {
   await page.route(isSearchRequest, (route) =>
     route.fulfill({
