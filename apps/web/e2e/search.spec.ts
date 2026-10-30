@@ -59,6 +59,23 @@ test("an empty page invites a search", async ({ page, request }) => {
   await expect(results(page)).toHaveCount(0);
 });
 
+test("an example query starts that search", async ({ page, isMobile }) => {
+  await page.goto("/");
+  const examples = page.getByRole("list", { name: "Example queries" }).getByRole("button");
+  await expect(examples.first()).toBeVisible();
+  if (isMobile) {
+    for (const height of await examples.evaluateAll((buttons) => buttons.map((b) => b.getBoundingClientRect().height)))
+      expect(height).toBeGreaterThanOrEqual(44);
+  }
+
+  await page.getByRole("button", { name: "Search type:battlefield" }).click();
+
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("type:battlefield");
+  await expect(searchBox(page)).toHaveValue("type:battlefield");
+  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+  await expect(page.getByRole("list", { name: "Example queries" })).toHaveCount(0);
+});
+
 test("the page fits the screen without scrolling sideways", async ({ page }) => {
   await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
   await expect(results(page).getByRole("listitem").first()).toBeVisible();

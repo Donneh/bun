@@ -3,6 +3,7 @@ import {
   AppShell,
   applyTheme,
   CardGrid,
+  ExampleQueries,
   FilterChips,
   Hero,
   InfiniteScrollSentinel,
@@ -37,6 +38,14 @@ type NextPageState =
 const LOADING_PLACEHOLDERS = 12;
 const NEXT_PAGE_PLACEHOLDERS = 8;
 const MIN_PAGE_INTERVAL_MS = 600;
+const EXAMPLE_QUERIES = [
+  "c:fury cost:<=2",
+  "type:battlefield",
+  "supertype:champion c:calm",
+  "r:epic might:>=5",
+  "ability:draw",
+  "(c:mind or c:chaos) type:spell",
+];
 
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
@@ -171,12 +180,9 @@ async function loadNextPage() {
       @remove="removeFilter"
     />
     <WarningList v-if="view.kind === 'results'" :warnings="view.warnings" />
-    <StatusMessage
-      v-if="view.kind === 'idle'"
-      kind="empty"
-      title="Try a query"
-      detail="c:fury cost:<=2 or type:battlefield"
-    />
+    <StatusMessage v-if="view.kind === 'idle'" kind="empty" title="Try a query">
+      <ExampleQueries :queries="EXAMPLE_QUERIES" @select="submit" />
+    </StatusMessage>
     <template v-else-if="view.kind === 'loading'">
       <StatusMessage kind="loading" title="Searching…" />
       <CardGrid :cards="[]" :placeholders="LOADING_PLACEHOLDERS" label="Loading results" />
