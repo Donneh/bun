@@ -1,6 +1,6 @@
 import type { APIRequestContext } from "@playwright/test";
-import { expect, test } from "../e2e/browser-console.ts";
 import { expectedApiVersion, expectedBuildId, webUrl, wwwUrl } from "../playwright.production.config.ts";
+import { expect, test } from "./staged-version.ts";
 
 const READY_TIMEOUT_MS = 180_000;
 const query = "c:fury cost:<=2";
