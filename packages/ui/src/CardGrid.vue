@@ -48,6 +48,9 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeh
 }
 
 .cell.landscape {
+  --rk-card-frame-height: calc((100cqi - var(--column-gap)) / 2 * 88 / 63);
+
+  container-type: inline-size;
   grid-column: span 2;
 }
 
