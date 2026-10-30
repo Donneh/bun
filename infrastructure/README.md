@@ -103,6 +103,17 @@ Staging covers the API and web Worker versions only. The scheduler Worker deploy
 
 `create_before_destroy` on the deployment keeps the old deployment in the state when Cloudflare rejects a new one. Without it, OpenTofu would drop the deployment from the state first, and the next deploy would not know the live version.
 
+### Monitor during a deploy
+
+The Monitor workflow (`.github/workflows/monitor.yml`) tests production every 15 minutes. Its first job pipes `gh run list --workflow deploy.yml --branch main` into `monitor-target.ts`, which decides what to test:
+
+- **A Deploy run is in progress and started less than 30 minutes ago.** Monitor skips its tests, succeeds and says so in its summary with a link to the Deploy run. The Deploy run tests production itself and rolls back on failure. After 30 minutes Monitor tests again, so a stuck Deploy run cannot hide an outage for longer than that.
+- **Otherwise** Monitor checks out the commit of the Deploy run on `main` that succeeded last, the commit that production runs, and runs that commit's `test:api` and `test:production`. A test merged for behavior that is not live yet, or that a failed deploy rolled back, therefore does not fail Monitor. If no recent Deploy run succeeded, it tests the commit it was dispatched on and warns.
+
+A Deploy run that starts while Monitor is already testing does not skip it. Such a run first spends about two minutes on its checks and then stages at 0.01%, so Monitor has almost always finished before the promotion, and at 0.01% almost none of its requests reach the staged version.
+
+`bun run deploy` from a machine leaves no Deploy run, so after it Monitor tests the commit of the last Deploy run instead of the one that is live.
+
 ### First deploy
 
 The very first deploy, with an empty state, has no live versions, so the read step fails. Run the Deploy workflow by hand with **bootstrap** checked, or `gh workflow run deploy.yml -f bootstrap=true`. A Worker without a live version then gets all traffic at once, and the rollback has nothing to return it to. The workflow refuses `bootstrap` together with `break_api`.
