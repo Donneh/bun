@@ -1,4 +1,5 @@
 import type { Subprocess } from "bun";
+import "./version-overrides.ts";
 
 const LOCAL_READY_TIMEOUT_MS = 30_000;
 const REMOTE_READY_TIMEOUT_MS = 180_000;
@@ -67,7 +68,7 @@ async function startLocalWorker() {
 
 async function runSuite(baseUrl: URL) {
   console.log(`Running API tests against ${baseUrl.origin}`);
-  const suite = Bun.spawn(["bun", "test", "./test-api", ...process.argv.slice(2)], {
+  const suite = Bun.spawn(["bun", "test", "--preload", "./scripts/version-overrides.ts", "./test-api", ...process.argv.slice(2)], {
     stdio: ["inherit", "inherit", "inherit"],
     env: { ...process.env, BASE_URL: baseUrl.origin },
   });

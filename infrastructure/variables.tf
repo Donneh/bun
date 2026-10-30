@@ -22,3 +22,9 @@ variable "web_hostname" {
     error_message = "Set web_hostname (WEB_HOSTNAME in GitHub) to a hostname such as riftkeeper.app."
   }
 }
+
+variable "live_versions" {
+  type        = map(string)
+  default     = {}
+  description = "The version that serves traffic now, by Worker name. A Worker listed here keeps that version at 100% and gets its new version at 0%. A Worker missing from it moves all traffic to its new version."
+}
