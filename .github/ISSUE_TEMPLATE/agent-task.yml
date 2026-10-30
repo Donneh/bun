@@ -35,7 +35,7 @@ body:
     id: required-evidence
     attributes:
       label: Required evidence
-      description: What the pull request must show, such as a video of the page, before and after numbers with the method, or a passing test.
+      description: What the pull request must show, such as before and after numbers with the method, or a passing test. Screenshots come from CI, not from the agent's machine. The E2E workflow posts a Screenshots comment on every pull request with the first screen of `/`, a search, a card page and an unknown path, on desktop and on a phone, in light and dark. Name what a reviewer should see in it, and ask for a video when a screenshot cannot show the change.
     validations:
       required: true
   - type: textarea
