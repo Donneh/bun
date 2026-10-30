@@ -4,6 +4,7 @@ import type { CardSummary } from "@riftkeeper/ui";
 import { cardHref } from "./card-detail";
 import { responsiveImage } from "./card-images";
 import type { SearchState } from "./search-state";
+import type { SearchOutcome, SearchResults } from "./search-view";
 
 interface SearchResponse {
   readonly data: readonly Card[];
@@ -11,20 +12,6 @@ interface SearchResponse {
   readonly warnings: readonly SearchWarning[];
   readonly parsed: Decomposition;
 }
-
-export interface SearchResults {
-  readonly kind: "results";
-  readonly cards: readonly CardSummary[];
-  readonly page: number;
-  readonly total: number;
-  readonly hasMore: boolean;
-  readonly warnings: readonly SearchWarning[];
-  readonly parsed: Decomposition;
-}
-
-export type SearchOutcome = SearchResults | { readonly kind: "error"; readonly message: string };
-
-export type SearchView = { readonly kind: "loading" } | SearchOutcome;
 
 export type CardOutcome =
   | { readonly kind: "card"; readonly card: Card }

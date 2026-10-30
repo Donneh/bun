@@ -13,6 +13,7 @@
     "app/utils/card-images.ts",
     "app/utils/filter-chips.ts",
     "app/utils/search-state.ts",
+    "app/utils/search-view.ts",
     "app/utils/theme-preference.ts",
     "playwright.config.ts",
     "playwright.production.config.ts"

@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-const props = defineProps<{ shown: number; total: number }>();
+const props = withDefaults(defineProps<{ shown?: number; total?: number; searching?: boolean }>(), {
+  shown: 0,
+  searching: false,
+});
 
 const count = (value: number) => value.toLocaleString("en");
 
 const text = computed(() => {
+  if (props.searching || props.total === undefined) return "Searching…";
   const noun = props.total === 1 ? "card" : "cards";
   return props.shown < props.total
     ? `Showing ${count(props.shown)} of ${count(props.total)} ${noun}`
@@ -14,7 +18,7 @@ const text = computed(() => {
 </script>
 
 <template>
-  <p class="summary" aria-live="polite" aria-atomic="true">{{ text }}</p>
+  <p class="summary" role="status" aria-live="polite" aria-atomic="true">{{ text }}</p>
 </template>
 
 <style scoped>
