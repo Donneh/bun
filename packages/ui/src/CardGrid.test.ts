@@ -1,5 +1,5 @@
 import userEvent from "@testing-library/user-event";
-import { render, screen, within } from "@testing-library/vue";
+import { fireEvent, render, screen, within } from "@testing-library/vue";
 import { describe, expect, test } from "vitest";
 import CardGrid from "./CardGrid.vue";
 import type { CardSummary } from "./card-summary.ts";
@@ -62,5 +62,13 @@ describe("CardGrid", () => {
     render(CardGrid, { props: { cards, label: "Search results" } });
 
     expect(screen.getByRole("list", { name: "Search results" }).getAttribute("aria-busy")).toBe("false");
+  });
+
+  test("reports which card the user is about to open", async () => {
+    const { emitted } = render(CardGrid, { props: { cards, label: "Search results" } });
+
+    await fireEvent.focus(screen.getByRole("link", { name: "Grand Arena" }));
+
+    expect(emitted("intent")).toEqual([["arena"]]);
   });
 });

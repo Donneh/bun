@@ -9,14 +9,14 @@ withDefaults(defineProps<{ cards: readonly CardSummary[]; label?: string; placeh
   stale: false,
 });
 
-const emit = defineEmits<{ navigate: [href: string] }>();
+const emit = defineEmits<{ navigate: [href: string]; intent: [id: string] }>();
 </script>
 
 <template>
   <div class="container">
     <ul class="grid" :class="{ stale }" :aria-label="label" :aria-busy="stale">
       <li v-for="card in cards" :key="card.id" class="cell" :class="card.orientation">
-        <CardTile v-bind="card" @navigate="emit('navigate', $event)" />
+        <CardTile v-bind="card" @navigate="emit('navigate', $event)" @intent="emit('intent', card.id)" />
       </li>
       <li v-for="index in placeholders" :key="`placeholder-${index}`" class="cell" aria-hidden="true">
         <CardTileSkeleton />

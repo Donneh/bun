@@ -94,6 +94,43 @@ for (const [way, goBack] of Object.entries(goingBack))
     expect(searches).toEqual([]);
   });
 
+test("a card opened from the results shows at once, its image fetched while the pointer rested on it", async ({
+  page,
+  request,
+}) => {
+  const query = "type:unit";
+  const { data } = await apiSearch(request, query);
+  const card = data.find((candidate) => candidate.printings[0]?.orientation === "portrait");
+  expect(card, "a portrait unit on the first page").toBeDefined();
+  const { id, name, printings } = card as ApiCard;
+  const art = printings[0] as ApiPrinting;
+  const isDetailImage = (url: string) =>
+    imageFile(url) === imageFile(art.imageUrl) && ["360", "720"].includes(new URL(url).searchParams.get("w") ?? "");
+  const cardRequests: string[] = [];
+  page.on("request", (sent) => {
+    if (isCardRequest(new URL(sent.url()))) cardRequests.push(sent.url());
+  });
+
+  await page.goto(`/?q=${encodeURIComponent(query)}`);
+  const tile = results(page).locator(`a[href="/cards/${id}"]`);
+  await expect(tile).toBeVisible();
+  const preloaded = page.waitForResponse((response) => isDetailImage(response.url()));
+  await tile.hover();
+  const preloadedUrl = (await preloaded).url();
+  await tile.click();
+
+  await expect(page).toHaveURL(new RegExp(`/cards/${id}$`));
+  await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
+  const image = cardImage(page, name);
+  await expect
+    .poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0), {
+      timeout: 1000,
+    })
+    .toBe(true);
+  expect(await image.evaluate((element: HTMLImageElement) => element.currentSrc)).toBe(preloadedUrl);
+  expect(cardRequests).toEqual([]);
+});
+
 test("a card link opens in a new tab and works there", async ({ page, context, request, isMobile }) => {
   test.skip(isMobile, "modifier clicks need a keyboard");
   const card = await cardWithPrintings(request, 1);

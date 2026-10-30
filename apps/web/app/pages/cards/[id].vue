@@ -13,6 +13,7 @@ import {
   ThemeButton,
 } from "@riftkeeper/ui";
 import { useTheme } from "~/composables/theme";
+import { rememberedCard } from "~/utils/card-cache";
 import { cardFacts, printingSummaries, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
 import { type CardView, fetchCard } from "~/utils/card-search";
@@ -30,12 +31,17 @@ const {
   refresh,
 } = useLazyAsyncData(
   () => `card:${cardId.value}`,
-  () => fetchCard(apiBase, cardId.value),
+  () => {
+    const card = rememberedCard(cardId.value);
+    return card ? Promise.resolve({ kind: "card", card } as const) : fetchCard(apiBase, cardId.value);
+  },
 );
 
-const view = computed<CardView>(() =>
-  status.value === "pending" || !outcome.value ? { kind: "loading" } : outcome.value,
-);
+const view = computed<CardView>(() => {
+  if (outcome.value && status.value !== "pending") return outcome.value;
+  const remembered = rememberedCard(cardId.value);
+  return remembered ? { kind: "card", card: remembered } : { kind: "loading" };
+});
 const card = computed(() => (view.value.kind === "card" ? view.value.card : null));
 const printing = computed(() => (card.value ? selectedPrinting(card.value, route.query.printing) : null));
 const facts = computed(() => (card.value ? cardFacts(card.value) : []));
