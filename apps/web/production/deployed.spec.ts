@@ -72,8 +72,8 @@ test("a card link opened directly serves the app and shows the card", async ({ p
   await page.goto(`/?q=${encodeURIComponent(query)}`);
   const { data } = (await (await searchResponse).json()) as { data: { id: string; name: string }[] };
   const [card] = data;
-  expect(card, `${query} finds a card`).toBeDefined();
-  const path = `/cards/${card?.id}`;
+  if (!card) throw new Error(`${query} finds no card`);
+  const path = `/cards/${card.id}`;
 
   const response = await request.get(path, { headers: { "cache-control": "no-cache" } });
   expect(response.status(), path).toBe(200);
@@ -84,8 +84,8 @@ test("a card link opened directly serves the app and shows the card", async ({ p
 
   await page.goto(path);
 
-  await expect(page.getByRole("heading", { level: 1, name: card?.name, exact: true })).toBeVisible();
-  await expect(page.getByRole("article").getByRole("img", { name: card?.name, exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: card.name, exact: true })).toBeVisible();
+  await expect(page.getByRole("article").getByRole("img", { name: card.name, exact: true })).toBeVisible();
   expect(errors).toEqual([]);
 });
 

@@ -14,13 +14,13 @@ The API Worker, `riftkeeper-api` on `hostname`:
 
 The web Worker, `riftkeeper-web` on `web_hostname`. It has no code, only static assets, so a page view never runs a Worker script:
 
-| Resource                           | Purpose                                                                                                                           |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off.                                                                                |
+| Resource                           | Purpose                                                                                                                                                                  |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off.                                                                                                                       |
 | `cloudflare_worker_version`        | Uploads `apps/web/.output/public`, the output of `nuxt generate`. An unknown path gets `index.html` with status 200, so the app routes deep links such as `/cards/<id>`. |
-| `cloudflare_workers_deployment`    | Splits traffic between the live and the new version. See [Release and rollback](#release-and-rollback).                           |
-| `cloudflare_workers_custom_domain` | Serves the Worker on `web_hostname` and `www.<web_hostname>`. Cloudflare creates the DNS records.                                 |
-| `cloudflare_ruleset`               | Redirects `www.<web_hostname>` to `web_hostname` with a 301 that keeps the path and query, before the request reaches the Worker. |
+| `cloudflare_workers_deployment`    | Splits traffic between the live and the new version. See [Release and rollback](#release-and-rollback).                                                                  |
+| `cloudflare_workers_custom_domain` | Serves the Worker on `web_hostname` and `www.<web_hostname>`. Cloudflare creates the DNS records.                                                                        |
+| `cloudflare_ruleset`               | Redirects `www.<web_hostname>` to `web_hostname` with a 301 that keeps the path and query, before the request reaches the Worker.                                        |
 
 The scheduler Worker, `riftkeeper-scheduler`, has no hostname. It starts the scheduled GitHub workflows, because GitHub's own `schedule:` trigger drops most runs (issue #43):
 
