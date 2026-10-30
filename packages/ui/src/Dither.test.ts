@@ -48,8 +48,16 @@ function setHidden(hidden: boolean) {
   document.dispatchEvent(new Event("visibilitychange"));
 }
 
+const SIDE = 32;
+
 const litPixels = (frame: Uint8ClampedArray | undefined) =>
   frame?.filter((value, index) => index % 4 === 3 && value > 0).length ?? 0;
+
+const litPixelsWhere = (frame: Uint8ClampedArray | undefined, where: (x: number, y: number) => boolean) =>
+  frame?.filter((value, index) => {
+    const pixel = Math.floor(index / 4);
+    return index % 4 === 3 && value > 0 && where(pixel % SIDE, Math.floor(pixel / SIDE));
+  }).length ?? 0;
 
 beforeEach(() => {
   pendingFrames = new Map();
@@ -113,6 +121,27 @@ describe("Dither", () => {
     expect(context.frames).toHaveLength(2);
     expect(context.frames[0]).not.toEqual(context.frames[1]);
     expect(pendingFrames.size).toBe(1);
+  });
+
+  test("fades the corner out before its left and bottom edges, so it never ends in a straight line", () => {
+    preferReducedMotion(true);
+    render(Dither, { props: { pattern: "corner", intensity: 1 } });
+
+    const frame = context.frames[0];
+    expect(litPixels(frame)).toBeGreaterThan(0);
+    expect(litPixelsWhere(frame, (x) => x === 0)).toBe(0);
+    expect(litPixelsWhere(frame, (_x, y) => y === SIDE - 1)).toBe(0);
+  });
+
+  test("keeps clear of the elements it must avoid", () => {
+    preferReducedMotion(true);
+    const button = document.createElement("button");
+    vi.spyOn(button, "getBoundingClientRect").mockReturnValue(DOMRect.fromRect({ x: 60, y: 0, width: 36, height: 30 }));
+    render(Dither, { props: { pattern: "corner", intensity: 1, avoid: [button], clearance: 6 } });
+
+    const frame = context.frames.at(-1);
+    expect(litPixels(frame)).toBeGreaterThan(0);
+    expect(litPixelsWhere(frame, (x, y) => x >= 20 && y < 10)).toBe(0);
   });
 
   test("paints nothing at zero intensity", () => {

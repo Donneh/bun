@@ -23,4 +23,14 @@ describe("Hero", () => {
     expect(container.querySelectorAll("p")).toHaveLength(1);
     expect(container.querySelector("canvas")?.getAttribute("aria-hidden")).toBe("true");
   });
+
+  test("shows its actions, such as the theme button, next to the eyebrow", () => {
+    const { container } = render(Hero, {
+      props: { eyebrow: "Riftkeeper", title: "Search" },
+      slots: { actions: '<button type="button">Theme: system</button>' },
+    });
+
+    const button = screen.getByRole("button", { name: "Theme: system" });
+    expect(container.querySelector("section")?.contains(button)).toBe(true);
+  });
 });

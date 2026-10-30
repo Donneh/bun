@@ -11,6 +11,13 @@ interface PatternStyle {
   readonly opacity: number;
 }
 
+export interface DitherBox {
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+}
+
 export interface DitherFrame {
   readonly pattern: DitherPattern;
   readonly intensity: number;
@@ -18,6 +25,8 @@ export interface DitherFrame {
   readonly width: number;
   readonly height: number;
   readonly seconds: number;
+  readonly keepOut?: readonly DitherBox[];
+  readonly clearance?: number;
 }
 
 export const STILL_FRAME_SECONDS = 2;
@@ -32,9 +41,10 @@ const PATTERNS: Record<DitherPattern, PatternStyle> = {
   corner: {
     opacity: 0.41,
     field: (x, y, seconds, width, height) => {
-      const radius = Math.hypot((1 - x / width) * 1.3, (y / height) * 1.8);
-      const ring = 0.5 + 0.5 * Math.sin(radius * 18 - seconds * 1.2);
-      return Math.max(0, 1 - radius * 1.7) * ring;
+      const reach = Math.min(width * 0.7, height * 3.2);
+      const radius = Math.hypot((width - x) / reach, y / (height * 0.92));
+      const ring = 0.5 + 0.5 * Math.sin(radius * 9 - seconds * 1.2);
+      return Math.max(0, 1 - radius) ** 1.4 * (0.35 + 0.65 * ring) * 1.6;
     },
   },
   sweep: {
@@ -46,13 +56,32 @@ const PATTERNS: Record<DitherPattern, PatternStyle> = {
   },
 };
 
+function distanceToBox(x: number, y: number, box: DitherBox): number {
+  const dx = Math.max(box.left - x, 0, x - box.right);
+  const dy = Math.max(box.top - y, 0, y - box.bottom);
+  return Math.hypot(dx, dy);
+}
+
+function clearanceFactor(x: number, y: number, keepOut: readonly DitherBox[], clearance: number): number {
+  let factor = 1;
+  for (const box of keepOut) {
+    const distance = distanceToBox(x, y, box);
+    if (distance <= 0) return 0;
+    factor = Math.min(factor, Math.min(1, distance / clearance) ** 2);
+  }
+  return factor;
+}
+
 export function paintDither(pixels: Uint8ClampedArray, frame: DitherFrame): void {
   const { field, opacity } = PATTERNS[frame.pattern];
   const alpha = Math.round(opacity * 255);
   const [red, green, blue] = frame.color;
+  const keepOut = frame.keepOut ?? [];
+  const clearance = Math.max(frame.clearance ?? 1, 1);
   for (let y = 0; y < frame.height; y++) {
     for (let x = 0; x < frame.width; x++) {
-      const value = field(x, y, frame.seconds, frame.width, frame.height) * frame.intensity;
+      const strength = field(x, y, frame.seconds, frame.width, frame.height) * frame.intensity;
+      const value = strength > 0 ? strength * clearanceFactor(x + 0.5, y + 0.5, keepOut, clearance) : 0;
       const threshold = BAYER_8[(y % 8) * 8 + (x % 8)] ?? 1;
       const offset = (y * frame.width + x) * 4;
       pixels[offset] = red;

@@ -5,14 +5,14 @@ import {
   CardGrid,
   FilterChips,
   Hero,
-  LoadMoreButton,
+  InfiniteScrollSentinel,
   ResultSummary,
   SearchBar,
   SortControl,
   type SortSelection,
   StatusMessage,
+  ThemeButton,
   type ThemePreference,
-  ThemeToggle,
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
@@ -29,10 +29,14 @@ import {
 } from "~/utils/search-state";
 import { loadThemePreference, saveThemePreference } from "~/utils/theme-preference";
 
-type LoadMoreState = { readonly kind: "idle" } | { readonly kind: "loading" } | { readonly kind: "error"; readonly message: string };
+type NextPageState =
+  | { readonly kind: "idle" }
+  | { readonly kind: "loading" }
+  | { readonly kind: "error"; readonly message: string };
 
 const LOADING_PLACEHOLDERS = 12;
-const LOAD_MORE_PLACEHOLDERS = 8;
+const NEXT_PAGE_PLACEHOLDERS = 8;
+const MIN_PAGE_INTERVAL_MS = 600;
 
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
@@ -68,9 +72,14 @@ const {
   () => (state.value.query ? searchCards(apiBase, state.value) : Promise.resolve(null)),
 );
 
-const loadMore = ref<LoadMoreState>({ kind: "idle" });
+const nextPage = ref<NextPageState>({ kind: "idle" });
+const nearEnd = ref(false);
+let nextPageAllowedAt = 0;
+let nextPageTimer: ReturnType<typeof setTimeout> | undefined;
+
 watch(stateKey, () => {
-  loadMore.value = { kind: "idle" };
+  clearTimeout(nextPageTimer);
+  nextPage.value = { kind: "idle" };
 });
 
 const view = computed<SearchView>(() => {
@@ -79,11 +88,14 @@ const view = computed<SearchView>(() => {
   return outcome.value;
 });
 
-const loadMorePlaceholders = computed(() =>
-  view.value.kind === "results" && loadMore.value.kind === "loading"
-    ? Math.min(LOAD_MORE_PLACEHOLDERS, view.value.total - view.value.cards.length)
+const nextPagePlaceholders = computed(() =>
+  view.value.kind === "results" && nextPage.value.kind === "loading"
+    ? Math.min(NEXT_PAGE_PLACEHOLDERS, view.value.total - view.value.cards.length)
     : 0,
 );
+
+watch([nearEnd, nextPage, view], continueScrolling);
+onBeforeUnmount(() => clearTimeout(nextPageTimer));
 
 const chips = computed(() => (view.value.kind === "results" ? view.value.parsed.filters.map(toChipSummary) : []));
 
@@ -112,19 +124,31 @@ function removeFilter(id: string) {
   if (chip) return search({ ...state.value, query: removeSpan(parsed.query, chip.span) });
 }
 
+function continueScrolling() {
+  clearTimeout(nextPageTimer);
+  if (!nearEnd.value || nextPage.value.kind !== "idle") return;
+  const wait = nextPageAllowedAt - Date.now();
+  if (wait > 0) {
+    nextPageTimer = setTimeout(continueScrolling, wait);
+    return;
+  }
+  void loadNextPage();
+}
+
 async function loadNextPage() {
-  const current = outcome.value;
-  if (current?.kind !== "results" || loadMore.value.kind === "loading") return;
+  const current = view.value;
+  if (current.kind !== "results" || !current.hasMore || nextPage.value.kind === "loading") return;
   const requestedFor = stateKey.value;
-  loadMore.value = { kind: "loading" };
+  nextPage.value = { kind: "loading" };
+  nextPageAllowedAt = Date.now() + MIN_PAGE_INTERVAL_MS;
   const next = await searchCards(apiBase, state.value, current.page + 1);
   if (requestedFor !== stateKey.value) return;
   if (next.kind === "error") {
-    loadMore.value = { kind: "error", message: next.message };
+    nextPage.value = { kind: "error", message: next.message };
     return;
   }
   outcome.value = appendPage(current, next);
-  loadMore.value = { kind: "idle" };
+  nextPage.value = { kind: "idle" };
 }
 </script>
 
@@ -134,7 +158,11 @@ async function loadNextPage() {
       :eyebrow="eyebrow"
       title="Search the whole set. Instantly."
       subtitle="Find cards by name, domain, cost, rarity or card text."
-    />
+    >
+      <template #actions>
+        <ThemeButton v-model="theme" />
+      </template>
+    </Hero>
     <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
     <FilterChips
       v-if="view.kind === 'results'"
@@ -170,21 +198,16 @@ async function loadNextPage() {
           @change="changeSort"
         />
       </Toolbar>
-      <CardGrid :cards="view.cards" :placeholders="loadMorePlaceholders" label="Search results" />
+      <CardGrid :cards="view.cards" :placeholders="nextPagePlaceholders" label="Search results" />
       <StatusMessage
-        v-if="loadMore.kind === 'error'"
+        v-if="nextPage.kind === 'error'"
         kind="error"
         title="Could not load more cards"
-        :detail="loadMore.message"
+        :detail="nextPage.message"
+        action="Try again"
+        @action="loadNextPage"
       />
-      <LoadMoreButton
-        v-if="view.hasMore"
-        :loading="loadMore.kind === 'loading'"
-        @load="loadNextPage"
-      />
-    </template>
-    <template #footer>
-      <ThemeToggle v-model="theme" />
+      <InfiniteScrollSentinel v-else-if="view.hasMore" :key="stateKey" @change="nearEnd = $event" />
     </template>
   </AppShell>
 </template>

@@ -1,10 +1,24 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, useTemplateRef } from "vue";
-import { type DitherColor, type DitherPattern, paintDither, parseRgb, STILL_FRAME_SECONDS } from "./dither.ts";
+import { onBeforeUnmount, onMounted, useTemplateRef, watch } from "vue";
+import {
+  type DitherBox,
+  type DitherColor,
+  type DitherPattern,
+  paintDither,
+  parseRgb,
+  STILL_FRAME_SECONDS,
+} from "./dither.ts";
 
 const props = withDefaults(
-  defineProps<{ pattern: DitherPattern; intensity?: number; color?: DitherColor; scale?: number }>(),
-  { intensity: 0.5, color: "accent", scale: 3 },
+  defineProps<{
+    pattern: DitherPattern;
+    intensity?: number;
+    color?: DitherColor;
+    scale?: number;
+    avoid?: readonly (Element | null | undefined)[];
+    clearance?: number;
+  }>(),
+  { intensity: 0.5, color: "accent", scale: 3, avoid: () => [], clearance: 32 },
 );
 
 const FRAME_INTERVAL_MS = 50;
@@ -12,10 +26,25 @@ const FRAME_INTERVAL_MS = 50;
 const canvas = useTemplateRef<HTMLCanvasElement>("canvas");
 let frameRequest = 0;
 let lastFrameAt = Number.NEGATIVE_INFINITY;
-let stopWatchingTheme: (() => void) | undefined;
+let stopWatching: (() => void) | undefined;
 
 function isOnScreen(rect: DOMRect) {
   return rect.bottom >= 0 && rect.top <= window.innerHeight;
+}
+
+function keepOutBoxes(canvasRect: DOMRect): DitherBox[] {
+  return props.avoid.flatMap((element) => {
+    if (!element) return [];
+    const rect = element.getBoundingClientRect();
+    return [
+      {
+        left: (rect.left - canvasRect.left) / props.scale,
+        top: (rect.top - canvasRect.top) / props.scale,
+        right: (rect.right - canvasRect.left) / props.scale,
+        bottom: (rect.bottom - canvasRect.top) / props.scale,
+      },
+    ];
+  });
 }
 
 function draw(seconds: number) {
@@ -38,6 +67,8 @@ function draw(seconds: number) {
     width,
     height,
     seconds,
+    keepOut: keepOutBoxes(rect),
+    clearance: props.clearance / props.scale,
   });
   context.putImageData(image, 0, 0);
 }
@@ -69,14 +100,26 @@ function drawStillFrame() {
   draw(STILL_FRAME_SECONDS);
 }
 
-function watchTheme() {
+function watchThemeAndLayout() {
   const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-  const observer = new MutationObserver(drawStillFrame);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  const themeObserver = new MutationObserver(drawStillFrame);
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
   scheme.addEventListener("change", drawStillFrame);
   window.addEventListener("resize", drawStillFrame);
+  const layoutObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(drawStillFrame);
+  const stopWatchingElements = watch(
+    () => [canvas.value, ...props.avoid],
+    (elements) => {
+      layoutObserver?.disconnect();
+      for (const element of elements) if (element) layoutObserver?.observe(element);
+      drawStillFrame();
+    },
+    { immediate: true, flush: "post" },
+  );
   return () => {
-    observer.disconnect();
+    stopWatchingElements();
+    themeObserver.disconnect();
+    layoutObserver?.disconnect();
     scheme.removeEventListener("change", drawStillFrame);
     window.removeEventListener("resize", drawStillFrame);
   };
@@ -84,8 +127,7 @@ function watchTheme() {
 
 onMounted(() => {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    drawStillFrame();
-    stopWatchingTheme = watchTheme();
+    stopWatching = watchThemeAndLayout();
     return;
   }
   document.addEventListener("visibilitychange", onVisibilityChange);
@@ -94,7 +136,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   pause();
-  stopWatchingTheme?.();
+  stopWatching?.();
   document.removeEventListener("visibilitychange", onVisibilityChange);
 });
 </script>

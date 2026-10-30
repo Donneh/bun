@@ -15,23 +15,23 @@ The package ships its `.vue` sources. The app's Vite or Nuxt build compiles them
 
 ## Components
 
-| Component          | Props                                                                                     | Events                        |
-| ------------------ | ----------------------------------------------------------------------------------------- | ----------------------------- |
-| `AppShell`         | default slot for the page content, `footer` slot                                          |                               |
-| `Hero`             | `eyebrow`, `title` (the page `h1`, visually hidden), `subtitle` (visually hidden)         |                               |
-| `Dither`           | `pattern: "corner" \| "sweep"`, `intensity` (0 to 1), `color: "accent" \| "ink"`, `scale` |                               |
-| `SearchBar`        | `v-model` query, `label`, `placeholder`, `name` (`q`), `prompt` (`›`)                     | `submit(query)`               |
-| `WarningList`      | `warnings: { message }[]`, renders nothing when empty                                     |                               |
-| `StatusMessage`    | `kind: "loading" \| "empty" \| "error"`, `title`, `detail`                                |                               |
-| `ResultSummary`    | `shown`, `total`                                                                          |                               |
-| `CardGrid`         | `cards: CardSummary[]`, `label`, `placeholders`                                           |                               |
-| `CardTile`         | `name`, `subtitle`, `imageUrl`, `orientation`, `srcset`, `sizes`                          |                               |
-| `CardTileSkeleton` | `orientation`                                                                             |                               |
-| `FilterChips`      | `chips: FilterChipSummary[]`, `moreConditions`, `label`                                   | `remove(id)`                  |
-| `SortControl`      | `sort`, `direction: "asc" \| "desc"`, `options: SortOption[]`                             | `change({ sort, direction })` |
-| `LoadMoreButton`   | `loading`                                                                                 | `load()`                      |
-| `ThemeToggle`      | `v-model` preference: `"system" \| "light" \| "dark"`, `label`                            |                               |
-| `Toolbar`          | default slot, stacked on phones and a row that wraps from 40rem                           |                               |
+| Component                | Props                                                                                                                           | Events                        |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `AppShell`               | default slot for the page content; clips sideways overflow so full-bleed decoration never scrolls the page                      |                               |
+| `Hero`                   | `eyebrow`, `title` (the page `h1`, visually hidden), `subtitle` (visually hidden), `actions` slot on the eyebrow line           |                               |
+| `Dither`                 | `pattern: "corner" \| "sweep"`, `intensity` (0 to 1), `color: "accent" \| "ink"`, `scale`, `avoid` (elements), `clearance` (px) |                               |
+| `SearchBar`              | `v-model` query, `label`, `placeholder`, `name` (`q`), `prompt` (`›`)                                                           | `submit(query)`               |
+| `WarningList`            | `warnings: { message }[]`, renders nothing when empty                                                                           |                               |
+| `StatusMessage`          | `kind: "loading" \| "empty" \| "error"`, `title`, `detail`, `action` (button label)                                             | `action()`                    |
+| `ResultSummary`          | `shown`, `total`, announced through a polite live region                                                                        |                               |
+| `CardGrid`               | `cards: CardSummary[]`, `label`, `placeholders`                                                                                 |                               |
+| `CardTile`               | `name`, `subtitle`, `imageUrl`, `orientation`, `srcset`, `sizes`                                                                |                               |
+| `CardTileSkeleton`       | `orientation`                                                                                                                   |                               |
+| `FilterChips`            | `chips: FilterChipSummary[]`, `moreConditions`, `label`                                                                         | `remove(id)`                  |
+| `SortControl`            | `sort`, `direction: "asc" \| "desc"`, `options: SortOption[]`                                                                   | `change({ sort, direction })` |
+| `ThemeButton`            | `v-model` preference: `"system" \| "light" \| "dark"`                                                                           |                               |
+| `InfiniteScrollSentinel` | `margin` (the `IntersectionObserver` root margin, `0px 0px 800px 0px`)                                                          | `change(visible)`             |
+| `Toolbar`                | default slot, stacked on phones and a row that wraps from 40rem                                                                 |                               |
 
 `CardSummary` holds `id`, `name`, `subtitle`, `imageUrl` and `orientation`. `CardGrid` keeps at least two columns. It gives a landscape card, such as a battlefield, two columns so it keeps its shape, and the full row on a phone. `placeholders` appends that many `CardTileSkeleton` tiles, hidden from assistive technology.
 
@@ -39,7 +39,13 @@ The package ships its `.vue` sources. The app's Vite or Nuxt build compiles them
 
 `SortControl` shows the sort key as a select and the direction as a button that flips it. The button's accessible name is `Direction: Ascending` or `Direction: Descending`.
 
-`Dither` draws an animated ordered (Bayer 8x8) dither on a canvas that fills its positioned parent. `corner` fades out from the top-right corner, and `sweep` moves a diagonal band across. It paints in the `--rk-color-accent` or `--rk-color-text` token, draws at most 20 frames a second, skips frames while it is off screen, pauses while the tab is hidden and stops when unmounted. With `prefers-reduced-motion` it draws one still frame and redraws it only when the theme changes. `Hero` places a `corner` dither where the text cannot be, and `CardTile` shows a `sweep` until its image loads.
+`Dither` draws an animated ordered (Bayer 8x8) dither on a canvas that fills its positioned parent. `corner` is densest in the top-right corner and thins out to nothing before the canvas's left and bottom edges, so it never ends in a straight line. `sweep` moves a diagonal band across. The pattern keeps clear of every element in `avoid`: it paints nothing over them and thins out over `clearance` pixels around them. It paints in the `--rk-color-accent` or `--rk-color-text` token, draws at most 20 frames a second, skips frames while it is off screen, pauses while the tab is hidden and stops when unmounted. With `prefers-reduced-motion` it draws one still frame and redraws it only when the theme, the window size or the size of an avoided element changes.
+
+`Hero` runs a `corner` dither to the top and right edges of the viewport, 10rem tall on phones and 15rem from 48rem. It avoids the eyebrow text, the `actions` slot and the content column below the hero, so the pattern shows only around the eyebrow line and in the right margin. `CardTile` is bare art: the image and its caption, with no frame. On hover the image lifts and the name turns the accent color. It shows a `sweep` until its image loads.
+
+`ThemeButton` cycles system, light and dark. Its icon shows the current mode (a monitor, a sun or a moon), and its accessible name and tooltip say it, as in `Theme: system`.
+
+`InfiniteScrollSentinel` is an empty element that reports `change(true)` when it comes within `margin` of the viewport and `change(false)` when it leaves or unmounts. The app decides what to load.
 
 `applyTheme(preference)` in `src/theme.ts`, also exported as `@riftkeeper/ui/theme`, sets `data-theme` on the root element, or removes it for `system`. Storing the choice is the app's job.
 

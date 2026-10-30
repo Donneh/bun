@@ -5,15 +5,15 @@
 :root {
   color-scheme: light;
 
-  --rk-color-background: #ffffff;
-  --rk-color-surface: #ffffff;
-  --rk-color-surface-muted: #f4f4f5;
-  --rk-color-border: #e4e4e7;
-  --rk-color-text: #16151a;
-  --rk-color-text-muted: #6b6875;
-  --rk-color-accent: #12b886;
-  --rk-color-accent-text: #087f5b;
-  --rk-color-on-accent: #0a0a0b;
+  --rk-color-background: #f4f1ec;
+  --rk-color-surface: #fbf9f6;
+  --rk-color-surface-muted: #ece7e0;
+  --rk-color-border: #e8e2d9;
+  --rk-color-text: #1c1917;
+  --rk-color-text-muted: #6c6560;
+  --rk-color-accent: #44403c;
+  --rk-color-accent-text: #44403c;
+  --rk-color-on-accent: #fbf9f6;
   --rk-color-focus-ring: color-mix(in srgb, var(--rk-color-accent) 22%, transparent);
   --rk-color-warning-surface: #fff8e1;
   --rk-color-warning-border: #f0c36d;
@@ -83,15 +83,15 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --rk-color-background: #0a0a0b;
-    --rk-color-surface: #0a0a0b;
-    --rk-color-surface-muted: #141417;
-    --rk-color-border: #232326;
-    --rk-color-text: #ececf1;
-    --rk-color-text-muted: #9a98a6;
-    --rk-color-accent: #3ee7a8;
-    --rk-color-accent-text: #3ee7a8;
-    --rk-color-on-accent: #0a0a0b;
+    --rk-color-background: #0c0a09;
+    --rk-color-surface: #12100e;
+    --rk-color-surface-muted: #1c1917;
+    --rk-color-border: #2a2622;
+    --rk-color-text: #f5f0e8;
+    --rk-color-text-muted: #a8a29e;
+    --rk-color-accent: #d6d3d1;
+    --rk-color-accent-text: #d6d3d1;
+    --rk-color-on-accent: #0c0a09;
     --rk-color-warning-surface: #1f1a0a;
     --rk-color-warning-border: #5c4813;
     --rk-color-warning-text: #f5d98c;
@@ -104,15 +104,15 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --rk-color-background: #0a0a0b;
-  --rk-color-surface: #0a0a0b;
-  --rk-color-surface-muted: #141417;
-  --rk-color-border: #232326;
-  --rk-color-text: #ececf1;
-  --rk-color-text-muted: #9a98a6;
-  --rk-color-accent: #3ee7a8;
-  --rk-color-accent-text: #3ee7a8;
-  --rk-color-on-accent: #0a0a0b;
+  --rk-color-background: #0c0a09;
+  --rk-color-surface: #12100e;
+  --rk-color-surface-muted: #1c1917;
+  --rk-color-border: #2a2622;
+  --rk-color-text: #f5f0e8;
+  --rk-color-text-muted: #a8a29e;
+  --rk-color-accent: #d6d3d1;
+  --rk-color-accent-text: #d6d3d1;
+  --rk-color-on-accent: #0c0a09;
   --rk-color-warning-surface: #1f1a0a;
   --rk-color-warning-border: #5c4813;
   --rk-color-warning-text: #f5d98c;
