@@ -110,9 +110,12 @@ The Monitor workflow (`.github/workflows/monitor.yml`) tests production every 15
 - **A Deploy run is in progress and started less than 30 minutes ago.** Monitor skips its tests, succeeds and says so in its summary with a link to the Deploy run. The Deploy run tests production itself and rolls back on failure. After 30 minutes Monitor tests again, so a stuck Deploy run cannot hide an outage for longer than that.
 - **Otherwise** Monitor checks out the commit of the Deploy run on `main` that succeeded last, the commit that production runs, and runs that commit's `test:api` and `test:production`. A test merged for behavior that is not live yet, or that a failed deploy rolled back, therefore does not fail Monitor. If no recent Deploy run succeeded, it tests the commit it was dispatched on and warns.
 
-A Deploy run that starts while Monitor is already testing does not skip it. Such a run first spends about two minutes on its checks and then stages at 0.01%, so Monitor has almost always finished before the promotion, and at 0.01% almost none of its requests reach the staged version.
+A Deploy run that starts while Monitor is already testing does not skip it. Such a run stages at 0.01% about one minute after it starts and promotes about two minutes after it starts, while Monitor's tests take under a minute. Monitor has therefore almost always finished before the promotion, and at 0.01% almost none of its requests reach the staged version.
 
-`bun run deploy` from a machine leaves no Deploy run, so after it Monitor tests the commit of the last Deploy run instead of the one that is live.
+Monitor can also pick an older commit than the live one in two rare cases:
+
+- `bun run deploy` from a machine leaves no Deploy run, so Monitor tests the commit of the last Deploy run.
+- `gh run list` shows only the latest attempt of a run. When a re-run of the live commit's Deploy run fails, the rollback keeps that commit live, but its run now reads `failure`, so Monitor tests the commit of the successful Deploy run before it. Run the Deploy workflow again to fix it.
 
 ### First deploy
 
