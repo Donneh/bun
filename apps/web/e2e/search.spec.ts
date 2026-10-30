@@ -68,10 +68,10 @@ test("an example query starts that search", async ({ page, isMobile }) => {
       expect(height).toBeGreaterThanOrEqual(44);
   }
 
-  await page.getByRole("button", { name: "Search type:battlefield" }).click();
+  await page.getByRole("button", { name: "Search ability:draw" }).click();
 
-  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("type:battlefield");
-  await expect(searchBox(page)).toHaveValue("type:battlefield");
+  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("ability:draw");
+  await expect(searchBox(page)).toHaveValue("ability:draw");
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
   await expect(page.getByRole("list", { name: "Example queries" })).toHaveCount(0);
 });

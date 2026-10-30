@@ -38,14 +38,7 @@ type NextPageState =
 const LOADING_PLACEHOLDERS = 12;
 const NEXT_PAGE_PLACEHOLDERS = 8;
 const MIN_PAGE_INTERVAL_MS = 600;
-const EXAMPLE_QUERIES = [
-  "c:fury cost:<=2",
-  "type:battlefield",
-  "supertype:champion c:calm",
-  "r:epic might:>=5",
-  "ability:draw",
-  "(c:mind or c:chaos) type:spell",
-];
+const EXAMPLE_QUERIES = ["c:fury cost:<=2", "r:epic might:>=5", "ability:draw"];
 
 const route = useRoute();
 const { apiBase } = useRuntimeConfig().public;
