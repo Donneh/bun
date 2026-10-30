@@ -21,9 +21,10 @@ The package ships its `.vue` sources. The app's Vite or Nuxt build compiles them
 | `Hero`                   | `eyebrow`, `title` (the page `h1`, visually hidden), `subtitle` (visually hidden), `actions` slot on the eyebrow line           |                               |
 | `Dither`                 | `pattern: "corner" \| "sweep"`, `intensity` (0 to 1), `color: "accent" \| "ink"`, `scale`, `avoid` (elements), `clearance` (px) |                               |
 | `SearchBar`              | `v-model` query, `label`, `placeholder`, `name` (`q`), `prompt` (`›`)                                                           | `submit(query)`               |
+| `ExampleQueries`         | `queries`, `lead` (`Try`), `label` (`Example queries`); one compact line that wraps, renders nothing when empty                 | `select(query)`               |
 | `WarningList`            | `warnings: { message }[]`, renders nothing when empty                                                                           |                               |
 | `StatusMessage`          | `kind: "loading" \| "empty" \| "error"`, `title`, `detail`, `action` (button label)                                             | `action()`                    |
-| `ResultSummary`          | `shown`, `total`, `searching` (says "Searching…" in the same place), a polite status region                                     |                               |
+| `ResultSummary`          | `shown`, `total` with thousands separators, `searching` (says "Searching…" in the same place), a polite status region           |                               |
 | `CardGrid`               | `cards: CardSummary[]`, `label`, `placeholders`, `stale` (dimmed and `aria-busy`)                                               |                               |
 | `CardTile`               | `name`, `subtitle`, `imageUrl`, `orientation`, `srcset`, `sizes`                                                                |                               |
 | `CardTileSkeleton`       | `orientation`                                                                                                                   |                               |

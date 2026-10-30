@@ -72,7 +72,7 @@ const {
   refresh,
 } = await useAsyncData(
   () => `search:${stateKey.value}`,
-  () => (state.value.query ? searchCards(apiBase, state.value) : Promise.resolve(null)),
+  () => searchCards(apiBase, state.value),
 );
 
 const nextPage = ref<NextPageState>({ kind: "idle" });
@@ -95,7 +95,6 @@ watch(
 );
 
 const view = computed<SearchView>(() => {
-  if (!state.value.query) return { kind: "idle" };
   const settled = status.value === "pending" ? null : (outcome.value ?? null);
   return searchView(settled, kept.value);
 });
@@ -178,10 +177,8 @@ async function loadNextPage() {
       </template>
     </Hero>
     <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
-    <StatusMessage v-if="view.kind === 'idle'" kind="empty" title="Try a query">
-      <ExampleQueries :queries="EXAMPLE_QUERIES" @select="submit" />
-    </StatusMessage>
-    <StatusMessage v-else-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
+    <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
+    <StatusMessage v-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
     <template v-else-if="view.kind === 'loading'">
       <FilterChips :chips="[]" :placeholder="Boolean(state.query)" />
       <Toolbar>

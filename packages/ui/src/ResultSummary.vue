@@ -6,10 +6,14 @@ const props = withDefaults(defineProps<{ shown?: number; total?: number; searchi
   searching: false,
 });
 
+const count = (value: number) => value.toLocaleString("en");
+
 const text = computed(() => {
   if (props.searching || props.total === undefined) return "Searching…";
   const noun = props.total === 1 ? "card" : "cards";
-  return props.shown < props.total ? `Showing ${props.shown} of ${props.total} ${noun}` : `${props.total} ${noun}`;
+  return props.shown < props.total
+    ? `Showing ${count(props.shown)} of ${count(props.total)} ${noun}`
+    : `${count(props.total)} ${noun}`;
 });
 </script>
 

@@ -27,6 +27,12 @@ describe("ResultSummary", () => {
     expect(screen.getByRole("status").textContent).toBe("Searching…");
   });
 
+  test("groups thousands", () => {
+    render(ResultSummary, { props: { shown: 1080, total: 1103 } });
+
+    expect(screen.getByText("Showing 1,080 of 1,103 cards")).toBeTruthy();
+  });
+
   test("announces a new count to screen readers", () => {
     render(ResultSummary, { props: { shown: 80, total: 312 } });
 

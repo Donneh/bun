@@ -14,7 +14,6 @@ export interface SearchResults {
 export type SearchOutcome = SearchResults | { readonly kind: "error"; readonly message: string };
 
 export type SearchView =
-  | { readonly kind: "idle" }
   | { readonly kind: "loading" }
   | { readonly kind: "error"; readonly message: string }
   | (SearchResults & { readonly stale: boolean });
