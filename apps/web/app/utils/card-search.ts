@@ -24,7 +24,7 @@ export interface SearchResults {
 
 export type SearchOutcome = SearchResults | { readonly kind: "error"; readonly message: string };
 
-export type SearchView = { readonly kind: "idle" } | { readonly kind: "loading" } | SearchOutcome;
+export type SearchView = { readonly kind: "loading" } | SearchOutcome;
 
 export type CardOutcome =
   | { readonly kind: "card"; readonly card: Card }

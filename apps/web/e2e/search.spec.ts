@@ -7,6 +7,8 @@ const filters = (page: Page) => page.getByRole("list", { name: "Filters" });
 const sortBy = (page: Page) => page.getByRole("combobox", { name: "Sort by" });
 const sortDirection = (page: Page) => page.getByRole("button", { name: /^Direction:/ });
 const themeButton = (page: Page) => page.getByRole("button", { name: /^Theme: / });
+const exampleQueries = (page: Page) => page.getByRole("list", { name: "Example queries" });
+const count = (value: number) => value.toLocaleString("en");
 const placeholders = (page: Page) => results(page).locator("li[aria-hidden='true']");
 const shownNames = (page: Page) =>
   results(page)
@@ -45,23 +47,50 @@ async function search(page: Page, query: string) {
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe(query);
 }
 
-test("an empty page invites a search", async ({ page, request }) => {
+test("an empty query shows every card in the current sort", async ({ page, request }) => {
   const health = await request.get(`${apiBase}/health`);
   const { data } = (await health.json()) as { data: { cards: number } };
+  const { meta } = await apiSearch(request, { q: "" });
+  expect(meta.total).toBe(data.cards);
 
   await page.goto("/");
 
   await expect(page).toHaveTitle("Riftkeeper");
   await expect(page.getByRole("heading", { level: 1, name: "Search the whole set. Instantly." })).toBeVisible();
-  await expect(page.getByText(`Riftkeeper · ${data.cards.toLocaleString("en")} cards · updated nightly`)).toBeVisible();
+  await expect(page.getByText(`Riftkeeper · ${count(data.cards)} cards · updated nightly`)).toBeVisible();
   await expect(searchBox(page)).toHaveValue("");
-  await expect(page.getByText("Try a query")).toBeVisible();
-  await expect(results(page)).toHaveCount(0);
+  await expect(exampleQueries(page).getByRole("button")).toHaveCount(3);
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
+  await expect(results(page).getByRole("listitem")).toHaveCount(meta.pageSize);
+  await expect(sortBy(page)).toHaveValue("set");
+
+  await scrollToEnd(page);
+
+  await expect.poll(() => results(page).getByRole("listitem").count()).toBeGreaterThan(meta.pageSize);
+});
+
+test("an empty query keeps the sort from the URL", async ({ page, request }) => {
+  const { data } = await apiSearch(request, { q: "", sort: "name" });
+
+  await page.goto("/?sort=name");
+
+  await expect(sortBy(page)).toHaveValue("name");
+  await expect.poll(() => shownNames(page)).toEqual(data.map((card) => card.name));
+  await expect(exampleQueries(page)).toBeVisible();
+});
+
+test("the example queries fit on two lines", async ({ page }) => {
+  await page.goto("/");
+  const buttons = exampleQueries(page).getByRole("button");
+  await expect(buttons.first()).toBeVisible();
+
+  const tops = await buttons.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().top));
+  expect(new Set(tops.map(Math.round)).size).toBeLessThanOrEqual(2);
 });
 
 test("an example query starts that search", async ({ page, isMobile }) => {
   await page.goto("/");
-  const examples = page.getByRole("list", { name: "Example queries" }).getByRole("button");
+  const examples = exampleQueries(page).getByRole("button");
   await expect(examples.first()).toBeVisible();
   if (isMobile) {
     for (const height of await examples.evaluateAll((buttons) => buttons.map((b) => b.getBoundingClientRect().height)))
@@ -72,33 +101,53 @@ test("an example query starts that search", async ({ page, isMobile }) => {
 
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("ability:draw");
   await expect(searchBox(page)).toHaveValue("ability:draw");
+  await expect(page).toHaveTitle("ability:draw · Riftkeeper");
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
-  await expect(page.getByRole("list", { name: "Example queries" })).toHaveCount(0);
+  await expect(exampleQueries(page)).toHaveCount(0);
 });
 
-test("the page fits the screen without scrolling sideways", async ({ page }) => {
-  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
+test("clearing the query returns to every card", async ({ page, request }) => {
+  const { meta } = await apiSearch(request, { q: "" });
+  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}&sort=name`);
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
 
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(0);
+  await searchBox(page).fill("");
+  await searchBox(page).press("Enter");
+
+  await expect.poll(() => new URL(page.url()).searchParams.has("q")).toBe(false);
+  expect(new URL(page.url()).searchParams.get("sort")).toBe("name");
+  await expect(page).toHaveTitle("Riftkeeper");
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
+  await expect(exampleQueries(page)).toBeVisible();
 });
 
-test("every control is a comfortable tap target on a phone", async ({ page, isMobile }) => {
-  test.skip(!isMobile, "tap target size applies to touch screens");
-  await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2 type:unit")}`);
-  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+for (const path of ["/", `/?q=${encodeURIComponent("c:fury cost:<=2")}`]) {
+  test(`${path} fits the screen without scrolling sideways`, async ({ page }) => {
+    await page.goto(path);
+    await expect(results(page).getByRole("listitem").first()).toBeVisible();
 
-  const controls = page.locator("button:visible, select:visible, input:visible");
-  const heights = await controls.evaluateAll((elements) =>
-    elements.map((element) => ({
-      control: element.getAttribute("aria-label") ?? element.textContent?.trim() ?? element.tagName,
-      height: element.getBoundingClientRect().height,
-    })),
-  );
-  expect(heights.length).toBeGreaterThan(0);
-  for (const { control, height } of heights) expect(height, control).toBeGreaterThanOrEqual(44);
-});
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow).toBeLessThanOrEqual(0);
+  });
+}
+
+for (const path of ["/", `/?q=${encodeURIComponent("c:fury cost:<=2 type:unit")}`]) {
+  test(`every control on ${path} is a comfortable tap target on a phone`, async ({ page, isMobile }) => {
+    test.skip(!isMobile, "tap target size applies to touch screens");
+    await page.goto(path);
+    await expect(results(page).getByRole("listitem").first()).toBeVisible();
+
+    const controls = page.locator("button:visible, select:visible, input:visible");
+    const heights = await controls.evaluateAll((elements) =>
+      elements.map((element) => ({
+        control: element.getAttribute("aria-label") ?? element.textContent?.trim() ?? element.tagName,
+        height: element.getBoundingClientRect().height,
+      })),
+    );
+    expect(heights.length).toBeGreaterThan(0);
+    for (const { control, height } of heights) expect(height, control).toBeGreaterThanOrEqual(44);
+  });
+}
 
 test("the corner dither keeps clear of the text and fades out before its edges", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -216,7 +265,7 @@ test("a query shows its matching cards and survives a reload", async ({ page, re
   await search(page, query);
 
   await expect(results(page).getByRole("listitem")).toHaveCount(shown);
-  await expect(page.getByText(new RegExp(`${meta.total} cards$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`${count(meta.total)} cards$`))).toBeVisible();
   await expectFirstImageLoaded(page);
 
   await page.reload();
@@ -275,36 +324,37 @@ test("a failed search shows the error and can be retried", async ({ page }) => {
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
 });
 
-test("the first screen of a query loads resized WebP images", async ({ page }, testInfo) => {
-  const imageResponses: Response[] = [];
-  page.on("response", (response) => {
-    if (response.request().resourceType() === "image") imageResponses.push(response);
-  });
-  await page.goto("/");
-  await search(page, "c:fury");
-  await expect(results(page).getByRole("listitem").first()).toBeVisible();
-  await page.waitForLoadState("networkidle");
+for (const path of ["/", `/?q=${encodeURIComponent("c:fury")}`]) {
+  test(`the first screen of ${path} loads resized WebP images`, async ({ page }, testInfo) => {
+    const imageResponses: Response[] = [];
+    page.on("response", (response) => {
+      if (response.request().resourceType() === "image") imageResponses.push(response);
+    });
+    await page.goto(path);
+    await expect(results(page).getByRole("listitem").first()).toBeVisible();
+    await page.waitForLoadState("networkidle");
 
-  const transferred = await Promise.all(
-    imageResponses.map(async (response) => {
-      const sizes = await response.request().sizes();
-      return {
-        url: response.url(),
-        type: await response.headerValue("content-type"),
-        bytes: sizes.responseBodySize + sizes.responseHeadersSize,
-      };
-    }),
-  );
-  const totalBytes = transferred.reduce((sum, image) => sum + image.bytes, 0);
-  await testInfo.attach("image-transfers", {
-    body: JSON.stringify({ totalBytes, transferred }, null, 2),
-    contentType: "application/json",
-  });
+    const transferred = await Promise.all(
+      imageResponses.map(async (response) => {
+        const sizes = await response.request().sizes();
+        return {
+          url: response.url(),
+          type: await response.headerValue("content-type"),
+          bytes: sizes.responseBodySize + sizes.responseHeadersSize,
+        };
+      }),
+    );
+    const totalBytes = transferred.reduce((sum, image) => sum + image.bytes, 0);
+    await testInfo.attach("image-transfers", {
+      body: JSON.stringify({ totalBytes, transferred }, null, 2),
+      contentType: "application/json",
+    });
 
-  expect(transferred.length).toBeGreaterThan(0);
-  for (const image of transferred) expect(image.type).toBe("image/webp");
-  expect(totalBytes).toBeLessThan(MAX_FIRST_SCREEN_IMAGE_BYTES);
-});
+    expect(transferred.length).toBeGreaterThan(0);
+    for (const image of transferred) expect(image.type).toBe("image/webp");
+    expect(totalBytes).toBeLessThan(MAX_FIRST_SCREEN_IMAGE_BYTES);
+  });
+}
 
 test("landscape cards keep their landscape shape", async ({ page }) => {
   await page.goto("/");
@@ -341,13 +391,14 @@ test("scrolling loads every result page by page and keeps the URL shareable", as
   expect(meta.total).toBeGreaterThan(meta.pageSize);
   const pageRequests: number[] = [];
   page.on("request", (request) => {
-    if (isNextPageRequest(new URL(request.url()))) pageRequests.push(Date.now());
+    const url = new URL(request.url());
+    if (isNextPageRequest(url) && url.searchParams.get("q") === query) pageRequests.push(Date.now());
   });
 
   await page.goto("/");
   await search(page, query);
   await expect(results(page).getByRole("listitem")).toHaveCount(meta.pageSize);
-  await expect(page.getByText(`Showing ${meta.pageSize} of ${meta.total} cards`)).toBeVisible();
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
   const firstPage = await shownNames(page);
 
   await expect
@@ -357,7 +408,7 @@ test("scrolling loads every result page by page and keeps the URL shareable", as
     })
     .toBe(meta.total);
 
-  await expect(page.getByText(`${meta.total} cards`, { exact: true })).toHaveAttribute("aria-live", "polite");
+  await expect(page.getByText(`${count(meta.total)} cards`, { exact: true })).toHaveAttribute("aria-live", "polite");
   expect((await shownNames(page)).slice(0, meta.pageSize)).toEqual(firstPage);
   expect(new URL(page.url()).searchParams.has("page")).toBe(false);
   expect(pageRequests).toHaveLength(Math.ceil(meta.total / meta.pageSize) - 1);
@@ -444,7 +495,7 @@ test("removing a filter chip edits the query and searches again", async ({ page,
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("c:fury");
   await expect(searchBox(page)).toHaveValue("c:fury");
   await expect(filters(page).getByRole("listitem")).toHaveText([/Domain\s*Fury/]);
-  await expect(page.getByText(new RegExp(`${meta.total} cards$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`${count(meta.total)} cards$`))).toBeVisible();
 });
 
 test("a repeated filter is shown as a chip that cannot be removed", async ({ page }) => {

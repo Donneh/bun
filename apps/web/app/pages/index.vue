@@ -68,7 +68,7 @@ const {
   refresh,
 } = await useAsyncData(
   () => `search:${stateKey.value}`,
-  () => (state.value.query ? searchCards(apiBase, state.value) : Promise.resolve(null)),
+  () => searchCards(apiBase, state.value),
 );
 
 const nextPage = ref<NextPageState>({ kind: "idle" });
@@ -82,7 +82,6 @@ watch(stateKey, () => {
 });
 
 const view = computed<SearchView>(() => {
-  if (!state.value.query) return { kind: "idle" };
   if (status.value === "pending" || !outcome.value) return { kind: "loading" };
   return outcome.value;
 });
@@ -163,6 +162,7 @@ async function loadNextPage() {
       </template>
     </Hero>
     <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
+    <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
     <FilterChips
       v-if="view.kind === 'results'"
       :chips="chips"
@@ -170,10 +170,7 @@ async function loadNextPage() {
       @remove="removeFilter"
     />
     <WarningList v-if="view.kind === 'results'" :warnings="view.warnings" />
-    <StatusMessage v-if="view.kind === 'idle'" kind="empty" title="Try a query">
-      <ExampleQueries :queries="EXAMPLE_QUERIES" @select="submit" />
-    </StatusMessage>
-    <template v-else-if="view.kind === 'loading'">
+    <template v-if="view.kind === 'loading'">
       <StatusMessage kind="loading" title="Searching…" />
       <CardGrid :cards="[]" :placeholders="LOADING_PLACEHOLDERS" label="Loading results" />
     </template>
