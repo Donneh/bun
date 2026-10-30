@@ -96,7 +96,7 @@ test("an unknown path serves the app, which says the page was not found", async 
 
   await page.goto("/no-such-page");
 
-  await expect(page.getByText("Page not found")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeAttached();
 });
 
 test("www redirects to the apex and keeps the path and query", async ({ request }) => {

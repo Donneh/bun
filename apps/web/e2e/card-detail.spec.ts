@@ -42,47 +42,57 @@ function imageFile(url: string) {
   return new URL(url).pathname;
 }
 
-test("opening a card and going back keeps the loaded results and the scroll position", async ({ page, request }) => {
-  const query = "type:unit";
-  const { meta } = await apiSearch(request, query);
-  expect(meta.total).toBeGreaterThan(meta.pageSize);
+const goingBack = {
+  "the back link": (page: Page) => page.getByRole("link", { name: "Back to results" }).click(),
+  "the browser's back button": (page: Page) => page.goBack(),
+};
 
-  await page.goto(`/?q=${encodeURIComponent(query)}`);
-  await expect(tiles(page)).toHaveCount(meta.pageSize);
-  await expect
-    .poll(async () => {
-      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-      return tiles(page).count();
-    })
-    .toBeGreaterThan(meta.pageSize);
-  const loaded = await tiles(page).count();
-  const target = tiles(page).nth(meta.pageSize + 1);
-  await target.scrollIntoViewIfNeeded();
-  const scrollBefore = await page.evaluate(() => window.scrollY);
-  expect(scrollBefore).toBeGreaterThan(0);
-  const href = await target.getAttribute("href");
-  const name = await target.getByRole("img").getAttribute("alt");
-  expect(href).toMatch(/^\/cards\/[a-z0-9-]+$/);
+for (const [way, goBack] of Object.entries(goingBack))
+  test(`opening a card and going back with ${way} keeps the loaded results and the scroll position`, async ({
+    page,
+    request,
+  }) => {
+    const query = "type:unit";
+    const { meta } = await apiSearch(request, query);
+    expect(meta.total).toBeGreaterThan(meta.pageSize);
 
-  const searches: string[] = [];
-  page.on("request", (sent) => {
-    if (isSearchRequest(new URL(sent.url()))) searches.push(sent.url());
+    await page.goto(`/?q=${encodeURIComponent(query)}`);
+    await expect(tiles(page)).toHaveCount(meta.pageSize);
+    await expect
+      .poll(async () => {
+        await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+        return tiles(page).count();
+      })
+      .toBeGreaterThan(meta.pageSize);
+    const loaded = await tiles(page).count();
+    const target = tiles(page).nth(meta.pageSize + 1);
+    await target.scrollIntoViewIfNeeded();
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollBefore).toBeGreaterThan(0);
+    const href = await target.getAttribute("href");
+    const name = await target.getByRole("img").getAttribute("alt");
+    expect(href).toMatch(/^\/cards\/[a-z0-9-]+$/);
+
+    const searches: string[] = [];
+    page.on("request", (sent) => {
+      if (isSearchRequest(new URL(sent.url()))) searches.push(sent.url());
+    });
+    await target.click();
+
+    await expect.poll(() => new URL(page.url()).pathname).toBe(href);
+    await expect(page.getByRole("heading", { level: 1, name: name ?? "" })).toBeVisible();
+    await expect(page).toHaveTitle(`${name} · Riftkeeper`);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+
+    await expect(page.getByRole("link", { name: "Back to results" })).toBeVisible();
+    await goBack(page);
+
+    await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe(query);
+    await expect(tiles(page)).toHaveCount(loaded);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(scrollBefore, -1);
+    await expect(page).toHaveTitle(`${query} · Riftkeeper`);
+    expect(searches).toEqual([]);
   });
-  await target.click();
-
-  await expect.poll(() => new URL(page.url()).pathname).toBe(href);
-  await expect(page.getByRole("heading", { level: 1, name: name ?? "" })).toBeVisible();
-  await expect(page).toHaveTitle(`${name} · Riftkeeper`);
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
-
-  await page.getByRole("link", { name: "Back to results" }).click();
-
-  await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe(query);
-  await expect(tiles(page)).toHaveCount(loaded);
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeCloseTo(scrollBefore, -1);
-  await expect(page).toHaveTitle(`${query} · Riftkeeper`);
-  expect(searches).toEqual([]);
-});
 
 test("a card link opens in a new tab and works there", async ({ page, context, request, isMobile }) => {
   test.skip(isMobile, "modifier clicks need a keyboard");
@@ -184,7 +194,8 @@ test("a failed card shows the error and can be retried", async ({ page, request 
 test("an unknown card says so", async ({ page }) => {
   await page.goto("/cards/no-such-card");
 
-  await expect(page.getByText("Card not found")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Card not found" })).toBeAttached();
+  await expect(page.getByText("Card not found", { exact: true }).last()).toBeVisible();
   await expect(page).toHaveTitle("Card not found · Riftkeeper");
   await expect(page.getByRole("link", { name: "Back to search" })).toHaveAttribute("href", "/");
 });
@@ -193,7 +204,8 @@ test("an unknown path shows the app with a page not found message", async ({ pag
   const response = await page.goto("/no/such/page");
 
   expect(response?.status()).toBe(200);
-  await expect(page.getByText("Page not found")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Page not found" })).toBeAttached();
+  await expect(page.getByText("Page not found", { exact: true }).last()).toBeVisible();
   await expect(page).toHaveTitle("Page not found · Riftkeeper");
 
   await page.getByRole("link", { name: "Back to search" }).click();

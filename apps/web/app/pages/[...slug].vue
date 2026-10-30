@@ -9,7 +9,7 @@ useHead({ title: "Page not found · Riftkeeper" });
 
 <template>
   <AppShell>
-    <Hero eyebrow="Riftkeeper" compact>
+    <Hero eyebrow="Riftkeeper" title="Page not found" compact>
       <template #actions>
         <ThemeButton v-model="theme" />
       </template>

@@ -2,7 +2,9 @@
 import { useTemplateRef } from "vue";
 import Dither from "./Dither.vue";
 
-withDefaults(defineProps<{ eyebrow: string; title?: string; subtitle?: string; compact?: boolean }>(), { compact: false });
+withDefaults(defineProps<{ eyebrow: string; title?: string | undefined; subtitle?: string; compact?: boolean }>(), {
+  compact: false,
+});
 
 const eyebrowText = useTemplateRef<HTMLElement>("eyebrowText");
 const actions = useTemplateRef<HTMLElement>("actions");

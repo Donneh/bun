@@ -44,6 +44,13 @@ const image = computed(() =>
   printing.value ? responsiveImage(printing.value.imageUrl, printing.value.orientation, "detail") : null,
 );
 
+const STATUS_HEADINGS: Record<Exclude<CardView["kind"], "card">, string> = {
+  loading: "Loading card",
+  "not-found": "Card not found",
+  error: "Could not load the card",
+};
+const statusHeading = computed(() => (view.value.kind === "card" ? undefined : STATUS_HEADINGS[view.value.kind]));
+
 const resultsPath = ref<string | null>(null);
 onMounted(() => {
   const back = router.options.history.state.back;
@@ -70,7 +77,7 @@ function choosePrinting(id: string) {
 
 <template>
   <AppShell>
-    <Hero eyebrow="Riftkeeper" compact>
+    <Hero eyebrow="Riftkeeper" :title="statusHeading" compact>
       <template #actions>
         <ThemeButton v-model="theme" />
       </template>
