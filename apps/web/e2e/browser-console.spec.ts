@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { type ExpectedMessage, expect, test } from "./browser-console.ts";
+import { type ExpectedMessage, expect, failedResponse, test } from "./browser-console.ts";
 
 const fixtureWarning: ExpectedMessage = {
   description: "the fixture's warning",
@@ -54,6 +54,34 @@ test.describe("the browser console check", () => {
     browserConsole.expect(refusedConnectionLog, refusedConnection);
     await page.route(FIXTURE_URL, (route) => route.abort("connectionrefused"));
     await page.evaluate((url) => fetch(url).catch(() => null), FIXTURE_URL);
+  });
+
+  test("waits for loads still in flight when the test ends", async ({ page, browserConsole }) => {
+    browserConsole.expect(failedResponse(404, "/late-missing.png"));
+    let imageRequested: () => void = () => undefined;
+    const imageArrived = new Promise<void>((resolve) => {
+      imageRequested = resolve;
+    });
+    const server = createServer((request, response) => {
+      if (request.url === "/late-missing.png") {
+        imageRequested();
+        setTimeout(() => {
+          response.writeHead(404);
+          response.end();
+        }, 1_500);
+        return;
+      }
+      response.writeHead(200, { "content-type": "text/html" });
+      response.end('<!doctype html><link rel="icon" href="data:,"><img src="/late-missing.png" alt="">');
+    });
+    await new Promise<void>((listening) => server.listen(0, "127.0.0.1", listening));
+    const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    try {
+      await page.goto(`${origin}/`, { waitUntil: "commit" });
+      await imageArrived;
+    } finally {
+      server.close();
+    }
   });
 
   test("ignores a request the browser aborts", async ({ page }) => {

@@ -46,6 +46,15 @@ function describeFailedRequest(request: Request) {
 
 const wasAbortedByTheBrowser = (request: Request) => request.failure()?.errorText === "net::ERR_ABORTED";
 
+const SETTLE_TIMEOUT_MS = 5_000;
+const SETTLE_POLL_MS = 50;
+
+async function settle(pages: readonly Page[], inFlight: ReadonlySet<Request>) {
+  const deadline = Date.now() + SETTLE_TIMEOUT_MS;
+  while (inFlight.size > 0 && Date.now() < deadline) await new Promise((wait) => setTimeout(wait, SETTLE_POLL_MS));
+  await Promise.all(pages.map((page) => page.evaluate(() => undefined).catch(() => undefined)));
+}
+
 const matches = (expected: ExpectedMessage, message: BrowserMessage) =>
   expected.kind === message.kind && expected.pattern.test(message.text);
 
@@ -54,13 +63,17 @@ export const test = base.extend<{ browserConsole: BrowserConsole }>({
     async ({ context }, use) => {
       const recorded: BrowserMessage[] = [];
       const expected: ExpectedMessage[] = [];
+      const inFlight = new Set<Request>();
       const watch = (page: Page) => {
         page.on("console", (message) => {
           const kind = CONSOLE_KINDS[message.type()];
           if (kind) recorded.push({ kind, text: describeConsoleMessage(message) });
         });
         page.on("pageerror", (error) => recorded.push({ kind: "page error", text: error.message }));
+        page.on("request", (request) => inFlight.add(request));
+        page.on("requestfinished", (request) => inFlight.delete(request));
         page.on("requestfailed", (request) => {
+          inFlight.delete(request);
           if (!wasAbortedByTheBrowser(request))
             recorded.push({ kind: "failed request", text: describeFailedRequest(request) });
         });
@@ -69,6 +82,7 @@ export const test = base.extend<{ browserConsole: BrowserConsole }>({
       context.on("page", watch);
 
       await use({ expect: (...messages) => expected.push(...messages) });
+      await settle(context.pages(), inFlight);
 
       const unexpected = recorded.filter((message) => !expected.some((candidate) => matches(candidate, message)));
       const missing = expected.filter((candidate) => !recorded.some((message) => matches(candidate, message)));
