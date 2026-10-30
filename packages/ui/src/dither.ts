@@ -67,7 +67,7 @@ function clearanceFactor(x: number, y: number, keepOut: readonly DitherBox[], cl
   for (const box of keepOut) {
     const distance = distanceToBox(x, y, box);
     if (distance <= 0) return 0;
-    factor = Math.min(factor, Math.min(1, distance / clearance) ** 2);
+    factor = Math.min(factor, Math.min(1, distance / clearance) ** 3);
   }
   return factor;
 }

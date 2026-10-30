@@ -31,7 +31,7 @@ const content = useTemplateRef<HTMLElement>("content");
   --corner-height: 10rem;
 
   position: relative;
-  padding-top: var(--rk-space-10);
+  padding-top: calc(var(--rk-space-10) + var(--rk-space-8));
 }
 
 .corner {

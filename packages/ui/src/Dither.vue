@@ -18,7 +18,7 @@ const props = withDefaults(
     avoid?: readonly (Element | null | undefined)[];
     clearance?: number;
   }>(),
-  { intensity: 0.5, color: "accent", scale: 3, avoid: () => [], clearance: 32 },
+  { intensity: 0.5, color: "accent", scale: 3, avoid: () => [], clearance: 48 },
 );
 
 const FRAME_INTERVAL_MS = 50;
