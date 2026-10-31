@@ -61,7 +61,7 @@ TCGCSV lists Riftbound as TCGplayer category `89`. The command reads the set cod
 
 The summary lists the printings without a price (tokens, which TCGplayer sells as double-sided pairs) and the TCGplayer products without a printing (runes, token pairs, and printings the card gallery does not have yet). Two products with the same number price neither printing, and the summary says so.
 
-The command never writes a partial snapshot. When a request fails, TCGCSV returns something unexpected, or the run would price more than 5% fewer printings than the snapshot it replaces, it keeps the existing `prices.json`, says so in the summary and exits `1`. The file stores one printing per line, sorted by id, so the nightly diff shows only the prices that changed.
+The command never writes a partial snapshot. When a request fails, TCGCSV returns something unexpected, or any set would lose the price of more than 5% of its printings priced in the snapshot it replaces (for example because TCGCSV dropped or renamed its group), it keeps the existing `prices.json`, says so in the summary and exits `1`. The file stores one printing per line, sorted by id, so the nightly diff shows only the prices that changed.
 
 ## Check
 

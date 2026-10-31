@@ -30,8 +30,10 @@ async function readPreviousPrices(path: string): Promise<PriceSnapshot | null> {
   return parsePriceSnapshot({ json: await file.json(), path });
 }
 
-async function update(previous: PriceSnapshot | null): Promise<PriceUpdate> {
+async function update(): Promise<PriceUpdate> {
+  let previous: PriceSnapshot | null = null;
   try {
+    previous = await readPreviousPrices(options.prices);
     const cards = await readCardSnapshot(options.cards);
     const setCodes = [...new Set(cards.flatMap((card) => card.printings.map((printing) => printing.set.code)))];
     const catalog = await fetchTcgcsvCatalog({ setCodes });
@@ -42,7 +44,7 @@ async function update(previous: PriceSnapshot | null): Promise<PriceUpdate> {
   }
 }
 
-const result = await update(await readPreviousPrices(options.prices));
+const result = await update();
 if (result.kind === "updated") await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
 const summary = renderPriceSummary(result);
 if (options.summary !== undefined) await Bun.write(options.summary, summary);

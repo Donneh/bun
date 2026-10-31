@@ -39,15 +39,23 @@ function toSnapshot({ match, updatedAt }: { match: PriceMatch; updatedAt: string
   });
 }
 
-function lostPricesMessage({ previous, next }: { previous: PriceSnapshot | null; next: PriceSnapshot }) {
-  const nextCount = Object.keys(next.printings).length;
-  if (nextCount === 0) return "TCGCSV priced none of our printings.";
+function lostPricesMessage({ previous, match }: { previous: PriceSnapshot | null; match: PriceMatch }) {
+  if (match.printings.size === 0) return "TCGCSV priced none of our printings.";
   if (previous === null) return undefined;
-  const previousCount = Object.keys(previous.printings).length;
-  const lost = previousCount - nextCount;
-  if (previousCount === 0 || lost / previousCount <= MAX_LOST_PRICED_PRINTINGS_RATIO) return undefined;
-  const percentage = ((lost / previousCount) * 100).toFixed(1);
-  return `${nextCount} printings have a price, ${lost} fewer than the ${previousCount} before (${percentage}%), above the ${MAX_LOST_PRICED_PRINTINGS_RATIO * 100}% limit.`;
+  const lostBySet = new Map<string, { previous: number; lost: number }>();
+  for (const id of Object.keys(previous.printings)) {
+    const setCode = match.setCodeByPrinting.get(id);
+    if (setCode === undefined) continue;
+    const counts = lostBySet.get(setCode) ?? { previous: 0, lost: 0 };
+    counts.previous += 1;
+    if (!match.printings.has(id)) counts.lost += 1;
+    lostBySet.set(setCode, counts);
+  }
+  const problems = [...lostBySet]
+    .filter(([, counts]) => counts.lost / counts.previous > MAX_LOST_PRICED_PRINTINGS_RATIO)
+    .map(([setCode, counts]) => `${setCode} lost ${counts.lost} of ${counts.previous} prices`);
+  if (problems.length === 0) return undefined;
+  return `${problems.join(", ")}, above the ${MAX_LOST_PRICED_PRINTINGS_RATIO * 100}% limit per set.`;
 }
 
 export function decidePriceUpdate({
@@ -59,9 +67,9 @@ export function decidePriceUpdate({
   match: PriceMatch;
   updatedAt: string;
 }): PriceUpdate {
-  const snapshot = toSnapshot({ match, updatedAt });
-  const message = lostPricesMessage({ previous, next: snapshot });
+  const message = lostPricesMessage({ previous, match });
   if (message !== undefined) return { kind: "rejected", message, match, kept: previous };
+  const snapshot = toSnapshot({ match, updatedAt });
   const unchanged = previous !== null && serializePriceSnapshot(previous) === serializePriceSnapshot(snapshot);
   return { kind: unchanged ? "unchanged" : "updated", snapshot, match };
 }
@@ -104,7 +112,7 @@ export function describePriceUpdate(update: PriceUpdate): string {
     case "updated":
     case "unchanged": {
       const priced = Object.keys(update.snapshot.printings).length;
-      return `Prices ${update.kind}: ${priced} of ${update.match.printingCount} printings priced, TCGCSV built ${formatDate(update.snapshot.updatedAt)}`;
+      return `Prices ${update.kind}: ${priced} of ${update.match.setCodeByPrinting.size} printings priced, TCGCSV built ${formatDate(update.snapshot.updatedAt)}`;
     }
     default: {
       const _exhaustive: never = update;

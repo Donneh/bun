@@ -1,4 +1,4 @@
-import type { Card, PrintingId } from "@riftkeeper/cards";
+import type { Card } from "@riftkeeper/cards";
 import type { PriceQuote, PrintingQuotes } from "@riftkeeper/cards/prices";
 import type { TcgcsvPrice, TcgcsvProduct, TcgcsvSetPrices } from "./tcgcsv.ts";
 
@@ -15,8 +15,8 @@ export type UnpricedPrinting = {
 };
 
 export type PriceMatch = {
-  readonly printings: ReadonlyMap<PrintingId, PrintingQuotes>;
-  readonly printingCount: number;
+  readonly printings: ReadonlyMap<string, PrintingQuotes>;
+  readonly setCodeByPrinting: ReadonlyMap<string, string>;
   readonly unpricedPrintings: readonly UnpricedPrinting[];
   readonly unmatchedProducts: readonly UnmatchedProduct[];
 };
@@ -63,7 +63,7 @@ export function matchPrices({ cards, sets }: { cards: readonly Card[]; sets: rea
   const printings = cards.flatMap((card) => card.printings.map((printing) => ({ printing, cardName: card.name })));
   const publicCodes = new Set(printings.map(({ printing }) => printing.publicCode));
 
-  const priced = new Map<PrintingId, PrintingQuotes>();
+  const priced = new Map<string, PrintingQuotes>();
   const unpricedPrintings: UnpricedPrinting[] = [];
   for (const { printing, cardName } of printings) {
     const [product, ...others] = productsByCode.get(printing.publicCode) ?? [];
@@ -78,5 +78,6 @@ export function matchPrices({ cards, sets }: { cards: readonly Card[]; sets: rea
     return products.map((product) => ({ productId: product.productId, publicCode, name: product.name, reason }));
   });
 
-  return { printings: priced, printingCount: printings.length, unpricedPrintings, unmatchedProducts };
+  const setCodeByPrinting = new Map(printings.map(({ printing }) => [printing.id, printing.set.code]));
+  return { printings: priced, setCodeByPrinting, unpricedPrintings, unmatchedProducts };
 }

@@ -7,6 +7,7 @@ const responses: Record<string, unknown> = {
     results: [
       { groupId: 10, abbreviation: "OGN" },
       { groupId: 20, abbreviation: "JDG" },
+      { groupId: 30, abbreviation: null },
     ],
   },
   "/tcgplayer/89/10/products": {
@@ -44,7 +45,7 @@ afterAll(() => {
 const baseUrl = () => server.url.origin;
 
 describe("fetchTcgcsvCatalog", () => {
-  test("fetches only the groups of our sets, one request after another, as riftkeeper.app", async () => {
+  test("fetches only the groups of our sets, one request after another, as riftkeeper.app, skipping groups without an abbreviation", async () => {
     requests = [];
     failingPath = undefined;
 

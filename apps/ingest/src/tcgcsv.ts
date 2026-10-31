@@ -9,7 +9,7 @@ const PriceAmountSchema = z.number().nonnegative().nullable();
 
 const TcgcsvGroupSchema = z.object({
   groupId: z.int().positive(),
-  abbreviation: z.string(),
+  abbreviation: z.string().nullable(),
 });
 
 const TcgcsvProductSchema = z.object({

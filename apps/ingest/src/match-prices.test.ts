@@ -67,7 +67,7 @@ describe("matchPrices", () => {
     const match = matchPrices({ cards, sets: [unleashed] });
 
     expect(match.printings.has(token.id)).toBe(false);
-    expect(match.printingCount).toBe(3);
+    expect(match.setCodeByPrinting.size).toBe(3);
     expect(match.unpricedPrintings).toEqual([{ publicCode: "UNL-T01", cardName: "Baron Pit" }]);
     expect(match.unmatchedProducts).toEqual([
       { productId: 3, publicCode: "UNL-T01 // T05", name: "Baron Pit // Gold", reason: "no-printing" },
