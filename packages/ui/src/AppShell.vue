@@ -3,6 +3,9 @@
     <main class="main">
       <slot />
     </main>
+    <div v-if="$slots.footer" class="end">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
 
@@ -16,14 +19,18 @@
   color: var(--rk-color-text);
 }
 
+.main,
+.end {
+  width: calc(100% - 2 * var(--rk-gutter));
+  max-width: var(--rk-content-width);
+  margin-inline: auto;
+}
+
 .main {
   display: flex;
   flex: 1;
   flex-direction: column;
   gap: var(--rk-space-5);
-  width: calc(100% - 2 * var(--rk-gutter));
-  max-width: var(--rk-content-width);
-  margin-inline: auto;
   padding-block: 0 var(--rk-space-8);
 }
 </style>

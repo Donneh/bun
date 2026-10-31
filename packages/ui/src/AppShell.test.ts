@@ -10,4 +10,12 @@ describe("AppShell", () => {
     expect(screen.queryByRole("banner")).toBeNull();
     expect(screen.queryByRole("contentinfo")).toBeNull();
   });
+
+  test("shows the footer after main", () => {
+    render(AppShell, { slots: { default: "<p>Content</p>", footer: "<footer>Notice</footer>" } });
+
+    const footer = screen.getByRole("contentinfo");
+    expect(footer.textContent).toBe("Notice");
+    expect(screen.getByRole("main").compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });

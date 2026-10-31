@@ -24,6 +24,7 @@ export { default as PrintingList } from "./PrintingList.vue";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as RiftboundGlyph } from "./RiftboundGlyph.vue";
 export { default as SearchBar } from "./SearchBar.vue";
+export { default as SiteFooter } from "./SiteFooter.vue";
 export { default as SortControl } from "./SortControl.vue";
 export { default as StatusMessage } from "./StatusMessage.vue";
 export type { SortDirection, SortOption, SortSelection } from "./sort-option.ts";
