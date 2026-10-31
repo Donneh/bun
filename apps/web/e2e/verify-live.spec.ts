@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
-import { DEFAULT_LOAD_TIMEOUT_MS } from "../verify-live/arguments.ts";
+import { DEFAULT_LOAD_TIMEOUT_MS, DEFAULT_OUT_DIR } from "../verify-live/arguments.ts";
 import { checkPage, checkSite, type PageCheck, problems } from "../verify-live/verify-live.ts";
 import { expect, test } from "./browser-console.ts";
 
@@ -67,14 +67,17 @@ test.describe("verify:live", () => {
       expect(problems(report).join("\n")).toContain(problem);
     });
 
-  test("passes every default page of the app at every viewport and color scheme", async ({ browser, baseURL }) => {
+  test("passes every default page of the app at every viewport and color scheme, and saves the screenshots for the pull request", async ({
+    browser,
+    baseURL,
+  }) => {
     test.setTimeout(180_000);
     const reports = await checkSite(
       browser,
       {
         baseUrl: baseURL ?? "",
         paths: [],
-        outDir: test.info().outputPath("verify-live"),
+        outDir: DEFAULT_OUT_DIR,
         headers: {},
         loadTimeoutMs: DEFAULT_LOAD_TIMEOUT_MS,
       },
