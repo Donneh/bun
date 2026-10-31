@@ -162,4 +162,8 @@ onBeforeUnmount(() => {
 .ink {
   color: var(--rk-color-text);
 }
+
+.domain {
+  color: var(--rk-color-domain);
+}
 </style>

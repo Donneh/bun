@@ -1,6 +1,6 @@
 export type DitherPattern = "corner" | "sweep";
 
-export type DitherColor = "accent" | "ink";
+export type DitherColor = "accent" | "ink" | "domain";
 
 export type Rgb = readonly [red: number, green: number, blue: number];
 
