@@ -32,6 +32,7 @@ Run these from this folder:
 bun run dev         # run the API in the local Workers runtime on http://localhost:3000
 bun run dev:web     # run the web app on http://localhost:3001 against https://api.riftkeeper.app
 bun run scrape      # refresh apps/api/data/cards.json, flags as in apps/ingest/README.md
+bun run prices      # refresh apps/api/data/prices.json from TCGCSV
 bun run test        # unit tests in every workspace, and the component tests in packages/ui
 bun run test:api    # black-box HTTP tests against the API running in workerd
 bun run test:e2e    # Playwright test of the web app against a local API, see apps/web/README.md

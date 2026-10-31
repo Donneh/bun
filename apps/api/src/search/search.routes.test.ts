@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { type Card, CardIdSchema, PrintingIdSchema } from "@riftkeeper/cards";
-import { makeCard, makePrinting } from "@riftkeeper/cards/testing";
+import { withPrices } from "@riftkeeper/cards/prices";
+import { makeCard, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
 import { createApp } from "../app.ts";
 import { MAX_QUERY_LENGTH, MAX_WARNINGS } from "./search.routes.ts";
 
@@ -28,7 +29,8 @@ const ashe = makeCard({
     }),
   ],
 });
-const app = createApp({ cards: [annie, ashe] });
+const prices = makePriceSnapshot();
+const app = createApp({ cards: [annie, ashe], prices });
 
 interface SearchBody {
   readonly data: readonly Card[];
@@ -47,7 +49,7 @@ describe("GET /search", () => {
     const { status, body } = await search({ q: "annie" });
 
     expect(status).toBe(200);
-    expect(body.data).toEqual([annie]);
+    expect(body.data).toEqual(withPrices([annie], prices));
     expect(body.meta).toEqual({ page: 1, pageSize: 40, total: 1 });
     expect(body.warnings).toEqual([]);
   });
@@ -61,7 +63,7 @@ describe("GET /search", () => {
   test("applies filters and reports them as editable chips", async () => {
     const { body } = await search({ q: "cost:>=4" });
 
-    expect(body.data).toEqual([annie]);
+    expect(body.data).toEqual(withPrices([annie], prices));
     expect(body.parsed).toMatchObject({
       query: "cost:>=4",
       hasAdvancedConditions: false,
@@ -79,7 +81,7 @@ describe("GET /search", () => {
     const { status, body } = await search({ q: "flavor:calm annie" });
 
     expect(status).toBe(200);
-    expect(body.data).toEqual([annie]);
+    expect(body.data).toEqual(withPrices([annie], prices));
     expect(body.warnings).toEqual([
       { message: '"flavor" is not supported yet and was ignored.', span: { start: 0, end: 11 } },
     ]);

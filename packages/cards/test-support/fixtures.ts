@@ -1,8 +1,10 @@
 import type { z } from "zod";
 import { type Card, CardSchema, type Printing, PrintingSchema } from "../src/card.ts";
+import { type PriceSnapshot, PriceSnapshotSchema } from "../src/price.ts";
 
 type PrintingOverrides = Partial<z.input<typeof PrintingSchema>>;
 type CardOverrides = Partial<z.input<typeof CardSchema>>;
+type PriceSnapshotOverrides = Partial<z.input<typeof PriceSnapshotSchema>>;
 
 export function makePrinting(overrides: PrintingOverrides = {}): Printing {
   return PrintingSchema.parse({
@@ -36,6 +38,16 @@ export function makeCard(overrides: CardOverrides = {}): Card {
     effect: null,
     tags: [],
     printings: [makePrinting({ id: `${id}-p1` })],
+    ...overrides,
+  });
+}
+
+export function makePriceSnapshot(overrides: PriceSnapshotOverrides = {}): PriceSnapshot {
+  return PriceSnapshotSchema.parse({
+    currency: "USD",
+    source: "TCGplayer via TCGCSV",
+    updatedAt: "2026-10-31T20:05:59.000Z",
+    printings: {},
     ...overrides,
   });
 }

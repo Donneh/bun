@@ -42,9 +42,26 @@ To reproduce a failure offline:
 
 ## Automation
 
-The workflows live in `.github/workflows/` at the Git repository root, one level above the workspace. `scrape-cards.yml` runs the scrape from `apps/ingest` every day and on demand. When the snapshot changed, it writes a summary with the outcome and the scrape warnings to the run page on every run, and opens or updates one pull request from the `automation/card-snapshot` branch with the change report as its body. GitHub caps a PR body at 65,536 characters, so a larger report is truncated in the body and the full report is attached to the workflow run as the `card-changes` artifact. The workflow then turns on auto-merge, so the pull request squash-merges as soon as the required `check` and `infrastructure` jobs pass, and the merge deploys the new snapshot like any other change to `main`. The snapshot guard keeps an empty scrape, or one that drops more than 5% of the known printings, from ever reaching a pull request. `ci.yml` runs `bun run check` from the workspace root on pull requests, and the scrape workflow calls it first. If the scrape fails, the fetched page is attached as the `gallery-html` artifact for three days. Both workflows read the Bun version from `packageManager` in the workspace root `package.json`.
+The workflows live in `.github/workflows/` at the Git repository root, one level above the workspace. `scrape-cards.yml` runs the scrape from `apps/ingest` every day and on demand. When the snapshot changed, it writes a summary with the outcome and the scrape warnings to the run page on every run, and opens or updates one pull request from the `automation/card-snapshot` branch with the change report as its body. GitHub caps a PR body at 65,536 characters, so a larger report is truncated in the body and the full report is attached to the workflow run as the `card-changes` artifact. The workflow then turns on auto-merge, so the pull request squash-merges as soon as the required `check` and `infrastructure` jobs pass, and the merge deploys the new snapshot like any other change to `main`. The snapshot guard keeps an empty scrape, or one that drops more than 5% of the known printings, from ever reaching a pull request. A separate `prices` job in the same workflow runs `bun run prices` and opens and auto-merges a pull request from `automation/price-snapshot` the same way. The two jobs do not depend on each other: a failed price fetch fails only the `prices` job, keeps yesterday's prices, and leaves the card update alone. `ci.yml` runs `bun run check` from the workspace root on pull requests, and the scrape workflow calls it first. If the scrape fails, the fetched page is attached as the `gallery-html` artifact for three days. Both workflows read the Bun version from `packageManager` in the workspace root `package.json`.
 
 One-time repository setup: store a fine-grained personal access token, limited to this repository with **Contents** and **Pull requests** read and write, as the repository secret `SNAPSHOT_PR_TOKEN`, and turn on Settings, General, "Allow auto-merge". The workflow opens and merges the pull request with that token because pull requests and merges made with the default `GITHUB_TOKEN` start no other workflows, so the required checks and the deploy would never run.
+
+## Prices
+
+`bun run prices` fetches TCGplayer prices in USD from [TCGCSV](https://tcgcsv.com/), a free daily mirror of TCGplayer's catalogue, and writes `apps/api/data/prices.json`.
+
+```sh
+bun run prices                          # refresh apps/api/data/prices.json
+bun run prices --summary summary.md     # also write a markdown summary of the run
+bun run prices --pr-body body.md        # also write the summary as a PR body, only when the prices changed
+bun run prices --cards other/cards.json --prices other/prices.json
+```
+
+TCGCSV lists Riftbound as TCGplayer category `89`. The command reads the set codes from the card snapshot and makes one request at a time, with a User-Agent that names riftkeeper.app: `last-updated.txt` (when TCGCSV built the files, about 20:00 UTC each day, which becomes `updatedAt`), `/tcgplayer/89/groups`, then `products` and `prices` for each group whose abbreviation is one of our set codes. A product matches a printing when `<set code>-<Number>` equals the printing's `publicCode`, for example `OGN-030a/298`. Each match gets a `normal` and a `foil` quote (`market`, `low`, `mid`, `high`) for the finishes TCGplayer sells. Products without a `Number` are sealed products and are skipped.
+
+The summary lists the printings without a price (tokens, which TCGplayer sells as double-sided pairs) and the TCGplayer products without a printing (runes, token pairs, and printings the card gallery does not have yet). Two products with the same number price neither printing, and the summary says so.
+
+The command never writes a partial snapshot. When a request fails, TCGCSV returns something unexpected, or any set would lose the price of more than 5% of its printings priced in the snapshot it replaces (for example because TCGCSV dropped or renamed its group), it keeps the existing `prices.json`, says so in the summary and exits `1`. The file stores one printing per line, sorted by id, so the nightly diff shows only the prices that changed.
 
 ## Check
 

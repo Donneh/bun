@@ -1,6 +1,7 @@
 import { decompose, parseQuery, type SortDirection, type SortKey, searchCards } from "@riftkeeper/search";
 import { createApp } from "../src/app.ts";
 import { cards } from "../src/cards/card-snapshot.ts";
+import { prices } from "../src/cards/price-snapshot.ts";
 
 interface BenchmarkCase {
   readonly name: string;
@@ -49,7 +50,7 @@ function ms(value: number) {
   return value.toFixed(3);
 }
 
-const app = createApp({ cards });
+const app = createApp({ cards, prices });
 const failures: string[] = [];
 let checksum = 0;
 

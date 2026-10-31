@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "scrape": "bun src/scrape.ts",
+    "prices": "bun src/prices.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },
