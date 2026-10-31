@@ -105,6 +105,19 @@ describe("SiteNavbar", () => {
     expect(header.classList.contains("searching")).toBe(false);
   });
 
+  test("leaves out its search, the phone search button and the / shortcut on a page with its own search", async () => {
+    render(SiteNavbar, { props: { theme: "system", searchable: false, links: [{ label: "Cards", href: "/" }] } });
+
+    expect(screen.queryByRole("search")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Search cards" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Cards" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Theme: / })).toBeTruthy();
+
+    await userEvent.keyboard("/");
+
+    expect(document.activeElement).toBe(document.body);
+  });
+
   test("stops listening for / when unmounted", async () => {
     const { unmount } = render(SiteNavbar, { props: { theme: "system" } });
     unmount();

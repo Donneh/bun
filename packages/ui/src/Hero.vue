@@ -2,9 +2,16 @@
 import { useTemplateRef } from "vue";
 import Dither from "./Dither.vue";
 
-withDefaults(defineProps<{ eyebrow: string; title?: string | undefined; subtitle?: string; compact?: boolean }>(), {
-  compact: false,
-});
+withDefaults(
+  defineProps<{
+    eyebrow: string;
+    title?: string | undefined;
+    subtitle?: string;
+    compact?: boolean;
+    decorated?: boolean;
+  }>(),
+  { compact: false, decorated: true },
+);
 
 const eyebrowText = useTemplateRef<HTMLElement>("eyebrowText");
 const actions = useTemplateRef<HTMLElement>("actions");
@@ -13,7 +20,7 @@ const content = useTemplateRef<HTMLElement>("content");
 
 <template>
   <section class="hero" :class="{ compact }">
-    <div class="corner">
+    <div v-if="decorated" class="corner">
       <Dither pattern="corner" :intensity="0.5" :avoid="[eyebrowText, actions, content]" />
     </div>
     <div class="row">

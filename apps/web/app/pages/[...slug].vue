@@ -1,21 +1,20 @@
 <script setup lang="ts">
-import { AppShell, BackLink, Hero, SiteFooter, StatusMessage, ThemeButton } from "@riftkeeper/ui";
+import { AppShell, BackLink, SiteFooter, SiteNavbar, StatusMessage } from "@riftkeeper/ui";
 import { useTheme } from "~/composables/theme";
 import { RIOT_NOTICE } from "~/utils/riot-notice";
 
 const theme = useTheme();
+const { links: navLinks, query: navQuery, navigate, search } = useSiteNavigation(null);
 
 useHead({ title: "Page not found · Riftkeeper" });
 </script>
 
 <template>
-  <AppShell>
-    <Hero eyebrow="Riftkeeper" title="Page not found" compact>
-      <template #actions>
-        <ThemeButton v-model="theme" />
-      </template>
-    </Hero>
-    <BackLink href="/" label="Back to search" @navigate="navigateTo" />
+  <AppShell narrow title="Page not found">
+    <template #header>
+      <SiteNavbar v-model="navQuery" v-model:theme="theme" :links="navLinks" @search="search" @navigate="navigate" />
+    </template>
+    <BackLink variant="button" href="/" label="Back to search" @navigate="navigateTo" />
     <StatusMessage kind="empty" title="Page not found" detail="There is nothing at this address." />
     <template #footer>
       <SiteFooter :notice="RIOT_NOTICE" />
