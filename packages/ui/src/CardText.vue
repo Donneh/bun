@@ -43,7 +43,7 @@ const parts = computed(() => parseCardText(props.text));
   display: inline-block;
   padding: 0.1em calc(var(--slant) + 0.2em);
   clip-path: polygon(var(--top-left), var(--top-right), var(--end), var(--bottom-right), var(--bottom-left), var(--start));
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-style: italic;
   font-weight: var(--rk-font-weight-bold);
   line-height: 1.4;
@@ -54,8 +54,8 @@ const parts = computed(() => parseCardText(props.text));
 
 .keyword :deep(.glyph) {
   margin-inline: 0.08em;
-  font-size: 1em;
-  vertical-align: -0.15em;
+  font-size: 1.1em;
+  vertical-align: -0.2em;
 }
 
 .keyword :deep([data-glyph="rune_rainbow"] :is(path, circle, rect, polygon, ellipse)) {
