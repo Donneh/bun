@@ -42,7 +42,7 @@ describe("SiteNavbar", () => {
     const nav = screen.getByRole("navigation", { name: "Site" });
     expect(nav.contains(screen.getByRole("link", { name: "Riftkeeper" }))).toBe(true);
     expect(nav.contains(searchField())).toBe(true);
-    expect(screen.getByRole("link", { name: "Cards" }).getAttribute("aria-current")).toBe("page");
+    expect(screen.getByRole("link", { name: "Cards" }).getAttribute("aria-current")).toBe("true");
     expect(screen.getByRole("button", { name: "Theme: system" })).toBeTruthy();
     expect(searchField().getAttribute("aria-keyshortcuts")).toBe("/");
   });
