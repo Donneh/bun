@@ -25,6 +25,12 @@ describe("AppShell", () => {
     expect(screen.getByRole("banner").textContent).toBe("Navbar");
   });
 
+  test("gives the page a heading for assistive technology when it has a title", () => {
+    render(AppShell, { props: { title: "Card not found" }, slots: { default: "<p>Content</p>" } });
+
+    expect(screen.getByRole("heading", { level: 1, name: "Card not found" })).toBeTruthy();
+  });
+
   test("narrows the page to the detail width on request", () => {
     const { container } = render(AppShell, { props: { narrow: true }, slots: { default: "<p>Content</p>" } });
 

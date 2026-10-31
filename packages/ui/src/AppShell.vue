@@ -1,12 +1,13 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ narrow?: boolean }>(), { narrow: false });
+withDefaults(defineProps<{ narrow?: boolean; title?: string | undefined }>(), { narrow: false });
 </script>
 
 <template>
-  <div class="shell" :class="{ narrow }">
+  <div class="shell" :class="{ narrow, 'with-header': $slots.header }">
     <slot name="backdrop" />
     <slot name="header" />
     <main class="main">
+      <h1 v-if="title" class="visually-hidden">{{ title }}</h1>
       <slot />
     </main>
     <div v-if="$slots.footer" class="end">
@@ -46,5 +47,20 @@ withDefaults(defineProps<{ narrow?: boolean }>(), { narrow: false });
   flex-direction: column;
   gap: var(--rk-space-5);
   padding-block: 0 var(--rk-space-8);
+}
+
+.with-header .main {
+  padding-top: var(--rk-space-10);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 </style>

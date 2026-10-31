@@ -22,41 +22,43 @@ withDefaults(defineProps<{ orientation?: CardOrientation; busy?: boolean }>(), {
 .detail {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--rk-space-6);
+  gap: var(--rk-space-8);
   align-items: start;
 }
 
+.detail.landscape {
+  gap: var(--rk-space-6);
+}
+
 .art {
+  justify-self: center;
+  width: min(18rem, 80vw);
+  filter: drop-shadow(0 24px 48px color-mix(in srgb, var(--rk-color-domain) 30%, transparent));
+}
+
+.landscape .art {
   width: 100%;
 }
 
-.portrait .art {
-  max-width: 22rem;
-}
-
 .body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rk-space-6);
   min-width: 0;
 }
 
 @media (min-width: 48rem) {
   .detail {
-    gap: var(--rk-space-8);
+    justify-content: center;
   }
 
   .portrait {
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 22rem) minmax(0, 38rem);
+  }
+
+  .portrait .art {
+    width: 100%;
   }
 
   .landscape {
-    grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
-  }
-
-  .art {
-    position: sticky;
-    top: var(--rk-space-6);
+    grid-template-columns: minmax(0, 42rem);
   }
 }
 </style>

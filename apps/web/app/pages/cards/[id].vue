@@ -4,18 +4,17 @@ import {
   BackLink,
   CardDetail,
   CardDetailSkeleton,
-  CardFacts,
-  CardHeading,
   CardImage,
-  Hero,
-  PrintingList,
+  CardInfo,
+  DomainBackdrop,
+  domainScope,
   SiteFooter,
+  SiteNavbar,
   StatusMessage,
-  ThemeButton,
 } from "@riftkeeper/ui";
 import { useTheme } from "~/composables/theme";
 import { rememberedCard } from "~/utils/card-cache";
-import { cardFacts, printingSummaries, selectedPrinting } from "~/utils/card-detail";
+import { cardInfo, printingSummaries, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
 import { type CardView, fetchCard } from "~/utils/card-search";
 import { RIOT_NOTICE } from "~/utils/riot-notice";
@@ -24,6 +23,8 @@ const route = useRoute();
 const router = useRouter();
 const { apiBase } = useRuntimeConfig().public;
 const theme = useTheme();
+
+const NAV_LINKS = [{ label: "Cards", href: "/", current: true }];
 
 const cardId = computed(() => String(route.params.id));
 
@@ -45,8 +46,9 @@ const view = computed<CardView>(() => {
   return remembered ? { kind: "card", card: remembered } : { kind: "loading" };
 });
 const card = computed(() => (view.value.kind === "card" ? view.value.card : null));
+const domains = computed(() => card.value?.domains ?? []);
 const printing = computed(() => (card.value ? selectedPrinting(card.value, route.query.printing) : null));
-const facts = computed(() => (card.value ? cardFacts(card.value) : []));
+const info = computed(() => (card.value && printing.value ? cardInfo(card.value, printing.value) : null));
 const printings = computed(() => (card.value ? printingSummaries(card.value) : []));
 const image = computed(() =>
   printing.value ? responsiveImage(printing.value.imageUrl, printing.value.orientation, "detail") : null,
@@ -65,6 +67,8 @@ onMounted(() => {
   if (typeof back === "string" && router.resolve(back).name === "index") resultsPath.value = back;
 });
 
+const navQuery = ref("");
+
 useHead(() => ({
   title: card.value
     ? `${card.value.name} · Riftkeeper`
@@ -78,19 +82,35 @@ async function goBack(href: string) {
   else await navigateTo(href);
 }
 
+function navigate(href: string) {
+  return navigateTo(href);
+}
+
+function search(query: string) {
+  return navigateTo({ path: "/", query: query ? { q: query } : {} });
+}
+
 function choosePrinting(id: string) {
   return navigateTo({ query: { ...route.query, printing: id } }, { replace: true });
 }
 </script>
 
 <template>
-  <AppShell>
-    <Hero eyebrow="Riftkeeper" :title="statusHeading" compact>
-      <template #actions>
-        <ThemeButton v-model="theme" />
-      </template>
-    </Hero>
+  <AppShell narrow :title="statusHeading" v-bind="domainScope(domains)">
+    <template #backdrop>
+      <DomainBackdrop :domains="domains" />
+    </template>
+    <template #header>
+      <SiteNavbar
+        v-model="navQuery"
+        v-model:theme="theme"
+        :links="NAV_LINKS"
+        @search="search"
+        @navigate="navigate"
+      />
+    </template>
     <BackLink
+      variant="button"
       :href="resultsPath ?? '/'"
       :label="resultsPath ? 'Back to results' : 'Back to search'"
       @navigate="goBack"
@@ -110,7 +130,7 @@ function choosePrinting(id: string) {
       action="Try again"
       @action="refresh"
     />
-    <CardDetail v-else-if="card && printing && image" :orientation="printing.orientation">
+    <CardDetail v-else-if="card && printing && image && info" :orientation="printing.orientation">
       <template #art>
         <CardImage
           :name="card.name"
@@ -121,9 +141,13 @@ function choosePrinting(id: string) {
           loading="eager"
         />
       </template>
-      <CardHeading :name="card.name" :subtitle="card.subtitle" />
-      <CardFacts :facts="facts" />
-      <PrintingList :printings="printings" :selected="printing.id" @select="choosePrinting" />
+      <CardInfo
+        :card="info"
+        :printings="printings"
+        :selected="printing.id"
+        @select="choosePrinting"
+        @navigate="navigate"
+      />
     </CardDetail>
     <template #footer>
       <SiteFooter :notice="RIOT_NOTICE" />
