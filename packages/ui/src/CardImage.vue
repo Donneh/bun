@@ -57,6 +57,9 @@ watch(
   position: relative;
   overflow: hidden;
   border-radius: var(--rk-radius-lg);
+}
+
+.pending {
   background: var(--rk-color-surface-muted);
 }
 
