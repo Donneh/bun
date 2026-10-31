@@ -22,11 +22,20 @@ const headingId = useId();
           :aria-pressed="printing.id === selected"
           @click="emit('select', printing.id)"
         >
-          <span class="title">
+          <img
+            class="thumbnail"
+            :src="printing.imageUrl"
+            :srcset="printing.srcset"
+            sizes="2.5rem"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+          <span class="name">
             <span class="set">{{ printing.setName }}</span>
-            <span class="code">{{ printing.code }}</span>
+            <span class="details">{{ printing.details.join(" · ") }}</span>
           </span>
-          <span class="details">{{ printing.details.join(" · ") }}</span>
+          <span class="code">{{ printing.code }}</span>
         </button>
       </li>
     </ul>
@@ -35,70 +44,66 @@ const headingId = useId();
 
 <style scoped>
 .printings {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: var(--rk-space-3);
 }
 
 .heading {
   margin: 0;
   color: var(--rk-color-text-muted);
-  font-family: var(--rk-font-family-detail);
-  font-size: var(--rk-font-size-xs);
-  font-weight: var(--rk-font-weight-regular);
+  font: var(--rk-font-weight-regular) var(--rk-font-size-xs) var(--rk-font-family-mono);
 }
 
 .list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rk-space-2);
-  margin: 0;
+  display: grid;
+  gap: var(--rk-space-1);
+  margin: 0 calc(-1 * var(--rk-space-3));
   padding: 0;
   list-style: none;
 }
 
 .printing {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rk-space-1);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--rk-space-3);
+  align-items: center;
   width: 100%;
-  min-height: var(--rk-control-height);
+  min-height: var(--rk-control-height-sm);
   padding: var(--rk-space-2) var(--rk-space-3);
-  border: var(--rk-border-width) solid var(--rk-color-border);
-  border-radius: var(--rk-radius-md);
-  background: var(--rk-color-surface);
+  border: none;
+  border-radius: var(--rk-radius-inset);
+  background: transparent;
   color: var(--rk-color-text);
   font: inherit;
   text-align: start;
   cursor: pointer;
-  transition:
-    border-color var(--rk-duration-fast) ease,
-    background-color var(--rk-duration-fast) ease;
-}
-
-.printing[aria-pressed="true"] {
-  border-color: var(--rk-color-accent);
-  box-shadow: inset 0 0 0 var(--rk-border-width) var(--rk-color-accent);
+  transition: background-color var(--rk-duration-fast) ease;
 }
 
 @media (hover: hover) {
   .printing:hover {
-    border-color: var(--rk-color-accent);
+    background: color-mix(in srgb, var(--rk-color-text) 5%, transparent);
   }
 }
 
-.printing:focus-visible {
-  border-color: var(--rk-color-accent);
-  outline: var(--rk-focus-width) solid var(--rk-color-accent);
-  outline-offset: var(--rk-focus-width);
+.printing[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--rk-color-domain) 12%, transparent);
 }
 
-.title {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0 var(--rk-space-3);
+.printing:focus-visible {
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: 0;
+}
+
+.thumbnail {
+  display: block;
+  width: 2.5rem;
+  border-radius: var(--rk-radius-sm);
+}
+
+.name {
+  display: grid;
+  min-width: 0;
 }
 
 .set {
@@ -106,11 +111,16 @@ const headingId = useId();
   font-weight: var(--rk-font-weight-bold);
 }
 
-.code,
 .details {
+  overflow: hidden;
   color: var(--rk-color-text-muted);
-  font-family: var(--rk-font-family-detail);
   font-size: var(--rk-font-size-xs);
-  overflow-wrap: anywhere;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code {
+  color: var(--rk-color-text-muted);
+  font: var(--rk-font-size-xs) var(--rk-font-family-mono);
 }
 </style>

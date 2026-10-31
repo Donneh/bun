@@ -55,6 +55,13 @@ describe("responsiveImage for the card page", () => {
 
   test("describes the art column in sizes", () => {
     expect(responsiveImage(cdnUrl, "portrait", "detail").sizes).toContain("22rem");
-    expect(responsiveImage(cdnUrl, "landscape", "detail").sizes).toContain("30rem");
+    expect(responsiveImage(cdnUrl, "landscape", "detail").sizes).toContain("42rem");
+  });
+});
+
+describe("responsiveImage for printing thumbnails", () => {
+  test("offers small widths for the 2.5rem thumbnail", () => {
+    expect(widths("portrait", "thumbnail")).toEqual([80, 160]);
+    expect(responsiveImage(cdnUrl, "portrait", "thumbnail").sizes).toBe("2.5rem");
   });
 });

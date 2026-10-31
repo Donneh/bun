@@ -2,6 +2,7 @@
 import CardDetail from "./CardDetail.vue";
 import type { CardOrientation } from "./card-summary.ts";
 import Dither from "./Dither.vue";
+import GlassPanel from "./GlassPanel.vue";
 
 withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
   orientation: "portrait",
@@ -16,22 +17,31 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
         <Dither pattern="sweep" color="ink" :intensity="1" />
       </div>
     </template>
-    <div class="lines heading" aria-hidden="true">
-      <span class="line name" />
-      <span class="line subtitle" />
-    </div>
-    <div class="facts" aria-hidden="true">
-      <div v-for="index in 4" :key="index" class="lines">
-        <span class="line label" />
-        <span class="line value" />
+    <GlassPanel class="info" aria-hidden="true">
+      <div class="section head">
+        <span class="line kicker" />
+        <span class="line name" />
+        <span class="line subtitle" />
       </div>
-    </div>
-    <div class="lines" aria-hidden="true">
-      <span class="line label" />
-      <span class="line text" />
-      <span class="line text" />
-      <span class="line short" />
-    </div>
+      <div class="section stats">
+        <span v-for="index in 3" :key="index" class="stat">
+          <span class="line value" />
+          <span class="line label" />
+        </span>
+      </div>
+      <div class="section rules">
+        <span class="line text" />
+        <span class="line text" />
+        <span class="line short" />
+      </div>
+      <div class="section">
+        <span class="line label" />
+        <span v-for="index in 2" :key="index" class="printing">
+          <span class="thumbnail" />
+          <span class="line text" />
+        </span>
+      </div>
+    </GlassPanel>
   </CardDetail>
 </template>
 
@@ -51,16 +61,51 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
   aspect-ratio: 88 / 63;
 }
 
-.lines {
-  display: flex;
-  flex-direction: column;
+.info {
+  display: grid;
+}
+
+.section {
+  display: grid;
+  gap: var(--rk-space-3);
+  padding: var(--rk-space-5) var(--rk-space-6);
+}
+
+.section + .section {
+  border-top: var(--rk-border-width) solid var(--rk-glass-edge);
+}
+
+.head {
+  gap: var(--rk-space-2);
+  padding-top: var(--rk-space-6);
+}
+
+.stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding-block: var(--rk-space-4);
+}
+
+.stat {
+  display: grid;
+  justify-items: center;
   gap: var(--rk-space-2);
 }
 
-.facts {
+.rules {
+  background: color-mix(in srgb, var(--rk-color-domain) 8%, transparent);
+}
+
+.printing {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
-  gap: var(--rk-space-4) var(--rk-space-5);
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: var(--rk-space-3);
+  align-items: center;
+}
+
+.thumbnail {
+  aspect-ratio: 63 / 88;
+  border-radius: var(--rk-radius-sm);
+  background: var(--rk-color-surface-muted);
 }
 
 .line {
@@ -70,22 +115,27 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
   background: var(--rk-color-surface-muted);
 }
 
-.heading .name {
-  width: 60%;
-  height: var(--rk-font-size-display);
+.kicker {
+  width: 40%;
 }
 
-.heading .subtitle {
+.name {
+  width: 60%;
+  height: 2rem;
+}
+
+.subtitle {
   width: 35%;
   height: var(--rk-font-size-lg);
 }
 
-.label {
-  width: 4rem;
+.value {
+  width: 2rem;
+  height: 1.75rem;
 }
 
-.value {
-  width: 6rem;
+.label {
+  width: 4rem;
 }
 
 .text {
@@ -94,5 +144,11 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
 
 .short {
   width: 55%;
+}
+
+@media (max-width: 47.99rem) {
+  .section {
+    padding-inline: var(--rk-space-4);
+  }
 }
 </style>

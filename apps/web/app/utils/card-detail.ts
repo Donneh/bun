@@ -1,6 +1,7 @@
 import type { Card, Domain, Printing, Variant } from "@riftkeeper/cards";
-import type { CardFact, GlyphName, GlyphTextPart, PrintingSummary } from "@riftkeeper/ui";
+import type { CardInfoContent, CardStat, GlyphName, GlyphTextPart, PrintingSummary } from "@riftkeeper/ui";
 import { isGlyphName } from "@riftkeeper/ui/glyph";
+import { responsiveImage } from "./card-images.ts";
 
 const VARIANT_LABELS: Record<Variant, string> = {
   standard: "Standard",
@@ -13,70 +14,76 @@ const VARIANT_LABELS: Record<Variant, string> = {
 
 const capitalize = (word: string) => word.charAt(0).toUpperCase() + word.slice(1);
 
-const joined = (values: readonly (string | null)[]) =>
-  values.filter((value): value is string => Boolean(value)).join(" · ");
-
 export function cardHref(id: string): string {
   return `/cards/${encodeURIComponent(id)}`;
 }
 
-const text = (value: string): GlyphTextPart => ({ kind: "text", text: value });
+export function searchHref(query: string): string {
+  return `/?q=${encodeURIComponent(query)}`;
+}
 
-const decorated = (name: GlyphName, value: string): GlyphTextPart[] => [
-  { kind: "glyph", name, decorative: true },
-  text(value),
-];
-
-const SEPARATOR = text(" · ");
-
-const interleave = (groups: readonly (readonly GlyphTextPart[])[]): GlyphTextPart[] =>
-  groups.flatMap((group, index) => (index === 0 ? group : [SEPARATOR, ...group]));
+function quotedValue(value: string): string {
+  return /[\s"\\()]/.test(value) ? `"${value.replace(/["\\]/g, "\\$&")}"` : value;
+}
 
 export function domainGlyph(domain: Domain): GlyphName {
   return domain === "colorless" ? "colorless" : `rune_${domain}`;
 }
 
-function energyParts(energy: number): GlyphTextPart[] {
-  const name = `energy_${energy}`;
-  return isGlyphName(name) ? [{ kind: "glyph", name }] : [text(`${energy} energy`)];
+const labelled = (name: GlyphName, value: string): GlyphTextPart[] => [
+  { kind: "glyph", name, decorative: true },
+  { kind: "text", text: value },
+];
+
+function kicker(card: Card): GlyphTextPart[][] {
+  const typeWords = [card.supertype, card.type]
+    .filter((word): word is NonNullable<typeof word> => word !== null)
+    .map(capitalize)
+    .join(" ");
+  const domains = card.domains.map((domain) => labelled(domainGlyph(domain), capitalize(domain)));
+  if (!typeWords) return domains;
+  return [
+    ...domains,
+    card.type === null ? [{ kind: "text", text: typeWords }] : labelled(`card_type_${card.type}`, typeWords),
+  ];
 }
 
-function powerParts(power: number, domains: readonly Domain[]): GlyphTextPart[] {
+function powerGlyph(domains: readonly Domain[]): GlyphName | undefined {
   const [domain] = domains;
-  if (domains.length !== 1 || domain === undefined || domain === "colorless") return [text(`${power} power`)];
-  return [text(`${power} `), { kind: "glyph", name: domainGlyph(domain), label: `${capitalize(domain)} power` }];
+  return domains.length === 1 && domain !== undefined && domain !== "colorless" ? domainGlyph(domain) : undefined;
 }
 
-function typeFact(card: Card): GlyphTextPart[] {
-  const words = joined([card.type, card.supertype].map((word) => word && capitalize(word)));
-  if (!words) return [];
-  return card.type === null ? [text(words)] : decorated(`card_type_${card.type}`, words);
+const stat = (label: string, value: string, glyph: GlyphName | undefined, valueShown = true): CardStat =>
+  glyph === undefined ? { label, value, valueShown: true } : { label, value, glyph, valueShown };
+
+function energyStat(energy: number): CardStat {
+  const glyph = `energy_${energy}`;
+  return isGlyphName(glyph) ? stat("Energy", String(energy), glyph, false) : stat("Energy", String(energy), undefined);
 }
 
-function costFact(card: Card): GlyphTextPart[] {
-  return interleave([
-    ...(card.energyCost === null ? [] : [energyParts(card.energyCost)]),
-    ...(card.powerCost === null ? [] : [powerParts(card.powerCost, card.domains)]),
-  ]);
+function mightStat(might: number | null, bonus: number | null): CardStat | null {
+  if (might !== null) return stat("Might", bonus === null ? String(might) : `${might} +${bonus}`, "might");
+  return bonus === null ? null : stat("Might bonus", `+${bonus}`, "might");
 }
 
-export function cardFacts(card: Card): CardFact[] {
-  const facts = [
-    { label: "Type", value: typeFact(card) },
-    {
-      label: card.domains.length === 1 ? "Domain" : "Domains",
-      value: interleave(card.domains.map((domain) => decorated(domainGlyph(domain), capitalize(domain)))),
-    },
-    { label: "Cost", value: costFact(card) },
-    { label: "Might", value: card.might === null ? [] : decorated("might", String(card.might)) },
-    { label: "Might bonus", value: card.mightBonus === null ? [] : decorated("might", `+${card.mightBonus}`) },
-    { label: "Tags", value: card.tags.length === 0 ? [] : [text(joined(card.tags))] },
-  ];
-  const rules: CardFact[] = [
-    ...(card.ability ? [{ label: "Ability", rulesText: card.ability }] : []),
-    ...(card.effect ? [{ label: "Effect", rulesText: card.effect }] : []),
-  ];
-  return [...facts.filter((fact) => fact.value.length > 0), ...rules];
+function stats(card: Card): CardStat[] {
+  return [
+    card.energyCost === null ? null : energyStat(card.energyCost),
+    card.powerCost === null ? null : stat("Power", String(card.powerCost), powerGlyph(card.domains)),
+    mightStat(card.might, card.mightBonus),
+  ].filter((entry): entry is CardStat => entry !== null);
+}
+
+export function cardInfo(card: Card, printing: Printing): CardInfoContent {
+  return {
+    name: card.name,
+    subtitle: card.subtitle,
+    kicker: kicker(card),
+    stats: stats(card),
+    rules: [card.ability, card.effect].filter((text): text is string => Boolean(text)),
+    tags: card.tags.map((tag) => ({ label: tag, href: searchHref(`t:${quotedValue(tag)}`) })),
+    artist: printing.artist,
+  };
 }
 
 export function printingSummaries(card: Card): PrintingSummary[] {
@@ -87,6 +94,8 @@ export function printingSummaries(card: Card): PrintingSummary[] {
     details: [VARIANT_LABELS[printing.variant], capitalize(printing.rarity), printing.artist].filter(
       (detail): detail is string => detail !== null,
     ),
+    imageUrl: printing.imageUrl,
+    srcset: responsiveImage(printing.imageUrl, printing.orientation, "thumbnail").srcset,
   }));
 }
 
