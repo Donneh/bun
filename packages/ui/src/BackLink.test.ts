@@ -16,6 +16,15 @@ describe("BackLink", () => {
     expect(screen.getByRole("link", { name: "Back to search" })).toBeTruthy();
   });
 
+  test("is a quiet text link by default and a frosted button on request", async () => {
+    const { rerender } = render(BackLink, { props: { href: "/" } });
+    expect(screen.getByRole("link").classList.contains("rk-glass")).toBe(false);
+
+    await rerender({ href: "/", variant: "button" });
+
+    expect(screen.getByRole("link").classList.contains("rk-glass")).toBe(true);
+  });
+
   test("reports a plain click and leaves a modified click to the browser", async () => {
     const { emitted } = render(BackLink, { props: { href: "/" } });
     const link = screen.getByRole("link");
