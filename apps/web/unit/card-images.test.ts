@@ -42,6 +42,17 @@ describe("responsiveImage for the card page", () => {
     expect(Math.max(...widths("portrait", "detail"))).toBeGreaterThan(Math.max(...widths("portrait")));
   });
 
+  test("uses the full width of the source art at high quality", () => {
+    expect(responsiveImage(cdnUrl, "portrait", "detail").srcset).toBe(
+      `${cdnUrl}?w=360&fm=webp&q=90 360w, ${cdnUrl}?w=744&fm=webp&q=90 744w`,
+    );
+    expect(Math.max(...widths("landscape", "detail"))).toBe(1040);
+  });
+
+  test("keeps the grid at the default quality", () => {
+    expect(responsiveImage(cdnUrl, "portrait").srcset).not.toContain("q=");
+  });
+
   test("describes the art column in sizes", () => {
     expect(responsiveImage(cdnUrl, "portrait", "detail").sizes).toContain("22rem");
     expect(responsiveImage(cdnUrl, "landscape", "detail").sizes).toContain("30rem");
