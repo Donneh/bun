@@ -12,9 +12,6 @@ defineProps<{ label: string; href?: string }>();
 
 <style scoped>
 .preview {
-  position: sticky;
-  top: 0;
-  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   gap: var(--rk-space-2);
