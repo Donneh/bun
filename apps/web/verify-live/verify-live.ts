@@ -1,11 +1,13 @@
-import { mkdir } from "node:fs/promises";
-import { join, relative } from "node:path";
+import { mkdir, writeFile } from "node:fs/promises";
+import { basename, join, relative } from "node:path";
 import { type Browser, type BrowserContextOptions, devices, type Page } from "@playwright/test";
 import type { VerifyOptions } from "./arguments.ts";
 
 export const SEARCH_QUERY = "c:fury cost:<=2";
 export const UNKNOWN_PATH = "/no-such-page";
+export const REPORTS_FILE = "reports.json";
 const SCROLL_PAUSE_MS = 150;
+const FIRST_SCREEN_JPEG_QUALITY = 80;
 
 export const VIEWPORTS = {
   desktop: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } },
@@ -41,6 +43,16 @@ export interface PageReport {
   readonly failedRequests: readonly string[];
   readonly scrollsSideways: boolean;
   readonly screenshot: string;
+  readonly firstScreen: string;
+}
+
+export interface SavedReport {
+  readonly path: string;
+  readonly viewport: ViewportName;
+  readonly colorScheme: ColorScheme;
+  readonly screenshot: string;
+  readonly firstScreen: string;
+  readonly problems: readonly string[];
 }
 
 export function problems(report: PageReport): string[] {
@@ -69,12 +81,12 @@ export function formatReport(report: PageReport): string {
   return [line, ...found.map((problem) => `      ${problem}`)].join("\n");
 }
 
-export function screenshotName(path: string, viewport: ViewportName, colorScheme: ColorScheme): string {
+function screenshotStem(path: string, viewport: ViewportName, colorScheme: ColorScheme): string {
   const slug = decodeURIComponent(path)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
-  return `${slug || "home"}-${viewport}-${colorScheme}.png`;
+  return `${slug || "home"}-${viewport}-${colorScheme}`;
 }
 
 export async function defaultPaths(browser: Browser, baseUrl: string, headers: Readonly<Record<string, string>>) {
@@ -136,7 +148,10 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
     );
     await mkdir(check.outDir, { recursive: true });
-    const screenshot = join(check.outDir, screenshotName(check.path, check.viewport, check.colorScheme));
+    const stem = join(check.outDir, screenshotStem(check.path, check.viewport, check.colorScheme));
+    const screenshot = `${stem}.png`;
+    const firstScreen = `${stem}-first-screen.jpg`;
+    await page.screenshot({ path: firstScreen, type: "jpeg", quality: FIRST_SCREEN_JPEG_QUALITY, scale: "css" });
     await page.screenshot({ path: screenshot, fullPage: true });
 
     return {
@@ -153,6 +168,7 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
       failedRequests,
       scrollsSideways,
       screenshot,
+      firstScreen,
     };
   } finally {
     await context.close();
@@ -170,7 +186,19 @@ export async function checkSite(browser: Browser, options: VerifyOptions, onRepo
         reports.push(report);
         onReport(report);
       }
+  await writeFile(join(options.outDir, REPORTS_FILE), JSON.stringify(reports.map(savedReport), null, 2));
   return reports;
+}
+
+function savedReport(report: PageReport): SavedReport {
+  return {
+    path: report.path,
+    viewport: report.viewport,
+    colorScheme: report.colorScheme,
+    screenshot: basename(report.screenshot),
+    firstScreen: basename(report.firstScreen),
+    problems: problems(report),
+  };
 }
 
 async function scrollThrough(page: Page, pageHeight: number, viewportHeight: number) {

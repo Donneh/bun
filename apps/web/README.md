@@ -64,6 +64,18 @@ Outside CI, Playwright reuses an API that already listens on the API port, so a 
 
 Every test records a video and a final screenshot in `test-results/`. The E2E workflow uploads that folder as the `e2e-videos-and-screenshots` artifact.
 
+## Screenshots in the pull request
+
+`e2e/verify-live.spec.ts` runs the `verify:live` checks on the built page and saves their screenshots and `reports.json` in `test-results/verify-live/`. When a pull request changes `apps/web`, `packages/ui`, `packages/cards`, `packages/search`, `bun.lock` or the E2E workflow:
+
+1. the read-only `web` job renders the comment with `verify-live/pull-request-comment-cli.ts`, after `test:e2e` and `test:dev`, with whether those tests passed, and uploads it with the first-screen JPEGs as the `screenshots` artifact;
+2. on a pull request from a branch of this repository, the `screenshots` job, which checks out no code, creates a commit without parents that holds only these JPEGs, and moves the ref `refs/screenshots/pr-<number>` to it, so the ref never holds more than the latest set;
+3. it points the comment's images at `https://raw.githubusercontent.com/<repository>/<commit>/`, and updates the pull request comment that starts with `<!-- riftkeeper-screenshots -->`, or posts it the first time. When the run uploaded no screenshots, the comment says so for that commit instead, so older screenshots never pass for the current commit. The job does nothing when the pull request has moved on to a newer commit.
+
+The `screenshots` job and the upload never fail the `web` check. When the pull request closes, the "Delete pull request screenshots" workflow deletes `refs/screenshots/pr-<number>`, and the comment's images stop loading once GitHub removes the unreachable commit.
+
+The images live in git under `refs/screenshots/`, outside `refs/heads/`, because a pull request comment can only show images from a public URL: artifacts are zip files and the job summary cannot hold images. A normal `git clone` or `git fetch` downloads only branches and tags, and the branch list stays clean. A set of first screens is about 1.3 MB, where the full-page screenshots of a single run are about 100 MB, so the comment shows only the first screen of each page. The full-page screenshots are in the artifact. Pull requests from forks get no comment, because their token cannot write to the repository.
+
 ## Check
 
 ```sh
