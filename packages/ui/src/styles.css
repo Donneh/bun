@@ -184,6 +184,10 @@
   color: var(--rk-color-on-selection);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   background: var(--rk-color-background);
