@@ -8,6 +8,7 @@ import {
   InfiniteScrollSentinel,
   ResultSummary,
   SearchBar,
+  SiteFooter,
   SortControl,
   type SortSelection,
   StatusMessage,
@@ -22,6 +23,7 @@ import { responsiveImage } from "~/utils/card-images";
 import { appendPage, fetchCardCount, searchCards } from "~/utils/card-search";
 import { chipId, removeSpan, toChipSummary } from "~/utils/filter-chips";
 import { preloadImage } from "~/utils/preload-image";
+import { RIOT_NOTICE } from "~/utils/riot-notice";
 import {
   parseSearchState,
   parseSortDirection,
@@ -228,6 +230,9 @@ async function loadNextPage() {
         />
         <InfiniteScrollSentinel v-else-if="current.hasMore" :key="stateKey" @change="nearEnd = $event" />
       </template>
+    </template>
+    <template #footer>
+      <SiteFooter :notice="RIOT_NOTICE" />
     </template>
   </AppShell>
 </template>

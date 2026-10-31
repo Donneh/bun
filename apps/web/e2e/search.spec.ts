@@ -211,7 +211,10 @@ test("the theme button cycles system, light and dark and remembers the choice", 
   const background = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const light = await background();
   await expect(themeButton(page)).toHaveAccessibleName("Theme: system");
-  const eyebrowBox = await page.getByText(/^Riftkeeper/).boundingBox();
+  const eyebrowBox = await page
+    .getByRole("main")
+    .getByText(/^Riftkeeper/)
+    .boundingBox();
   const buttonBox = await themeButton(page).boundingBox();
   const middle = (box: { y: number; height: number } | null) => (box ? box.y + box.height / 2 : Number.NaN);
   expect(Math.abs(middle(eyebrowBox) - middle(buttonBox))).toBeLessThan(4);

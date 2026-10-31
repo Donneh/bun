@@ -9,6 +9,7 @@ import {
   CardImage,
   Hero,
   PrintingList,
+  SiteFooter,
   StatusMessage,
   ThemeButton,
 } from "@riftkeeper/ui";
@@ -17,6 +18,7 @@ import { rememberedCard } from "~/utils/card-cache";
 import { cardFacts, printingSummaries, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
 import { type CardView, fetchCard } from "~/utils/card-search";
+import { RIOT_NOTICE } from "~/utils/riot-notice";
 
 const route = useRoute();
 const router = useRouter();
@@ -123,5 +125,8 @@ function choosePrinting(id: string) {
       <CardFacts :facts="facts" />
       <PrintingList :printings="printings" :selected="printing.id" @select="choosePrinting" />
     </CardDetail>
+    <template #footer>
+      <SiteFooter :notice="RIOT_NOTICE" />
+    </template>
   </AppShell>
 </template>
