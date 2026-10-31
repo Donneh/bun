@@ -9,8 +9,9 @@ withDefaults(
     subtitle?: string;
     compact?: boolean;
     decorated?: boolean;
+    flush?: boolean;
   }>(),
-  { compact: false, decorated: true },
+  { compact: false, decorated: true, flush: false },
 );
 
 const eyebrowText = useTemplateRef<HTMLElement>("eyebrowText");
@@ -19,7 +20,7 @@ const content = useTemplateRef<HTMLElement>("content");
 </script>
 
 <template>
-  <section class="hero" :class="{ compact }">
+  <section class="hero" :class="{ compact, flush }">
     <div v-if="decorated" class="corner">
       <Dither pattern="corner" :intensity="0.5" :avoid="[eyebrowText, actions, content]" />
     </div>
@@ -107,5 +108,9 @@ const content = useTemplateRef<HTMLElement>("content");
   .hero.compact {
     padding-top: var(--rk-space-10);
   }
+}
+
+.hero.flush {
+  padding-top: 0;
 }
 </style>

@@ -10,7 +10,7 @@ useHead({ title: "Page not found · Riftkeeper" });
 </script>
 
 <template>
-  <AppShell narrow title="Page not found">
+  <AppShell title="Page not found">
     <template #header>
       <SiteNavbar v-model="navQuery" v-model:theme="theme" :links="navLinks" @search="search" @navigate="navigate" />
     </template>

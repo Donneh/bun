@@ -87,7 +87,7 @@ function choosePrinting(id: string) {
 </script>
 
 <template>
-  <AppShell narrow :title="statusHeading" v-bind="domainScope(domains)">
+  <AppShell :title="statusHeading" v-bind="domainScope(domains)">
     <template #backdrop>
       <DomainBackdrop :domains="domains" />
     </template>

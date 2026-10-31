@@ -147,6 +147,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", focusOnSlash));
   align-items: center;
   justify-content: space-between;
   width: min(100%, var(--rk-page-width, var(--rk-content-width)));
+  min-height: 2.25rem;
   margin-inline: auto;
 }
 

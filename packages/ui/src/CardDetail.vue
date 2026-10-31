@@ -45,20 +45,19 @@ withDefaults(defineProps<{ orientation?: CardOrientation; busy?: boolean }>(), {
 }
 
 @media (min-width: 48rem) {
-  .detail {
-    justify-content: center;
-  }
-
   .portrait {
-    grid-template-columns: minmax(0, 22rem) minmax(0, 38rem);
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
   }
 
   .portrait .art {
     width: 100%;
   }
+}
 
+@media (min-width: 64rem) {
   .landscape {
-    grid-template-columns: minmax(0, 42rem);
+    grid-template-columns: minmax(0, 34rem) minmax(0, 1fr);
+    gap: var(--rk-space-8);
   }
 }
 </style>
