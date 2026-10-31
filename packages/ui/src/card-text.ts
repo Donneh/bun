@@ -1,24 +1,14 @@
+import { type GlyphName, isGlyphName } from "./glyph.ts";
+
 export type CardTextPart =
   | { readonly kind: "text"; readonly text: string }
   | { readonly kind: "keyword"; readonly text: string }
-  | { readonly kind: "symbol"; readonly text: string; readonly label: string; readonly round: boolean };
+  | { readonly kind: "glyph"; readonly name: GlyphName };
 
 const TOKEN = /\[([A-Za-z][^\][]*)\]|:rb_([a-z0-9_]+):/g;
 
-const NAMED_SYMBOLS: Record<string, { readonly text: string; readonly label: string }> = {
-  might: { text: "might", label: "Might" },
-  exhaust: { text: "exhaust", label: "Exhaust" },
-  rune_rainbow: { text: "any rune", label: "Rune of any domain" },
-};
-
 function symbolPart(name: string): CardTextPart {
-  const named = NAMED_SYMBOLS[name];
-  if (named) return { kind: "symbol", ...named, round: false };
-  const energy = /^energy_(\d+)$/.exec(name)?.[1];
-  if (energy) return { kind: "symbol", text: energy, label: `${energy} energy`, round: true };
-  const domain = /^rune_([a-z]+)$/.exec(name)?.[1];
-  const words = domain ? `${domain} rune` : name.replaceAll("_", " ");
-  return { kind: "symbol", text: words, label: words, round: false };
+  return isGlyphName(name) ? { kind: "glyph", name } : { kind: "text", text: name.replaceAll("_", " ") };
 }
 
 export function parseCardText(source: string): CardTextPart[] {

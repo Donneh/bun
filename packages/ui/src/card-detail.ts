@@ -1,8 +1,8 @@
-export interface CardFact {
-  readonly label: string;
-  readonly value: string;
-  readonly rulesText?: boolean;
-}
+import type { GlyphTextPart } from "./glyph.ts";
+
+export type CardFact =
+  | { readonly label: string; readonly value: readonly GlyphTextPart[] }
+  | { readonly label: string; readonly rulesText: string };
 
 export interface PrintingSummary {
   readonly id: string;

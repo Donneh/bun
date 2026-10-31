@@ -17,23 +17,25 @@ describe("parseCardText", () => {
     expect(parseCardText("[>] I have +1.")).toEqual([{ kind: "text", text: "[>] I have +1." }]);
   });
 
-  test("names energy, rune, might and exhaust symbols", () => {
-    const symbols = parseCardText(":rb_energy_2::rb_rune_fury: :rb_rune_rainbow: :rb_might: :rb_exhaust:").filter(
-      (part) => part.kind === "symbol",
+  test("turns energy, rune, might and exhaust symbols into glyphs", () => {
+    const glyphs = parseCardText(":rb_energy_2::rb_rune_fury: :rb_rune_rainbow: :rb_might: :rb_exhaust:").filter(
+      (part) => part.kind === "glyph",
     );
 
-    expect(symbols).toEqual([
-      { kind: "symbol", text: "2", label: "2 energy", round: true },
-      { kind: "symbol", text: "fury rune", label: "fury rune", round: false },
-      { kind: "symbol", text: "any rune", label: "Rune of any domain", round: false },
-      { kind: "symbol", text: "might", label: "Might", round: false },
-      { kind: "symbol", text: "exhaust", label: "Exhaust", round: false },
+    expect(glyphs).toEqual([
+      { kind: "glyph", name: "energy_2" },
+      { kind: "glyph", name: "rune_fury" },
+      { kind: "glyph", name: "rune_rainbow" },
+      { kind: "glyph", name: "might" },
+      { kind: "glyph", name: "exhaust" },
     ]);
   });
 
-  test("spells out a symbol it does not know", () => {
-    expect(parseCardText(":rb_new_thing:")).toEqual([
-      { kind: "symbol", text: "new thing", label: "new thing", round: false },
+  test("spells out a symbol it has no glyph for", () => {
+    expect(parseCardText("Pay :rb_new_thing:.")).toEqual([
+      { kind: "text", text: "Pay " },
+      { kind: "text", text: "new thing" },
+      { kind: "text", text: "." },
     ]);
   });
 });

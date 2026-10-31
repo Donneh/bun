@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import CardText from "./CardText.vue";
 import type { CardFact } from "./card-detail.ts";
+import GlyphText from "./GlyphText.vue";
 
 defineProps<{ facts: readonly CardFact[] }>();
 </script>
 
 <template>
   <dl v-if="facts.length > 0" class="facts">
-    <div v-for="fact in facts" :key="fact.label" class="fact" :class="{ wide: fact.rulesText }">
+    <div v-for="fact in facts" :key="fact.label" class="fact" :class="{ wide: 'rulesText' in fact }">
       <dt class="label">{{ fact.label }}</dt>
       <dd class="value">
-        <CardText v-if="fact.rulesText" :text="fact.value" />
-        <template v-else>{{ fact.value }}</template>
+        <CardText v-if="'rulesText' in fact" :text="fact.rulesText" />
+        <GlyphText v-else :parts="fact.value" />
       </dd>
     </div>
   </dl>

@@ -11,6 +11,8 @@ interface ApiPrinting {
 interface ApiCard {
   readonly id: string;
   readonly name: string;
+  readonly ability: string | null;
+  readonly effect: string | null;
   readonly printings: readonly ApiPrinting[];
 }
 
@@ -175,6 +177,26 @@ test("a card page opens directly, survives a reload and fits a phone", async ({ 
 
   await expect(page.getByRole("heading", { level: 1, name: "Search the whole set. Instantly." })).toBeAttached();
   expect(new URL(page.url()).pathname).toBe("/");
+});
+
+test("rules text shows each symbol as a named glyph instead of its token", async ({ page, request }) => {
+  const SYMBOL = /:rb_[a-z0-9_]+:/;
+  const symbolsOf = (card: ApiCard) => `${card.ability ?? ""}\n${card.effect ?? ""}`.match(/:rb_[a-z0-9_]+:/g) ?? [];
+  const { data } = await apiSearch(request, "type:unit");
+  const card = data.find((candidate) => symbolsOf(candidate).length > 0);
+  expect(card, "a unit on the first page has a symbol in its rules text").toBeDefined();
+  const symbols = symbolsOf(card as ApiCard);
+
+  await page.goto(`/cards/${card?.id}`);
+
+  const rules = page.getByRole("article").getByRole("paragraph");
+  const glyphs = rules.getByRole("img");
+  await expect(glyphs).toHaveCount(symbols.length);
+  for (const glyph of await glyphs.all()) {
+    await expect(glyph).toBeVisible();
+    await expect(glyph).toHaveAccessibleName(/\w/);
+  }
+  for (const text of await rules.allTextContents()) expect(text).not.toMatch(SYMBOL);
 });
 
 test("choosing a printing swaps the image and is kept in the URL", async ({ page, request }) => {

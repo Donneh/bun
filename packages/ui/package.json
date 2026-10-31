@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./glyph": "./src/glyph.ts",
     "./styles.css": "./src/styles.css",
     "./theme": "./src/theme.ts"
   },

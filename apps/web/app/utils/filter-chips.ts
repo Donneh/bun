@@ -1,5 +1,7 @@
 import type { ComparisonOperator, FilterChip, FilterChipValue, SourceSpan } from "@riftkeeper/search";
-import type { FilterChipSummary } from "@riftkeeper/ui";
+import type { FilterChipSummary, GlyphName } from "@riftkeeper/ui";
+import { isGlyphName } from "@riftkeeper/ui/glyph";
+import { domainGlyph } from "./card-detail";
 
 const OPERATOR_SYMBOLS: Record<ComparisonOperator, string> = {
   "=": "",
@@ -34,8 +36,25 @@ export function chipId(span: SourceSpan): string {
   return `${span.start}-${span.end}`;
 }
 
+function chipGlyphs(chip: FilterChip): GlyphName[] {
+  const { field, value } = chip;
+  if (value.kind === "domain") return [...value.anyOf, ...value.allOf, ...value.noneOf].map(domainGlyph);
+  if (field === "might") return ["might"];
+  if (field === "type" && value.kind === "select") {
+    const name = `card_type_${value.value.toLowerCase()}`;
+    return isGlyphName(name) ? [name] : [];
+  }
+  return [];
+}
+
 export function toChipSummary(chip: FilterChip): FilterChipSummary {
-  return { id: chipId(chip.span), label: chip.label, value: formatValue(chip.value), removable: chip.editable };
+  return {
+    id: chipId(chip.span),
+    label: chip.label,
+    value: formatValue(chip.value),
+    glyphs: chipGlyphs(chip),
+    removable: chip.editable,
+  };
 }
 
 const LEADING_AND = /^and(?:\s+|$)/i;
