@@ -1,4 +1,5 @@
 import type { Card } from "@riftkeeper/cards";
+import { type PriceSnapshot, withPrices } from "@riftkeeper/cards/prices";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createCardsRoutes } from "./cards/cards.routes.ts";
@@ -9,14 +10,15 @@ interface Bindings {
   readonly CF_VERSION_METADATA?: { readonly id: string };
 }
 
-export function createApp({ cards }: { cards: readonly Card[] }) {
+export function createApp({ cards, prices }: { cards: readonly Card[]; prices: PriceSnapshot }) {
+  const pricedCards = withPrices(cards, prices);
   return new Hono<{ Bindings: Bindings }>()
     .use(cors({ origin: "*", allowMethods: ["GET"] }))
     .get("/health", (c) =>
       c.json({ data: { status: "ok", cards: cards.length, version: c.env?.CF_VERSION_METADATA?.id ?? null } }, 200),
     )
-    .route("/cards", createCardsRoutes({ cards }))
-    .route("/search", createSearchRoutes({ cards }))
+    .route("/cards", createCardsRoutes({ cards: pricedCards }))
+    .route("/search", createSearchRoutes({ cards: pricedCards }))
     .notFound((c) =>
       c.json(errorBody({ code: "not_found", message: `No route for ${c.req.method} ${c.req.path}` }), 404),
     )

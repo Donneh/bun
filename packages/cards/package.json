@@ -5,6 +5,7 @@
   "exports": {
     ".": "./src/card.ts",
     "./snapshot": "./src/card-snapshot.ts",
+    "./prices": "./src/price.ts",
     "./testing": "./test-support/fixtures.ts"
   },
   "scripts": {
