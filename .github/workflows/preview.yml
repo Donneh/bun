@@ -30,8 +30,6 @@ jobs:
       url: ${{ steps.upload.outputs.url }}
     env:
       GH_TOKEN: ${{ github.token }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       SCREENSHOTS: ${{ github.workspace }}/apps/web/test-results/preview
     defaults:
@@ -41,6 +39,9 @@ jobs:
       - name: Check that previews are set up
         id: setup
         working-directory: .
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "::notice title=No preview::The preview environment has no CLOUDFLARE_API_TOKEN secret or no CLOUDFLARE_ACCOUNT_ID variable, so this pull request gets no preview. See 'Previews' in infrastructure/README.md."
@@ -70,25 +71,30 @@ jobs:
       - name: Upload the preview ${{ env.PREVIEW_NAME }}
         id: upload
         if: ${{ steps.setup.outputs.ready == 'true' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
         run: |
-          node node_modules/wrangler/bin/wrangler.js preview --name "$PREVIEW_NAME" --tag "${HEAD_SHA:0:7}" --json > "$RUNNER_TEMP/preview.json"
-          url=$(jq -r '.preview.urls[0] // empty' "$RUNNER_TEMP/preview.json")
+          node node_modules/wrangler/bin/wrangler.js preview --name "$PREVIEW_NAME" --tag "${HEAD_SHA:0:7}"
+          url=$(jq -r 'select(.type == "preview") | .preview_urls[0] // empty' "$WRANGLER_OUTPUT_FILE_PATH")
           if [ -z "$url" ]; then
             echo "::error title=No preview URL::Cloudflare returned no preview URL. Preview URLs on workers.dev must be on for riftkeeper-web (subdomain.previews_enabled in infrastructure/main.tf)."
-            cat "$RUNNER_TEMP/preview.json"
             exit 1
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "deployment_url=$(jq -r '.deployment.urls[0] // empty' "$RUNNER_TEMP/preview.json")" >> "$GITHUB_OUTPUT"
+          echo "deployment_url=$(jq -r 'select(.type == "preview") | .deployment_urls[0] // empty' "$WRANGLER_OUTPUT_FILE_PATH")" >> "$GITHUB_OUTPUT"
       - if: ${{ steps.setup.outputs.ready == 'true' }}
         run: bunx playwright install --with-deps chromium
       - name: Check the preview in a browser
+        id: browser
         if: ${{ steps.setup.outputs.ready == 'true' }}
         env:
           URL: ${{ steps.upload.outputs.url }}
         run: node verify-live/cli.ts "$URL" --out "$SCREENSHOTS"
       - name: Check that the preview is not indexed
-        if: ${{ steps.setup.outputs.ready == 'true' }}
+        id: noindex
+        if: ${{ steps.setup.outputs.ready == 'true' && !cancelled() && steps.upload.outputs.url != '' }}
         env:
           URL: ${{ steps.upload.outputs.url }}
         run: |
@@ -102,17 +108,25 @@ jobs:
           if-no-files-found: ignore
           retention-days: 30
       - name: Post or update the preview comment
-        if: ${{ steps.setup.outputs.ready == 'true' }}
+        if: ${{ steps.setup.outputs.ready == 'true' && !cancelled() && steps.upload.outputs.url != '' }}
         working-directory: .
         env:
           URL: ${{ steps.upload.outputs.url }}
           DEPLOYMENT_URL: ${{ steps.upload.outputs.deployment_url }}
+          CHECKS_PASSED: ${{ steps.browser.outcome == 'success' && steps.noindex.outcome == 'success' }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           {
             echo "$MARKER"
             echo "## Preview"
             echo
             echo "**[$URL]($URL)** serves this pull request at ${HEAD_SHA:0:7}, built against the production API. The link stays the same on every push, and the preview is deleted when the pull request closes."
+            echo
+            if [ "$CHECKS_PASSED" = "true" ]; then
+              echo "The browser checks passed on desktop and phone, in light and dark: [screenshots]($RUN_URL)."
+            else
+              echo "**The browser checks failed for ${HEAD_SHA:0:7}**, see [the run]($RUN_URL)."
+            fi
             if [ -n "$DEPLOYMENT_URL" ]; then
               echo
               echo "This commit only: $DEPLOYMENT_URL"
@@ -138,11 +152,12 @@ jobs:
     environment: preview
     env:
       GH_TOKEN: ${{ github.token }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Check that previews are set up
         id: setup
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "ready=false" >> "$GITHUB_OUTPUT"
@@ -156,10 +171,17 @@ jobs:
         with:
           bun-version-file: package.json
       - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
         run: bun install --frozen-lockfile
       - name: Delete the preview ${{ env.PREVIEW_NAME }}
         if: ${{ steps.setup.outputs.ready == 'true' }}
         working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if ! node node_modules/wrangler/bin/wrangler.js preview delete --name "$PREVIEW_NAME" --skip-confirmation 2> "$RUNNER_TEMP/delete.log"; then
             cat "$RUNNER_TEMP/delete.log"
