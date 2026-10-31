@@ -3,7 +3,10 @@ import { computed } from "vue";
 import Dither from "./Dither.vue";
 import { type Domain, domainScope } from "./domain.ts";
 
-const props = withDefaults(defineProps<{ domains: readonly Domain[]; glow?: boolean }>(), { glow: true });
+const props = withDefaults(
+  defineProps<{ domains: readonly Domain[]; glow?: boolean; avoid?: readonly (Element | null | undefined)[] }>(),
+  { glow: true, avoid: () => [] },
+);
 
 const scope = computed(() => domainScope(props.domains));
 </script>
@@ -12,7 +15,13 @@ const scope = computed(() => domainScope(props.domains));
   <div class="backdrop" v-bind="scope" aria-hidden="true">
     <div v-if="glow" class="glow" />
     <div class="dither">
-      <Dither :key="scope.style['--rk-color-domain']" pattern="corner" color="domain" :intensity="1.4" />
+      <Dither
+        :key="scope.style['--rk-color-domain']"
+        pattern="corner"
+        color="domain"
+        :intensity="1.4"
+        :avoid="avoid"
+      />
     </div>
   </div>
 </template>

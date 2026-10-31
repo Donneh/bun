@@ -24,7 +24,7 @@ const router = useRouter();
 const { apiBase } = useRuntimeConfig().public;
 const theme = useTheme();
 
-const NAV_LINKS = [{ label: "Cards", href: "/", current: true }];
+const { links: navLinks, query: navQuery, navigate, search } = useSiteNavigation();
 
 const cardId = computed(() => String(route.params.id));
 
@@ -67,7 +67,6 @@ onMounted(() => {
   if (typeof back === "string" && router.resolve(back).name === "index") resultsPath.value = back;
 });
 
-const navQuery = ref("");
 
 useHead(() => ({
   title: card.value
@@ -80,14 +79,6 @@ useHead(() => ({
 async function goBack(href: string) {
   if (resultsPath.value) router.back();
   else await navigateTo(href);
-}
-
-function navigate(href: string) {
-  return navigateTo(href);
-}
-
-function search(query: string) {
-  return navigateTo({ path: "/", query: query ? { q: query } : {} });
 }
 
 function choosePrinting(id: string) {
@@ -104,7 +95,7 @@ function choosePrinting(id: string) {
       <SiteNavbar
         v-model="navQuery"
         v-model:theme="theme"
-        :links="NAV_LINKS"
+        :links="navLinks"
         @search="search"
         @navigate="navigate"
       />

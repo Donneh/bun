@@ -58,7 +58,9 @@ test("an empty query shows every card in the current sort", async ({ page, reque
 
   await expect(page).toHaveTitle("Riftkeeper");
   await expect(page.getByRole("heading", { level: 1, name: "Search the whole set. Instantly." })).toBeVisible();
-  await expect(page.getByText(`Riftkeeper · ${count(data.cards)} cards · updated nightly`)).toBeVisible();
+  await expect(page.getByText(`${count(data.cards)} cards · updated nightly`, { exact: true })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Site" }).getByRole("link", { name: "Riftkeeper" })).toBeVisible();
+  await expect(page.getByRole("search")).toHaveCount(1);
   await expect(searchBox(page)).toHaveValue("");
   await expect(exampleQueries(page).getByRole("button")).toHaveCount(3);
   await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
@@ -154,10 +156,10 @@ test("the corner dither keeps clear of the text and fades out before its edges",
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}`);
   await expect(results(page).getByRole("listitem").first()).toBeVisible();
-  await expect(page.getByText(/^Riftkeeper · .* cards · /)).toBeVisible();
+  await expect(page.getByText(/^[\d,]+ cards · updated nightly$/)).toBeVisible();
 
   const coverage = await page.evaluate(() => {
-    const canvas = document.querySelector<HTMLCanvasElement>("section canvas");
+    const canvas = document.querySelector<HTMLCanvasElement>("canvas");
     const context = canvas?.getContext("2d");
     if (!canvas || !context) return null;
     const bounds = canvas.getBoundingClientRect();
@@ -176,7 +178,7 @@ test("the corner dither keeps clear of the text and fades out before its edges",
     };
     const rectOf = (selector: string) => document.querySelector(selector)?.getBoundingClientRect();
     const eyebrowText = [...document.querySelectorAll("section p span")].find((span) =>
-      span.textContent?.startsWith("Riftkeeper"),
+      span.textContent?.endsWith("updated nightly"),
     );
     let total = 0;
     let leftColumn = 0;
@@ -188,17 +190,15 @@ test("the corner dither keeps clear of the text and fades out before its edges",
           if (x === 0) leftColumn++;
           if (y === canvas.height - 1) bottomRow++;
         }
-    const behind = [
-      eyebrowText?.getBoundingClientRect(),
-      rectOf("form[role='search']"),
-      rectOf("button[aria-label^='Theme:']"),
-    ].map((rect) => (rect ? litInside(rect) : -1));
+    const behind = [eyebrowText?.getBoundingClientRect(), rectOf("main form[role='search']")].map((rect) =>
+      rect ? litInside(rect) : -1,
+    );
     return { total, leftColumn, bottomRow, behind, top: bounds.top, right: bounds.right };
   });
 
   expect(coverage).not.toBeNull();
   expect(coverage?.total).toBeGreaterThan(0);
-  expect(coverage?.behind).toEqual([0, 0, 0]);
+  expect(coverage?.behind).toEqual([0, 0]);
   expect(coverage?.leftColumn).toBe(0);
   expect(coverage?.bottomRow).toBe(0);
   expect(coverage?.top).toBeLessThanOrEqual(0);
@@ -211,13 +211,7 @@ test("the theme button cycles system, light and dark and remembers the choice", 
   const background = () => page.evaluate(() => getComputedStyle(document.body).backgroundColor);
   const light = await background();
   await expect(themeButton(page)).toHaveAccessibleName("Theme: system");
-  const eyebrowBox = await page
-    .getByRole("main")
-    .getByText(/^Riftkeeper/)
-    .boundingBox();
-  const buttonBox = await themeButton(page).boundingBox();
-  const middle = (box: { y: number; height: number } | null) => (box ? box.y + box.height / 2 : Number.NaN);
-  expect(Math.abs(middle(eyebrowBox) - middle(buttonBox))).toBeLessThan(4);
+  await expect(page.getByRole("navigation", { name: "Site" }).getByRole("button", { name: /^Theme: / })).toBeVisible();
 
   await themeButton(page).click();
   await expect(themeButton(page)).toHaveAccessibleName("Theme: light");

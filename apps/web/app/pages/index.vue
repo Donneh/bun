@@ -2,6 +2,7 @@
 import {
   AppShell,
   CardGrid,
+  DomainBackdrop,
   ExampleQueries,
   FilterChips,
   Hero,
@@ -9,13 +10,14 @@ import {
   ResultSummary,
   SearchBar,
   SiteFooter,
+  SiteNavbar,
   SortControl,
   type SortSelection,
   StatusMessage,
-  ThemeButton,
   Toolbar,
   WarningList,
 } from "@riftkeeper/ui";
+import type { ComponentPublicInstance } from "vue";
 import { useTheme } from "~/composables/theme";
 import { rememberedCard } from "~/utils/card-cache";
 import { selectedPrinting } from "~/utils/card-detail";
@@ -54,14 +56,17 @@ const theme = useTheme();
 
 const { data: cardCount } = useLazyAsyncData("card-count", () => fetchCardCount(apiBase));
 const eyebrow = computed(() =>
-  ["Riftkeeper", cardCount.value ? `${cardCount.value.toLocaleString("en")} cards` : null, "updated nightly"]
+  [cardCount.value ? `${cardCount.value.toLocaleString("en")} cards` : null, "updated nightly"]
     .filter(Boolean)
     .join(" · "),
 );
+const { links: navLinks, navigate } = useSiteNavigation();
 
 const state = computed(() => parseSearchState(route.query));
 const stateKey = computed(() => searchStateKey(state.value));
 const draft = ref(state.value.query);
+const searchBar = useTemplateRef<ComponentPublicInstance>("searchBar");
+const ditherAvoids = computed(() => [searchBar.value?.$el as Element | undefined]);
 watch(
   () => state.value.query,
   (value) => {
@@ -177,16 +182,20 @@ async function loadNextPage() {
 
 <template>
   <AppShell>
+    <template #backdrop>
+      <DomainBackdrop :domains="[]" :glow="false" :avoid="ditherAvoids" />
+    </template>
+    <template #header>
+      <SiteNavbar v-model:theme="theme" :links="navLinks" :searchable="false" @navigate="navigate" />
+    </template>
     <Hero
       :eyebrow="eyebrow"
       title="Search the whole set. Instantly."
       subtitle="Find cards by name, domain, cost, rarity or card text."
-    >
-      <template #actions>
-        <ThemeButton v-model="theme" />
-      </template>
-    </Hero>
-    <SearchBar v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
+      compact
+      :decorated="false"
+    />
+    <SearchBar ref="searchBar" v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
     <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
     <StatusMessage v-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
     <template v-else-if="view.kind === 'loading'">

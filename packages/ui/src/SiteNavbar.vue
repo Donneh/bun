@@ -5,15 +5,23 @@ import type { NavLink } from "./nav-link.ts";
 import ThemeButton from "./ThemeButton.vue";
 import type { ThemePreference } from "./theme.ts";
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     links?: readonly NavLink[];
     brand?: string;
     brandHref?: string;
     label?: string;
     placeholder?: string;
+    searchable?: boolean;
   }>(),
-  { links: () => [], brand: "Riftkeeper", brandHref: "/", label: "Search cards", placeholder: "Search cards…" },
+  {
+    links: () => [],
+    brand: "Riftkeeper",
+    brandHref: "/",
+    label: "Search cards",
+    placeholder: "Search cards…",
+    searchable: true,
+  },
 );
 
 const query = defineModel<string>({ default: "" });
@@ -56,6 +64,7 @@ function cancelSearch() {
 }
 
 function focusOnSlash(event: KeyboardEvent) {
+  if (!props.searchable) return;
   if (event.key !== "/" || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
   if (event.target instanceof Element && event.target.closest(TYPING_TARGETS)) return;
   event.preventDefault();
@@ -70,7 +79,14 @@ onBeforeUnmount(() => window.removeEventListener("keydown", focusOnSlash));
   <header class="navbar" :class="{ searching }">
     <nav class="inner" aria-label="Site">
       <a class="brand" :href="brandHref" @click="follow($event, brandHref)">{{ brand }}</a>
-      <form ref="form" class="search" role="search" @submit.prevent="submit" @focusout="closeWhenFocusLeaves">
+      <form
+        v-if="searchable"
+        ref="form"
+        class="search"
+        role="search"
+        @submit.prevent="submit"
+        @focusout="closeWhenFocusLeaves"
+      >
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
           <path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
@@ -91,7 +107,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", focusOnSlash));
         />
         <kbd class="key" aria-hidden="true">/</kbd>
       </form>
-      <button class="open-search" type="button" :aria-label="label" @click="openSearch">
+      <button v-if="searchable" class="open-search" type="button" :aria-label="label" @click="openSearch">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
           <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2" />
           <path d="m20 20-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
