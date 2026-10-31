@@ -17,7 +17,6 @@
   --rk-color-focus-ring: color-mix(in srgb, var(--rk-color-accent) 22%, transparent);
   --rk-color-selection: var(--rk-color-accent);
   --rk-color-on-selection: var(--rk-color-on-accent);
-  --rk-color-glyph-ring: var(--rk-color-text-muted);
   --rk-color-warning-surface: #fff8e1;
   --rk-color-warning-border: #f0c36d;
   --rk-color-warning-text: #6b4e00;

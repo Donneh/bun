@@ -18,10 +18,6 @@ export function glyphMarkup(name: GlyphName, idPrefix: string): string {
   return GLYPH_MARKUP[name].replaceAll("GLYPH_ID", idPrefix);
 }
 
-export function isDiscGlyph(name: GlyphName): boolean {
-  return name.startsWith("energy_") || (name.startsWith("rune_") && name !== "rune_rainbow");
-}
-
 export function glyphLabel(name: GlyphName): string {
   if (name === "rune_rainbow") return "Rune of any domain";
   const energy = /^energy_(\d+)$/.exec(name)?.[1];
