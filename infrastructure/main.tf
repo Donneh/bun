@@ -131,7 +131,7 @@ resource "cloudflare_worker" "web" {
 
   subdomain = {
     enabled          = false
-    previews_enabled = false
+    previews_enabled = true
   }
 
   observability = {
