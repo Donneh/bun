@@ -15,6 +15,8 @@
   --rk-color-accent-text: #44403c;
   --rk-color-on-accent: #fbf9f6;
   --rk-color-focus-ring: color-mix(in srgb, var(--rk-color-accent) 22%, transparent);
+  --rk-color-selection: var(--rk-color-accent);
+  --rk-color-on-selection: var(--rk-color-on-accent);
   --rk-color-warning-surface: #fff8e1;
   --rk-color-warning-border: #f0c36d;
   --rk-color-warning-text: #6b4e00;
@@ -125,6 +127,11 @@
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+::selection {
+  background: var(--rk-color-selection);
+  color: var(--rk-color-on-selection);
 }
 
 body {
