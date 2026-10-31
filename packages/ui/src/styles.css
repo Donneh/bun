@@ -24,6 +24,14 @@
   --rk-color-danger-surface: #fff1f1;
   --rk-color-danger-border: #f0a3a3;
   --rk-color-danger-text: #a01c1c;
+  --rk-color-keyword-teal: #1d6b66;
+  --rk-color-on-keyword-teal: #fbf9f6;
+  --rk-color-keyword-lime: #a3c43c;
+  --rk-color-on-keyword-lime: #1c1917;
+  --rk-color-keyword-rose: #c42a63;
+  --rk-color-on-keyword-rose: #fbf9f6;
+  --rk-color-keyword-slate: #5f5953;
+  --rk-color-on-keyword-slate: #fbf9f6;
 
   --rk-space-1: 0.25rem;
   --rk-space-2: 0.5rem;
