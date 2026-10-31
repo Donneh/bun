@@ -41,6 +41,10 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
           <span class="line text" />
         </span>
       </div>
+      <div class="section foot">
+        <span class="pill" />
+        <span class="line label" />
+      </div>
     </GlassPanel>
   </CardDetail>
 </template>
@@ -100,6 +104,20 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
   grid-template-columns: 2.5rem minmax(0, 1fr);
   gap: var(--rk-space-3);
   align-items: center;
+  padding-block: var(--rk-space-2);
+}
+
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pill {
+  width: 4rem;
+  height: var(--rk-control-height-sm);
+  border-radius: 999px;
+  background: var(--rk-color-surface-muted);
 }
 
 .thumbnail {

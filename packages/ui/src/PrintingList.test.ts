@@ -10,6 +10,7 @@ const printings = [
     code: "OGN-119/298",
     details: ["Standard", "Epic", "Six More Vodka"],
     imageUrl: "https://example.com/ogn-119.png",
+    orientation: "portrait" as const,
   },
   {
     id: "ogn-119a-298",
@@ -17,6 +18,7 @@ const printings = [
     code: "OGN-119a/298",
     details: ["Alt art", "Showcase"],
     imageUrl: "https://example.com/ogn-119a.png",
+    orientation: "landscape" as const,
   },
 ];
 
@@ -40,6 +42,7 @@ describe("PrintingList", () => {
       printings.map((printing) => printing.imageUrl),
     );
     expect(thumbnails.every((image) => image.getAttribute("alt") === "")).toBe(true);
+    expect(thumbnails.map((image) => image.classList.contains("landscape"))).toEqual([false, true]);
   });
 
   test("marks the selected printing as pressed", () => {

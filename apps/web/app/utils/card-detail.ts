@@ -95,6 +95,7 @@ export function printingSummaries(card: Card): PrintingSummary[] {
       (detail): detail is string => detail !== null,
     ),
     imageUrl: printing.imageUrl,
+    orientation: printing.orientation,
     srcset: responsiveImage(printing.imageUrl, printing.orientation, "thumbnail").srcset,
   }));
 }

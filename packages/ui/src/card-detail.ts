@@ -1,3 +1,4 @@
+import type { CardOrientation } from "./card-summary.ts";
 import type { GlyphName, GlyphTextPart } from "./glyph.ts";
 
 export interface CardStat {
@@ -18,6 +19,7 @@ export interface PrintingSummary {
   readonly code: string;
   readonly details: readonly string[];
   readonly imageUrl: string;
+  readonly orientation: CardOrientation;
   readonly srcset?: string;
 }
 

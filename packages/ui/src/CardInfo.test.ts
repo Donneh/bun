@@ -26,9 +26,10 @@ const ahri: CardInfoContent = {
   artist: "Six More Vodka",
 };
 
+const printing = { setName: "Origins", orientation: "portrait" as const };
 const printings = [
-  { id: "ogn-119", setName: "Origins", code: "OGN-119/298", details: ["Standard"], imageUrl: "https://e.com/1.png" },
-  { id: "ogn-119a", setName: "Origins", code: "OGN-119a/298", details: ["Alt art"], imageUrl: "https://e.com/2.png" },
+  { ...printing, id: "ogn-119", code: "OGN-119/298", details: ["Standard"], imageUrl: "https://e.com/1.png" },
+  { ...printing, id: "ogn-119a", code: "OGN-119a/298", details: ["Alt art"], imageUrl: "https://e.com/2.png" },
 ];
 
 const renderInfo = (card: CardInfoContent = ahri) =>

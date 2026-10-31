@@ -24,6 +24,7 @@ const headingId = useId();
         >
           <img
             class="thumbnail"
+            :class="printing.orientation"
             :src="printing.imageUrl"
             :srcset="printing.srcset"
             sizes="2.5rem"
@@ -98,7 +99,18 @@ const headingId = useId();
 .thumbnail {
   display: block;
   width: 2.5rem;
+  aspect-ratio: 63 / 88;
   border-radius: var(--rk-radius-sm);
+  object-fit: cover;
+}
+
+.thumbnail.landscape {
+  aspect-ratio: 88 / 63;
+}
+
+.printing[aria-pressed="true"] .details,
+.printing[aria-pressed="true"] .code {
+  color: var(--rk-color-text);
 }
 
 .name {
