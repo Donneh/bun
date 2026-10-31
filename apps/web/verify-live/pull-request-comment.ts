@@ -9,6 +9,8 @@ export interface CommentSource {
 
 const VIEWPORT_LABELS: Record<ViewportName, string> = { desktop: "Desktop", "pixel-7": "Pixel 7" };
 const IMAGE_WIDTH = 200;
+const PROBLEMS_PER_PAGE = 3;
+const PROBLEM_LENGTH = 300;
 
 export function pullRequestComment({ reports, imageBaseUrl, commit, runUrl }: CommentSource): string {
   const failed = reports.filter((report) => report.problems.length > 0);
@@ -36,9 +38,10 @@ function pathSection(path: string, reports: readonly SavedReport[], imageBaseUrl
   const label = (report: SavedReport) => `${VIEWPORT_LABELS[report.viewport]} ${report.colorScheme}`;
   const image = (report: SavedReport) => {
     const url = `${imageBaseUrl.replace(/\/$/, "")}/${encodeURIComponent(report.firstScreen)}`;
-    return `<a href="${url}"><img src="${url}" width="${IMAGE_WIDTH}" alt="${path} ${label(report)}"></a>`;
+    const alt = escapeHtml(`${decodeURIComponent(path)} ${label(report)}`);
+    return `<a href="${url}"><img src="${url}" width="${IMAGE_WIDTH}" alt="${alt}"></a>`;
   };
-  const problems = reports.flatMap((report) => report.problems.map((problem) => `- ${label(report)}: ${problem}`));
+  const problems = reports.flatMap((report) => problemLines(label(report), report.problems));
   return [
     "",
     `### \`${decodeURIComponent(path)}\``,
@@ -48,4 +51,20 @@ function pathSection(path: string, reports: readonly SavedReport[], imageBaseUrl
     `| ${reports.map(image).join(" | ")} |`,
     ...(problems.length > 0 ? ["", ...problems] : []),
   ];
+}
+
+function problemLines(label: string, problems: readonly string[]): string[] {
+  const shown = problems.slice(0, PROBLEMS_PER_PAGE).map((problem) => `- ${label}: ${inlineCode(problem)}`);
+  const hidden = problems.length - PROBLEMS_PER_PAGE;
+  return hidden > 0 ? [...shown, `- ${label}: ${hidden} more in the run log`] : shown;
+}
+
+function inlineCode(text: string): string {
+  const firstLine = (text.split("\n")[0] ?? "").trim();
+  const clipped = firstLine.length > PROBLEM_LENGTH ? `${firstLine.slice(0, PROBLEM_LENGTH)}…` : firstLine;
+  return `<code>${escapeHtml(clipped)}</code>`;
+}
+
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
