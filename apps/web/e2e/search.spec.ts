@@ -235,6 +235,29 @@ test("the theme button cycles system, light and dark and remembers the choice", 
   expect(await background()).toBe(light);
 });
 
+for (const colorScheme of ["light", "dark"] as const)
+  test(`selected text uses the ink accent in the ${colorScheme} theme`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.goto("/");
+
+    const colors = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.background = "var(--rk-color-accent)";
+      probe.style.color = "var(--rk-color-on-accent)";
+      document.body.append(probe);
+      const accent = getComputedStyle(probe);
+      const selection = getComputedStyle(document.body, "::selection");
+      const result = {
+        accent: [accent.backgroundColor, accent.color],
+        selection: [selection.backgroundColor, selection.color],
+      };
+      probe.remove();
+      return result;
+    });
+
+    expect(colors.selection).toEqual(colors.accent);
+  });
+
 test("the page works when the browser blocks storage", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", {
