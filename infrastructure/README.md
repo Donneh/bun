@@ -16,7 +16,7 @@ The web Worker, `riftkeeper-web` on `web_hostname`. It has no code, only static 
 
 | Resource                           | Purpose                                                                                                                                                                  |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off.                                                                                                                       |
+| `cloudflare_worker`                | The Worker and its settings. `workers.dev` is off and Preview URLs on `workers.dev` are on, for [Previews](#previews).                                                   |
 | `cloudflare_worker_version`        | Uploads `apps/web/.output/public`, the output of `nuxt generate`. An unknown path gets `index.html` with status 200, so the app routes deep links such as `/cards/<id>`. |
 | `cloudflare_workers_deployment`    | Splits traffic between the live and the new version. See [Release and rollback](#release-and-rollback).                                                                  |
 | `cloudflare_workers_custom_domain` | Serves the Worker on `web_hostname` and `www.<web_hostname>`. Cloudflare creates the DNS records.                                                                        |
@@ -145,6 +145,31 @@ curl -s https://api.riftkeeper.app/health -H 'Cloudflare-Workers-Version-Overrid
 ```
 
 The version must be part of the current deployment. Otherwise Cloudflare ignores the header and serves the live version.
+
+## Previews
+
+`.github/workflows/preview.yml` gives every pull request from a branch of this repository a [Worker Preview](https://developers.cloudflare.com/workers/previews/) of the web app, so the change can be tried on a phone before it is merged:
+
+1. It builds `apps/web` against the production API, with a "Preview" bar that links the pull request, a `robots: noindex` meta tag and a `_headers` file that sends `X-Robots-Tag: noindex`.
+2. `wrangler preview --name pr-<number>` creates or updates the Preview `pr-<number>` of `riftkeeper-web`. Its URL stays the same across pushes.
+3. `verify:live` checks the Preview URL in a browser, and a `curl` checks the `noindex` header.
+4. It posts or updates one "Preview" comment with the link, and sets it as the `preview` environment's URL.
+5. When the pull request closes, the `cleanup` job deletes the Preview and says so in the comment. Cloudflare keeps at most 100 Previews per Worker on the free plan and deletes the least recently deployed one beyond that.
+
+A Preview is not a Worker version and not a deployment: `wrangler preview` only calls the `/workers/workers/riftkeeper-web/previews` endpoints and the assets upload. Production traffic, the live deployment and the version list do not change, and OpenTofu sees no drift. Check it with `GET https://api.riftkeeper.app/health` and the version list of `riftkeeper-web` before and after a Preview.
+
+Only the web app gets a Preview. Its API is production, so an API change shows in a Preview only after it is deployed.
+
+Turning on Preview URLs (`subdomain.previews_enabled` on `cloudflare_worker.web`) also serves every uploaded `riftkeeper-web` version on `<version prefix>-riftkeeper-web.<subdomain>.workers.dev`. Those versions hold only the public static page, so that exposes nothing new. The API and scheduler Workers keep Preview URLs off.
+
+### Set up previews
+
+The owner does this once. Until then the Preview workflow skips with a notice.
+
+1. Create a Cloudflare API token `riftkeeper-preview` with only **Workers Scripts Write** on the account. A separate token keeps the zone permissions of `riftkeeper-deploy` out of pull request jobs and can be revoked on its own. It can still upload and deploy Workers, so keep pull requests from forks out: the workflow already skips them, and GitHub does not give their runs secrets.
+2. Make sure the account has a `workers.dev` subdomain: it shows on the **Workers & Pages** overview in the dashboard, or in `GET /accounts/{account_id}/workers/subdomain`. Preview URLs are `<preview>-riftkeeper-web.<subdomain>.workers.dev`.
+3. In GitHub, create the environment `preview` and add the secret `CLOUDFLARE_API_TOKEN` (the new token) and the variable `CLOUDFLARE_ACCOUNT_ID`.
+4. Merge the pull request that turns on `previews_enabled`, and let the Deploy workflow apply it. Rerun the Preview workflow on an open pull request to get its link.
 
 ## Deploy from your machine
 

@@ -1,0 +1,168 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  PR: ${{ github.event.pull_request.number }}
+  PREVIEW_NAME: pr-${{ github.event.pull_request.number }}
+  MARKER: "<!-- riftkeeper-preview -->"
+  WRANGLER_SEND_METRICS: "false"
+
+jobs:
+  preview:
+    if: ${{ github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+    environment:
+      name: preview
+      url: ${{ steps.upload.outputs.url }}
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - name: Check that previews are set up
+        id: setup
+        working-directory: .
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::No preview: the preview environment has no CLOUDFLARE_API_TOKEN secret or CLOUDFLARE_ACCOUNT_ID variable. See 'Previews' in infrastructure/README.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: actions/checkout@v4
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: bun install --frozen-lockfile
+        working-directory: .
+      - name: Build the page against the production API
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        env:
+          NUXT_PUBLIC_PREVIEW_HREF: ${{ github.event.pull_request.html_url }}
+        run: |
+          NUXT_PUBLIC_PREVIEW_LABEL="Pull request #$PR at ${HEAD_SHA:0:7}" bun run build
+          printf '/*\n  X-Robots-Tag: noindex\n' > .output/public/_headers
+      - name: Upload the Preview ${{ env.PREVIEW_NAME }}
+        id: upload
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: |
+          node node_modules/wrangler/bin/wrangler.js preview --name "$PREVIEW_NAME" --tag "${HEAD_SHA:0:7}" --json > "$RUNNER_TEMP/preview.json"
+          url=$(jq -r '.preview.urls[0] // empty' "$RUNNER_TEMP/preview.json")
+          if [ -z "$url" ]; then
+            echo "::error::Cloudflare returned no Preview URL. Are workers.dev Preview URLs enabled on riftkeeper-web (subdomain.previews_enabled in infrastructure/main.tf)?"
+            cat "$RUNNER_TEMP/preview.json"
+            exit 1
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "commit_url=$(jq -r '.deployment.urls[0] // empty' "$RUNNER_TEMP/preview.json")" >> "$GITHUB_OUTPUT"
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: bunx playwright install --with-deps chromium
+      - name: Check the Preview in a browser
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        env:
+          URL: ${{ steps.upload.outputs.url }}
+        run: node verify-live/cli.ts "$URL" --out "$RUNNER_TEMP/preview-screenshots"
+      - name: Check that the Preview is not indexed
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        env:
+          URL: ${{ steps.upload.outputs.url }}
+        run: |
+          curl --fail --silent --show-error --head "$URL/" | grep -i '^x-robots-tag: .*noindex'
+      - name: Post or update the Preview comment
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        working-directory: .
+        env:
+          URL: ${{ steps.upload.outputs.url }}
+          COMMIT_URL: ${{ steps.upload.outputs.commit_url }}
+        run: |
+          {
+            echo "$MARKER"
+            echo "## Preview"
+            echo
+            echo "**[$URL]($URL)** serves this pull request at ${HEAD_SHA:0:7}, built against the production API. It updates on every push and is deleted when the pull request closes."
+            if [ -n "$COMMIT_URL" ]; then
+              echo
+              echo "This commit only: $COMMIT_URL"
+            fi
+            echo
+            echo "The page shows a Preview bar and answers with \`X-Robots-Tag: noindex\`. Production traffic and versions are unchanged: a Preview is not a Worker version or deployment."
+          } > "$RUNNER_TEMP/preview-comment.md"
+          id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/preview-comment.md" > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" -F "body=@$RUNNER_TEMP/preview-comment.md" > /dev/null
+          fi
+
+  cleanup:
+    if: ${{ github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    environment: preview
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Check that previews are set up
+        id: setup
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: actions/checkout@v4
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: bun install --frozen-lockfile
+      - name: Delete the Preview ${{ env.PREVIEW_NAME }}
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        working-directory: apps/web
+        run: |
+          if ! node node_modules/wrangler/bin/wrangler.js preview delete --name "$PREVIEW_NAME" --skip-confirmation 2> "$RUNNER_TEMP/delete.log"; then
+            cat "$RUNNER_TEMP/delete.log"
+            grep -q 'not found\|10025' "$RUNNER_TEMP/delete.log" || exit 1
+          fi
+      - name: Mark the Preview comment as deleted
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: |
+          id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' | head -n 1)
+          if [ -n "$id" ]; then
+            printf '%s\n## Preview\n\nThe Preview was deleted when the pull request closed.\n' "$MARKER" > "$RUNNER_TEMP/preview-comment.md"
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/preview-comment.md" > /dev/null
+          fi

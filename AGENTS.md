@@ -34,7 +34,7 @@ Black-box and end-to-end tests run against the real card snapshot, which changes
 A change is done when it is live and verified, not when it is merged.
 
 1. Work on a branch. GitHub rejects direct pushes to `main`.
-2. Open a pull request. CI runs the `check` and `infrastructure` jobs.
+2. Open a pull request. CI runs the `check` and `infrastructure` jobs. The Preview workflow builds `apps/web` against the production API, serves it as the Preview `pr-<number>` of `riftkeeper-web` on `workers.dev`, and posts the link in a "Preview" comment, so the owner can try the change on a phone before merging. It deletes the Preview when the pull request closes.
 3. Squash-merge when both are green.
 4. The merge starts the Deploy workflow: the same checks, then `tofu apply` stages the new versions at 0.01% next to the live ones, `test:api` and `test:production` test the staged versions through a version override header, a second `tofu apply` promotes them, and both suites run again. On any failure the workflow moves production back to the versions that were live before the run and fails. See "Release and rollback" in `infrastructure/README.md`. Watch it with `gh run watch`.
    - Find the run by the merge commit, `gh run list --workflow deploy.yml --commit <merge-sha>`, never by taking the latest run: right after the merge the latest is still the previous deploy. The run can take a few seconds to appear; retry for up to two minutes.
@@ -47,7 +47,7 @@ After a new or changed custom domain, Cloudflare answers with an empty, cacheabl
 
 ## Rules
 
-- Never run `wrangler deploy`. OpenTofu owns both Workers and their settings, and wrangler would overwrite them. Wrangler is only for `bun run dev`, `wrangler dev` and bundling.
+- Never run `wrangler deploy`. OpenTofu owns both Workers and their settings, and wrangler would overwrite them. Wrangler is only for `bun run dev`, `wrangler dev`, bundling, and `wrangler preview` in the Preview workflow, which creates a pull request Preview that is neither a Worker version nor a deployment.
 - Write self-documenting code and avoid comments.
 - Infrastructure changes go through `infrastructure/` and a pull request, never through the dashboard or the Cloudflare API.
 - Base every pull request on `main`, never on another feature branch: GitHub closes a pull request when its base branch is deleted on merge. Force-pushes are denied, so update a branch by merging `main` into it.
@@ -62,7 +62,7 @@ GitHub secrets and variables and repository settings are changed by a human. Say
 Cloudflare account changes that OpenTofu does not manage, such as API token permissions or DNS records, go through the Cloudflare MCP `execute` tool. Whether an agent may run it without asking depends on the operator's local Claude Code settings; the shared project settings do not grant it.
 
 - The deploy token `riftkeeper-deploy` uses the legacy **Workers Scripts Write** on the account, and **Workers Routes Write**, **Zone Settings Write**, **Zone WAF Write** and **Dynamic URL Redirects Write** (the www redirect rule) on `riftkeeper.app`. The endpoints that create a Worker and attach a custom domain accept only Workers Scripts Write, not the newer Workers roles. A new Cloudflare resource type usually needs a new permission; check the endpoint's `x-api-token-group` with the Cloudflare MCP `search` tool before merging.
-- Secrets and variables live on the `production` environment in GitHub.
+- Secrets and variables live on the `production` environment in GitHub. The Preview workflow uses the `preview` environment instead: its own `CLOUDFLARE_API_TOKEN` with only **Workers Scripts Write** on the account, and `CLOUDFLARE_ACCOUNT_ID`. See "Previews" in `infrastructure/README.md`.
 
 ## Cloudflare
 
