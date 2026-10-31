@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FilterChipSummary } from "./filter-chip.ts";
+import RiftboundGlyph from "./RiftboundGlyph.vue";
 
 withDefaults(
   defineProps<{ chips: readonly FilterChipSummary[]; moreConditions?: boolean; label?: string; placeholder?: boolean }>(),
@@ -18,7 +19,11 @@ const emit = defineEmits<{ remove: [id: string] }>();
     <ul class="chips" :aria-label="label">
       <li v-for="chip in chips" :key="chip.id" class="chip" :class="{ removable: chip.removable }">
         <span class="label">{{ chip.label }}</span>
-        <span class="value">{{ chip.value }}</span>
+        <span class="value"
+          ><RiftboundGlyph v-for="glyph in chip.glyphs" :key="glyph" class="glyph" :name="glyph" decorative />{{
+            chip.value
+          }}</span
+        >
         <button
           v-if="chip.removable"
           class="remove"
@@ -85,6 +90,10 @@ const emit = defineEmits<{ remove: [id: string] }>();
 .value {
   overflow-wrap: anywhere;
   color: var(--rk-color-text);
+}
+
+.glyph:last-of-type {
+  margin-inline-end: 0.3em;
 }
 
 .remove {

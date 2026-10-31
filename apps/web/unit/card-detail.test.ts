@@ -51,14 +51,48 @@ describe("cardHref", () => {
 describe("cardFacts", () => {
   test("lists every fact the card has, in reading order", () => {
     expect(cardFacts(ahri)).toEqual([
-      { label: "Type", value: "Unit · Champion" },
-      { label: "Domains", value: "Mind · Calm" },
-      { label: "Cost", value: "3 energy · 1 power" },
-      { label: "Might", value: "3" },
-      { label: "Might bonus", value: "+2" },
-      { label: "Tags", value: "Ahri · Ionia" },
-      { label: "Ability", value: "When I attack, give an enemy unit -2 :rb_might:.", rulesText: true },
-      { label: "Effect", value: "[Ganking]", rulesText: true },
+      {
+        label: "Type",
+        value: [
+          { kind: "glyph", name: "card_type_unit", decorative: true },
+          { kind: "text", text: "Unit · Champion" },
+        ],
+      },
+      {
+        label: "Domains",
+        value: [
+          { kind: "glyph", name: "rune_mind", decorative: true },
+          { kind: "text", text: "Mind" },
+          { kind: "text", text: " · " },
+          { kind: "glyph", name: "rune_calm", decorative: true },
+          { kind: "text", text: "Calm" },
+        ],
+      },
+      {
+        label: "Cost",
+        value: [
+          { kind: "glyph", name: "energy_3" },
+          { kind: "text", text: " · " },
+          { kind: "text", text: "1 power" },
+        ],
+      },
+      {
+        label: "Might",
+        value: [
+          { kind: "glyph", name: "might", decorative: true },
+          { kind: "text", text: "3" },
+        ],
+      },
+      {
+        label: "Might bonus",
+        value: [
+          { kind: "glyph", name: "might", decorative: true },
+          { kind: "text", text: "+2" },
+        ],
+      },
+      { label: "Tags", value: [{ kind: "text", text: "Ahri · Ionia" }] },
+      { label: "Ability", rulesText: "When I attack, give an enemy unit -2 :rb_might:." },
+      { label: "Effect", rulesText: "[Ganking]" },
     ]);
   });
 
@@ -66,10 +100,46 @@ describe("cardFacts", () => {
     expect(cardFacts(battlefield).map((fact) => fact.label)).toEqual(["Type", "Domain", "Ability"]);
   });
 
+  test("shows the colorless glyph for a colorless card", () => {
+    expect(cardFacts(battlefield).find((fact) => fact.label === "Domain")).toEqual({
+      label: "Domain",
+      value: [
+        { kind: "glyph", name: "colorless", decorative: true },
+        { kind: "text", text: "Colorless" },
+      ],
+    });
+  });
+
   test("shows a cost of zero", () => {
     const free = makeCard({ energyCost: 0, powerCost: null });
 
-    expect(cardFacts(free).find((fact) => fact.label === "Cost")?.value).toBe("0 energy");
+    expect(cardFacts(free).find((fact) => fact.label === "Cost")).toEqual({
+      label: "Cost",
+      value: [{ kind: "glyph", name: "energy_0" }],
+    });
+  });
+
+  test("names the power of a single-domain card with its domain rune", () => {
+    const fury = makeCard({ domains: ["fury"], energyCost: 2, powerCost: 1 });
+
+    expect(cardFacts(fury).find((fact) => fact.label === "Cost")).toEqual({
+      label: "Cost",
+      value: [
+        { kind: "glyph", name: "energy_2" },
+        { kind: "text", text: " · " },
+        { kind: "text", text: "1 " },
+        { kind: "glyph", name: "rune_fury", label: "Fury power" },
+      ],
+    });
+  });
+
+  test("spells out an energy cost that has no glyph", () => {
+    const expensive = makeCard({ energyCost: 13, powerCost: null });
+
+    expect(cardFacts(expensive).find((fact) => fact.label === "Cost")).toEqual({
+      label: "Cost",
+      value: [{ kind: "text", text: "13 energy" }],
+    });
   });
 });
 

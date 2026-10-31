@@ -5,8 +5,8 @@ import FilterChips from "./FilterChips.vue";
 import type { FilterChipSummary } from "./filter-chip.ts";
 
 const chips: FilterChipSummary[] = [
-  { id: "0-6", label: "Domain", value: "Fury", removable: true },
-  { id: "7-14", label: "Cost", value: "≤ 2", removable: false },
+  { id: "0-6", label: "Domain", value: "Fury", glyphs: ["rune_fury"], removable: true },
+  { id: "7-14", label: "Cost", value: "≤ 2", glyphs: [], removable: false },
 ];
 
 describe("FilterChips", () => {
@@ -18,6 +18,18 @@ describe("FilterChips", () => {
       expect.stringContaining("DomainFury"),
       expect.stringContaining("Cost≤ 2"),
     ]);
+  });
+
+  test("draws a filter's glyphs next to its value and leaves them out of what it reads", () => {
+    const domains: FilterChipSummary[] = [
+      { id: "0-11", label: "Domain", value: "Fury or Calm", glyphs: ["rune_fury", "rune_calm"], removable: true },
+    ];
+    render(FilterChips, { props: { chips: domains } });
+
+    const item = within(screen.getByRole("list", { name: "Filters" })).getByRole("listitem");
+    expect(item.querySelectorAll("[aria-hidden='true'] svg")).toHaveLength(2);
+    expect(within(item).queryByRole("img")).toBeNull();
+    expect(item.textContent).toContain("DomainFury or Calm");
   });
 
   test("offers removal only for removable filters", () => {

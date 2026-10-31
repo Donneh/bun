@@ -68,10 +68,16 @@ describe("toChipSummary", () => {
     expect(chipsOf("c:fury+calm").map((chip) => toChipSummary(chip).value)).toEqual(["Fury and Calm"]);
   });
 
+  test("draws the rune of each domain, the might glyph and the card type glyph", () => {
+    expect(
+      chipsOf("c:fury,calm c:colorless m:>=3 type:unit r:epic cost:2").map((chip) => toChipSummary(chip).glyphs),
+    ).toEqual([["rune_fury", "rune_calm"], ["colorless"], ["might"], ["card_type_unit"], [], []]);
+  });
+
   test("lets only editable filters be removed", () => {
     const [first, second, type] = chipsOf("cost:2 cost:3 type:unit").map(toChipSummary);
 
     expect([first?.removable, second?.removable, type?.removable]).toEqual([false, false, true]);
-    expect(type).toEqual({ id: "14-23", label: "Type", value: "unit", removable: true });
+    expect(type).toEqual({ id: "14-23", label: "Type", value: "unit", glyphs: ["card_type_unit"], removable: true });
   });
 });
