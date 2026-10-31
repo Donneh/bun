@@ -32,6 +32,23 @@
   --rk-color-keyword-slate: #5f5953;
   --rk-color-on-keyword-slate: #fbf9f6;
 
+  --rk-color-domain-fury: #df1620;
+  --rk-color-domain-calm: #488c38;
+  --rk-color-domain-mind: #0f6fa6;
+  --rk-color-domain-body: #e87600;
+  --rk-color-domain-chaos: #6a4094;
+  --rk-color-domain-order: #d2b400;
+  --rk-color-domain-colorless: #8a8580;
+  --rk-color-domain: var(--rk-color-accent);
+  --rk-color-domain-second: var(--rk-color-domain);
+  --rk-color-domain-strong: var(--rk-color-accent);
+
+  --rk-glass-fill: color-mix(in srgb, var(--rk-color-surface) 70%, transparent);
+  --rk-glass-blur: 23px;
+  --rk-glass-edge: color-mix(in srgb, var(--rk-color-text) 10%, transparent);
+  --rk-glass-highlight: rgb(255 255 255 / 0.7);
+  --rk-glass-shadow: color-mix(in srgb, var(--rk-color-text) 10%, transparent);
+
   --rk-space-1: 0.25rem;
   --rk-space-2: 0.5rem;
   --rk-space-3: 0.75rem;
@@ -46,6 +63,9 @@
   --rk-radius-md: 0.25rem;
   --rk-radius-lg: 0.375rem;
   --rk-radius-round: 50%;
+  --rk-radius-card: 0.25rem;
+  --rk-radius-control: calc(var(--rk-radius-card) * 0.6);
+  --rk-radius-inset: calc(var(--rk-radius-card) * 0.5);
 
   --rk-font-family: "Inter Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --rk-font-family-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
@@ -70,6 +90,7 @@
   --rk-control-height: 2.75rem;
   --rk-control-height-sm: 2.75rem;
   --rk-content-width: 70rem;
+  --rk-content-width-narrow: 62rem;
   --rk-card-min-width: 9rem;
 
   --rk-duration-fast: 150ms;
@@ -108,6 +129,8 @@
     --rk-color-danger-surface: #241010;
     --rk-color-danger-border: #6b2626;
     --rk-color-danger-text: #ffb4b4;
+    --rk-glass-highlight: rgb(255 255 255 / 0.08);
+    --rk-glass-shadow: rgb(0 0 0 / 0.45);
   }
 }
 
@@ -129,6 +152,26 @@
   --rk-color-danger-surface: #241010;
   --rk-color-danger-border: #6b2626;
   --rk-color-danger-text: #ffb4b4;
+  --rk-glass-highlight: rgb(255 255 255 / 0.08);
+  --rk-glass-shadow: rgb(0 0 0 / 0.45);
+}
+
+[data-rk-domain] {
+  --rk-color-domain-strong: color-mix(in srgb, var(--rk-color-domain) 55%, var(--rk-color-text));
+  --rk-color-accent: var(--rk-color-domain-strong);
+  --rk-color-focus-ring: color-mix(in srgb, var(--rk-color-domain) 22%, transparent);
+  --rk-color-selection: var(--rk-color-domain-strong);
+  --rk-color-on-selection: var(--rk-color-on-accent);
+}
+
+.rk-glass {
+  border: var(--rk-border-width) solid var(--rk-glass-edge);
+  background: var(--rk-glass-fill);
+  box-shadow:
+    inset 0 1px 0 var(--rk-glass-highlight),
+    0 12px 40px var(--rk-glass-shadow);
+  backdrop-filter: blur(var(--rk-glass-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--rk-glass-blur)) saturate(160%);
 }
 
 *,

@@ -1,5 +1,11 @@
+<script setup lang="ts">
+withDefaults(defineProps<{ narrow?: boolean }>(), { narrow: false });
+</script>
+
 <template>
-  <div class="shell">
+  <div class="shell" :class="{ narrow }">
+    <slot name="backdrop" />
+    <slot name="header" />
     <main class="main">
       <slot />
     </main>
@@ -11,6 +17,9 @@
 
 <style scoped>
 .shell {
+  --rk-page-width: var(--rk-content-width);
+
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -19,10 +28,15 @@
   color: var(--rk-color-text);
 }
 
+.shell.narrow {
+  --rk-page-width: var(--rk-content-width-narrow);
+}
+
 .main,
 .end {
+  position: relative;
   width: calc(100% - 2 * var(--rk-gutter));
-  max-width: var(--rk-content-width);
+  max-width: var(--rk-page-width);
   margin-inline: auto;
 }
 

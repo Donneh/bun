@@ -11,6 +11,26 @@ describe("AppShell", () => {
     expect(screen.queryByRole("contentinfo")).toBeNull();
   });
 
+  test("puts the header before main and the backdrop behind both", () => {
+    const { container } = render(AppShell, {
+      slots: {
+        default: "<p>Content</p>",
+        header: "<header>Navbar</header>",
+        backdrop: '<div class="backdrop" aria-hidden="true"></div>',
+      },
+    });
+
+    const shell = container.firstElementChild;
+    expect([...(shell?.children ?? [])].map((child) => child.tagName)).toEqual(["DIV", "HEADER", "MAIN"]);
+    expect(screen.getByRole("banner").textContent).toBe("Navbar");
+  });
+
+  test("narrows the page to the detail width on request", () => {
+    const { container } = render(AppShell, { props: { narrow: true }, slots: { default: "<p>Content</p>" } });
+
+    expect(container.firstElementChild?.classList.contains("narrow")).toBe(true);
+  });
+
   test("shows the footer after main", () => {
     render(AppShell, { slots: { default: "<p>Content</p>", footer: "<footer>Notice</footer>" } });
 
