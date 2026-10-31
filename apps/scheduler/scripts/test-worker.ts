@@ -51,8 +51,8 @@ async function waitUntilServing() {
   throw new Error(`wrangler dev did not serve ${baseUrl} within ${READY_TIMEOUT_MS} ms`);
 }
 
-async function runCron(cron: string, githubStatus: number) {
-  await fetch(`${baseUrl}/github-status?status=${githubStatus}`);
+async function runCron(cron: string, ...githubStatuses: number[]) {
+  await fetch(`${baseUrl}/github-status?status=${githubStatuses.join(",")}`);
   const response = await fetch(`${baseUrl}/__scheduled?cron=${encodeURIComponent(cron)}`);
   const dispatches = (await (await fetch(`${baseUrl}/dispatches`)).json()) as Dispatch[];
   return { ok: response.ok, dispatches };
@@ -74,8 +74,17 @@ try {
     );
   }
 
-  const rejected = await runCron("17 5 * * *", 401);
-  check(!rejected.ok, "a dispatch that GitHub rejects fails the scheduled event");
+  const rejected = await runCron("17 5 * * *", 401, 204);
+  check(
+    !rejected.ok && rejected.dispatches.length === 1,
+    "a dispatch that GitHub rejects fails the scheduled event without a retry",
+  );
+
+  const recovered = await runCron("17 5 * * *", 503, 204);
+  check(
+    recovered.ok && recovered.dispatches.length === 2,
+    "a dispatch that GitHub answers with a server error is retried and succeeds",
+  );
 
   const unknown = await runCron("0 0 * * *", 204);
   check(!unknown.ok && unknown.dispatches.length === 0, "an unknown cron fails without dispatching");

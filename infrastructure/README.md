@@ -31,7 +31,7 @@ The scheduler Worker, `riftkeeper-scheduler`, has no hostname. It starts the sch
 | `cloudflare_workers_deployment`   | Sends all events to the latest version.                                                                                        |
 | `cloudflare_workers_cron_trigger` | Runs the Worker on every cron in `apps/scheduler/schedules.json`. Each event dispatches the workflow that the file maps it to. |
 
-`apps/scheduler/schedules.json` is the one list of schedules. OpenTofu reads its crons for the trigger and the Worker reads it to pick the workflow, so add or change a schedule there and nowhere else. The workflows themselves have only `workflow_dispatch`. A dispatch that GitHub does not answer with 204 throws, so it shows in Workers Observability for `riftkeeper-scheduler` with the status and response body.
+`apps/scheduler/schedules.json` is the one list of schedules. OpenTofu reads its crons for the trigger and the Worker reads it to pick the workflow, so add or change a schedule there and nowhere else. The workflows themselves have only `workflow_dispatch`. A dispatch that GitHub answers with a 5xx, or that fails on the network, is retried after 2 and again after 20 seconds. Any other answer than 204, or a third failure, throws, so it shows in Workers Observability for `riftkeeper-scheduler` with the status and response body. A successful dispatch logs when the token expires, from GitHub's `github-authentication-token-expiration` header. Nobody watches those logs, so the [scheduler watchdog](#scheduler-watchdog) alerts when dispatches stop.
 
 The scheduler deploys at 100% on every apply. A cron event cannot carry a version override, so a staged version would never be tested before it runs.
 
@@ -79,10 +79,23 @@ The deploy passes `WORKFLOW_DISPATCH_TOKEN` to OpenTofu as the sensitive variabl
 
 ### Rotate the GitHub dispatch token
 
+The current `WORKFLOW_DISPATCH_TOKEN` was stored on 2026-10-30. Its expiry date is not recorded yet: read it from the scheduler's `Dispatched ... the token expires ...` log line, or from the token's page in GitHub's developer settings, and write it here. Rotate the token before that date; the [scheduler watchdog](#scheduler-watchdog) opens an issue within about an hour if it expires anyway.
+
 1. Create a new fine-grained token with **Actions** read and write on this repository only.
 2. Replace the repository secret `WORKFLOW_DISPATCH_TOKEN` with it.
 3. Run the Deploy workflow (`gh workflow run deploy.yml`). The changed secret makes a new scheduler version.
 4. Confirm that the next scheduled run of `monitor.yml` starts, with `gh run list --workflow monitor.yml --event workflow_dispatch`, then revoke the old token.
+5. Write the new token's expiry date above.
+
+### Scheduler watchdog
+
+Nobody watches Workers Observability, so `.github/workflows/scheduler-watchdog.yml` checks from GitHub that the scheduler still dispatches. It is the one workflow on GitHub's own `schedule:` trigger, at minutes 11 and 41, because it must not depend on the scheduler it watches. GitHub drops some of its runs, which only delays an alert. `apps/scheduler/scripts/watchdog.ts` looks up the latest `workflow_dispatch` run of every workflow in `apps/scheduler/schedules.json` and fails when one is older than its maximum age in `apps/scheduler/src/watchdog.ts`: 60 minutes for `monitor.yml`, 26 hours for `scrape-cards.yml`. A unit test fails when a scheduled workflow has no maximum age.
+
+When the check fails, the run fails, which GitHub emails to the person who last changed the watchdog's cron, and it opens the issue **Scheduler stopped dispatching workflows**, or comments on it when it is already open. The issue lists each late workflow with its latest run and where to look for the cause. The first run that finds every workflow on time comments on the issue and closes it.
+
+The watchdog uses the workflow's own `GITHUB_TOKEN` (`actions: read`, `issues: write`), not the dispatch token. It keeps working when the dispatch token expires, and it does not depend on the scheduler's credential: it checks that runs start, not how they were started.
+
+It counts every `workflow_dispatch` run, so a run started by hand resets the clock and can delay an alert by up to one maximum age. The scheduler's dispatches and a person's look the same while the scheduler uses the owner's personal token. Once it dispatches as a GitHub App (#77), the watchdog can count only runs whose triggering actor is the app.
 
 ## Release and rollback
 
@@ -102,6 +115,20 @@ Every apply waits up to 60 seconds for the state lock (`-lock-timeout=60s`), so 
 Staging covers the API and web Worker versions only. The scheduler Worker deploys at 100% at the stage apply, because a cron event cannot carry a version override, and a rollback does not move it. The stage apply applies every other change in `infrastructure/` in full, such as a Worker setting, a custom domain or a ruleset, and the rollback does not undo it.
 
 `create_before_destroy` on the deployment keeps the old deployment in the state when Cloudflare rejects a new one. Without it, OpenTofu would drop the deployment from the state first, and the next deploy would not know the live version.
+
+### Monitor during a deploy
+
+The Monitor workflow (`.github/workflows/monitor.yml`) tests production every 15 minutes. Its first job pipes `gh run list --workflow deploy.yml --branch main` into `monitor-target.ts`, which decides what to test:
+
+- **A Deploy run is in progress and started less than 30 minutes ago.** Monitor skips its tests, succeeds and says so in its summary with a link to the Deploy run. The Deploy run tests production itself and rolls back on failure. After 30 minutes Monitor tests again, so a stuck Deploy run cannot hide an outage for longer than that.
+- **Otherwise** Monitor checks out the commit of the Deploy run on `main` that succeeded last, the commit that production runs, and runs that commit's `test:api` and `test:production`. A test merged for behavior that is not live yet, or that a failed deploy rolled back, therefore does not fail Monitor. If no recent Deploy run succeeded, it tests the commit it was dispatched on and warns.
+
+A Deploy run that starts while Monitor is already testing does not skip it. Such a run stages at 0.01% about one minute after it starts and promotes about two minutes after it starts, while Monitor's tests take under a minute. Monitor has therefore almost always finished before the promotion, and at 0.01% almost none of its requests reach the staged version.
+
+Monitor can also pick an older commit than the live one in two rare cases:
+
+- `bun run deploy` from a machine leaves no Deploy run, so Monitor tests the commit of the last Deploy run.
+- `gh run list` shows only the latest attempt of a run. When a re-run of the live commit's Deploy run fails, the rollback keeps that commit live, but its run now reads `failure`, so Monitor tests the commit of the successful Deploy run before it. Run the Deploy workflow again to fix it.
 
 ### First deploy
 
