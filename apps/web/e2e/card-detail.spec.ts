@@ -108,7 +108,7 @@ test("a card opened from the results shows at once, its image fetched while the 
   const { id, name, printings } = card as ApiCard;
   const art = printings[0] as ApiPrinting;
   const isDetailImage = (url: string) =>
-    imageFile(url) === imageFile(art.imageUrl) && ["360", "720"].includes(new URL(url).searchParams.get("w") ?? "");
+    imageFile(url) === imageFile(art.imageUrl) && ["360", "744"].includes(new URL(url).searchParams.get("w") ?? "");
   const cardRequests: string[] = [];
   page.on("request", (sent) => {
     if (isCardRequest(new URL(sent.url()))) cardRequests.push(sent.url());
