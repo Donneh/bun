@@ -6,6 +6,16 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
+env:
+  MARKER: "<!-- riftkeeper-screenshots -->"
+  IMAGES_PLACEHOLDER: https://screenshots.invalid
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
 jobs:
   web:
     runs-on: ubuntu-latest
@@ -14,9 +24,20 @@ jobs:
       run:
         working-directory: apps/web
     outputs:
-      screenshots: ${{ steps.screenshots.outputs.saved }}
+      changed: ${{ steps.changes.outputs.web }}
+      screenshots: ${{ steps.upload.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check whether the pull request changes the web page
+        id: changes
+        working-directory: .
+        run: |
+          git diff --name-only HEAD^1 HEAD -- apps/web packages/ui packages/cards packages/search bun.lock .github/workflows/e2e.yml > "$RUNNER_TEMP/web-changes.txt"
+          if [ -s "$RUNNER_TEMP/web-changes.txt" ]; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
@@ -24,24 +45,34 @@ jobs:
         working-directory: .
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
-      - name: Find the screenshots for the pull request
-        id: screenshots
-        if: ${{ !cancelled() }}
+      - run: bun run test:dev
+      - name: Write the screenshot comment
+        id: comment
+        if: ${{ !cancelled() && steps.changes.outputs.web == 'true' }}
+        continue-on-error: true
+        env:
+          E2E_RESULT: ${{ job.status }}
         run: |
           if [ -f test-results/verify-live/reports.json ]; then
+            {
+              echo "$MARKER"
+              bun verify-live/pull-request-comment-cli.ts --reports test-results/verify-live/reports.json \
+                --images "$IMAGES_PLACEHOLDER" --commit "$HEAD_SHA" --run "$RUN_URL" --e2e "$E2E_RESULT"
+            } > test-results/verify-live/pull-request-comment.md
             echo "saved=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Upload the screenshots for the pull request
-        if: ${{ !cancelled() && steps.screenshots.outputs.saved == 'true' }}
+        id: upload
+        if: ${{ !cancelled() && steps.comment.outputs.saved == 'true' }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
           path: |
             apps/web/test-results/verify-live/*.jpg
-            apps/web/test-results/verify-live/reports.json
+            apps/web/test-results/verify-live/pull-request-comment.md
           if-no-files-found: error
           retention-days: 1
-      - run: bun run test:dev
       - name: Upload videos and screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -53,9 +84,10 @@ jobs:
 
   screenshots:
     needs: web
-    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ !cancelled() && needs.web.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    continue-on-error: true
     permissions:
       contents: write
       pull-requests: write
@@ -63,20 +95,15 @@ jobs:
       group: screenshots-${{ github.event.pull_request.number }}
       cancel-in-progress: false
     env:
-      GH_TOKEN: ${{ github.token }}
       PR: ${{ github.event.pull_request.number }}
-      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       SCREENSHOTS_REF: refs/screenshots/pr-${{ github.event.pull_request.number }}
-      MARKER: "<!-- riftkeeper-screenshots -->"
-      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       SAVED: ${{ needs.web.outputs.screenshots == 'true' }}
-      GIT_AUTHOR_NAME: github-actions[bot]
-      GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-      GIT_COMMITTER_NAME: github-actions[bot]
-      GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+      WEB_RESULT: ${{ needs.web.result }}
     steps:
       - name: Check that this run tested the head of the pull request
         id: head
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           current=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
           if [ "$current" = "$HEAD_SHA" ]; then
@@ -85,44 +112,38 @@ jobs:
             echo "::notice::The pull request moved on to $current, so this run leaves the comment to the newer run"
           fi
       - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
-      - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
         uses: actions/download-artifact@v4
         with:
           name: screenshots
           path: ${{ runner.temp }}/screenshots
-      - name: Push the screenshots to ${{ env.SCREENSHOTS_REF }}
+      - name: Replace ${{ env.SCREENSHOTS_REF }} with a commit of only these screenshots
         id: push
         if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          export GIT_INDEX_FILE="$RUNNER_TEMP/screenshots-index"
-          parent=()
-          if git fetch --no-tags --depth=1 origin "$SCREENSHOTS_REF"; then
-            git read-tree FETCH_HEAD
-            parent=(-p FETCH_HEAD)
-          else
-            git read-tree --empty
-          fi
           for file in "$RUNNER_TEMP"/screenshots/*.jpg; do
-            git update-index --add --cacheinfo "100644,$(git hash-object -w "$file"),$HEAD_SHA/$(basename "$file")"
+            base64 -w0 "$file" > "$RUNNER_TEMP/blob.b64"
+            jq -n --rawfile content "$RUNNER_TEMP/blob.b64" '{content: $content, encoding: "base64"}' > "$RUNNER_TEMP/blob.json"
+            sha=$(gh api "repos/$GITHUB_REPOSITORY/git/blobs" --input "$RUNNER_TEMP/blob.json" --jq .sha)
+            jq -n --arg path "$(basename "$file")" --arg sha "$sha" '{path: $path, mode: "100644", type: "blob", sha: $sha}' >> "$RUNNER_TEMP/tree-entries.json"
           done
-          commit=$(git commit-tree "$(git write-tree)" "${parent[@]}" -m "Screenshots of $HEAD_SHA for #$PR")
-          git push origin "$commit:$SCREENSHOTS_REF"
-          echo "images=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$commit/$HEAD_SHA" >> "$GITHUB_OUTPUT"
-      - name: Write the screenshot comment
+          jq -s '{tree: .}' "$RUNNER_TEMP/tree-entries.json" > "$RUNNER_TEMP/tree.json"
+          tree=$(gh api "repos/$GITHUB_REPOSITORY/git/trees" --input "$RUNNER_TEMP/tree.json" --jq .sha)
+          commit=$(gh api "repos/$GITHUB_REPOSITORY/git/commits" -f "tree=$tree" -f "message=Screenshots of $HEAD_SHA for #$PR" --jq .sha)
+          gh api "repos/$GITHUB_REPOSITORY/git/matching-refs/${SCREENSHOTS_REF#refs/}" \
+            --jq '.[] | select(.ref == $ENV.SCREENSHOTS_REF) | .ref' > "$RUNNER_TEMP/existing-ref.txt"
+          if [ -s "$RUNNER_TEMP/existing-ref.txt" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/${SCREENSHOTS_REF}" -f "sha=$commit" -F force=true > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=$SCREENSHOTS_REF" -f "sha=$commit" > /dev/null
+          fi
+          echo "images=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$commit" >> "$GITHUB_OUTPUT"
+      - name: Point the screenshot comment at the pushed images
         if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
         env:
           IMAGES: ${{ steps.push.outputs.images }}
-        run: |
-          {
-            echo "$MARKER"
-            bun apps/web/verify-live/pull-request-comment-cli.ts \
-              --reports "$RUNNER_TEMP/screenshots/reports.json" --images "$IMAGES" --commit "$HEAD_SHA" --run "$RUN_URL"
-          } > "$RUNNER_TEMP/screenshot-comment.md"
+        run: sed "s|$IMAGES_PLACEHOLDER|$IMAGES|g" "$RUNNER_TEMP/screenshots/pull-request-comment.md" > "$RUNNER_TEMP/screenshot-comment.md"
       - name: Write that this commit has no screenshots
         if: ${{ steps.head.outputs.current == 'true' && env.SAVED != 'true' }}
         run: |
@@ -130,13 +151,16 @@ jobs:
             echo "$MARKER"
             echo "## Screenshots"
             echo
-            echo "No screenshots of ${HEAD_SHA:0:7}: the [E2E run]($RUN_URL) failed before \`verify:live\` saved them."
+            echo "No screenshots of ${HEAD_SHA:0:7}: the [E2E run]($RUN_URL) ended with \`$WEB_RESULT\` and uploaded none."
           } > "$RUNNER_TEMP/screenshot-comment.md"
       - name: Post or update the screenshot comment
         if: ${{ steps.head.outputs.current == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
-            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' | head -n 1)
+          gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' > "$RUNNER_TEMP/comment-ids.txt"
+          id=$(head -n 1 "$RUNNER_TEMP/comment-ids.txt")
           if [ -n "$id" ]; then
             gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$id" -F "body=@$RUNNER_TEMP/screenshot-comment.md" > /dev/null
           else
