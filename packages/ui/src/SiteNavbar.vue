@@ -103,7 +103,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", focusOnSlash));
           :key="link.href"
           class="link"
           :href="link.href"
-          :aria-current="link.current ? 'page' : undefined"
+          :aria-current="link.current ? 'true' : undefined"
           @click="follow($event, link.href)"
           >{{ link.label }}</a
         >
@@ -274,7 +274,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", focusOnSlash));
   transition: color var(--rk-duration-fast) ease;
 }
 
-.link[aria-current="page"] {
+.link[aria-current="true"] {
   background: color-mix(in srgb, var(--rk-color-domain) 14%, transparent);
   color: var(--rk-color-text);
 }
