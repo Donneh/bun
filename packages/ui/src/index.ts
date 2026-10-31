@@ -18,7 +18,6 @@ export { default as FilterChips } from "./FilterChips.vue";
 export type { FilterChipSummary } from "./filter-chip.ts";
 export { default as Hero } from "./Hero.vue";
 export { default as InfiniteScrollSentinel } from "./InfiniteScrollSentinel.vue";
-export { default as PreviewBanner } from "./PreviewBanner.vue";
 export { default as PrintingList } from "./PrintingList.vue";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as SearchBar } from "./SearchBar.vue";
