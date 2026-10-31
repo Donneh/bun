@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { type Card, CardSchema } from "@riftkeeper/cards";
+import { type PricedCard, PricedCardSchema } from "@riftkeeper/cards/prices";
 import { z } from "zod";
 
 const baseUrl = process.env.BASE_URL;
@@ -8,12 +8,12 @@ if (!baseUrl) {
 }
 
 const SearchResponseSchema = z.object({
-  data: z.array(CardSchema),
+  data: z.array(PricedCardSchema),
   meta: z.object({ page: z.int().positive(), pageSize: z.int().positive(), total: z.int().nonnegative() }),
   warnings: z.array(z.object({ message: z.string().min(1), span: z.object({ start: z.int(), end: z.int() }) })),
   parsed: z.object({ query: z.string(), filters: z.array(z.unknown()), hasAdvancedConditions: z.boolean() }),
 });
-const CardListResponseSchema = z.object({ data: z.array(CardSchema) });
+const CardListResponseSchema = z.object({ data: z.array(PricedCardSchema) });
 const OptionsResponseSchema = z.object({
   data: z.object({ sets: z.array(z.object({ code: z.string(), name: z.string() })) }),
 });
@@ -32,7 +32,7 @@ async function search(params: Record<string, string>) {
   return SearchResponseSchema.parse(body);
 }
 
-async function allCards(): Promise<Card[]> {
+async function allCards(): Promise<PricedCard[]> {
   return CardListResponseSchema.parse((await get("/cards")).body).data;
 }
 

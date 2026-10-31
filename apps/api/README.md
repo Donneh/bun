@@ -1,6 +1,6 @@
 # @riftkeeper/api
 
-Riftkeeper card API built with [Hono](https://hono.dev) for [Cloudflare Workers](https://developers.cloudflare.com/workers/). It serves the Riftbound card list from a committed snapshot, `data/cards.json`, which [`@riftkeeper/ingest`](../ingest/README.md) refreshes every day from the official [card gallery](https://playriftbound.com/en-us/card-gallery/).
+Riftkeeper card API built with [Hono](https://hono.dev) for [Cloudflare Workers](https://developers.cloudflare.com/workers/). It serves the Riftbound card list from a committed snapshot, `data/cards.json`, which [`@riftkeeper/ingest`](../ingest/README.md) refreshes every day from the official [card gallery](https://playriftbound.com/en-us/card-gallery/), and TCGplayer prices from a second committed snapshot, `data/prices.json`, which it refreshes every day from [TCGCSV](https://tcgcsv.com/).
 
 ## Run
 
@@ -33,6 +33,20 @@ Every response sends `Access-Control-Allow-Origin: *`, so a browser on any origi
 A card id is a lowercase slug of the card name and subtitle with apostrophes removed, for example `agonys-embrace` or `jinx-rebel`.
 
 A `Card` holds the gameplay facts shared by all printings: `id`, `name`, `subtitle`, `type`, `supertype`, `domains` (can be empty), `energyCost`, `powerCost`, `might`, `mightBonus`, `ability`, `effect` and `tags`. Facts Riot does not give are `null`. Its `printings` array holds one entry per printed version with `id`, `publicCode`, `set`, `collectorNumber`, `variant`, `rarity`, `artist` (`null` when unknown), `imageUrl` and `orientation`. The schema lives in `packages/cards/src/card.ts`.
+
+Every card response (`/cards`, `/cards/:id` and `/search`) also gives each printing its `prices`, or `null` when TCGplayer has no price for it, such as for tokens:
+
+```json
+{
+  "normal": { "market": 0.1, "low": 0.01, "mid": 0.2, "high": 5.11 },
+  "foil": { "market": 0.19, "low": 0.13, "mid": 0.25, "high": 99 },
+  "currency": "USD",
+  "source": "TCGplayer via TCGCSV",
+  "updatedAt": "2026-10-31T20:05:59.000Z"
+}
+```
+
+`normal` and `foil` are present only for the finishes TCGplayer sells; at least one is. Any of `market`, `low`, `mid` and `high` can be `null`. `updatedAt` is when TCGCSV built the prices, not when we fetched them. The schema lives in `packages/cards/src/price.ts`.
 
 ## Search
 
@@ -88,6 +102,8 @@ On a lightly used API almost every request lands on a new Worker instance, so st
 ## Card snapshot
 
 `src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker does not validate the snapshot when it starts. `bun run build` runs `scripts/validate-snapshot.ts` first, which fails the build when the snapshot does not match the card schema or has fields the schema does not know, with one message instead of a list of Zod issues. The unit tests check the same.
+
+`src/cards/price-snapshot.ts` bundles `data/prices.json` the same way, and `scripts/validate-snapshot.ts` checks it against the price schema. Prices are keyed by printing id and joined to the cards once, when the Worker starts. A printing missing from the price snapshot gets `prices: null`, and a price for a printing that no longer exists is ignored, so the two snapshots can be updated independently.
 
 ## Black-box tests
 

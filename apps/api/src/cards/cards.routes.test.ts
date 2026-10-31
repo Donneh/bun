@@ -1,12 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { makeCard } from "@riftkeeper/cards/testing";
+import { withPrices } from "@riftkeeper/cards/prices";
+import { makeCard, makePriceSnapshot } from "@riftkeeper/cards/testing";
 import { createApp } from "../app.ts";
 
-const cards = [
+const unpricedCards = [
   makeCard({ id: "abandon", name: "Abandon" }),
   makeCard({ id: "jinx-loose-cannon", name: "Jinx", subtitle: "Loose Cannon" }),
 ];
-const app = createApp({ cards });
+const prices = makePriceSnapshot();
+const app = createApp({ cards: unpricedCards, prices });
+const cards = withPrices(unpricedCards, prices);
 
 describe("GET /cards", () => {
   test("returns every card", async () => {
