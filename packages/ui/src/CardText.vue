@@ -14,7 +14,7 @@ const parts = computed(() => parseCardText(props.text));
       <strong
         v-if="part.kind === 'keyword'"
         class="keyword"
-        :class="[part.tone, { arrow: part.arrow, joined: part.joined }]"
+        :class="[part.tone, { arrow: part.arrow, joined: part.joined, 'with-cost': part.cost.length > 0 }]"
         >{{ part.text }}<RiftboundGlyph v-for="(glyph, glyphIndex) in part.cost" :key="glyphIndex" :name="glyph"
       /></strong>
       <RiftboundGlyph v-else-if="part.kind === 'glyph'" :name="part.name" />
@@ -39,12 +39,11 @@ const parts = computed(() => parseCardText(props.text));
   --bottom-right: calc(100% - var(--slant)) 100%;
   --bottom-left: 0 100%;
   --start: calc(var(--slant) / 2) 50%;
-  --rk-color-glyph-ring: currentColor;
 
   display: inline-block;
   padding: 0.1em calc(var(--slant) + 0.2em);
   clip-path: polygon(var(--top-left), var(--top-right), var(--end), var(--bottom-right), var(--bottom-left), var(--start));
-  font-size: 0.8em;
+  font-size: 0.9em;
   font-style: italic;
   font-weight: var(--rk-font-weight-bold);
   line-height: 1.4;
@@ -54,11 +53,25 @@ const parts = computed(() => parseCardText(props.text));
 }
 
 .keyword :deep(.glyph) {
-  font-size: 1.15em;
+  margin-inline: 0.08em;
+  font-size: 1.1em;
+  vertical-align: -0.2em;
+}
+
+.keyword :deep([data-glyph="rune_rainbow"] :is(path, circle, rect, polygon, ellipse)) {
+  fill: currentColor;
 }
 
 .keyword :deep(.glyph:first-child) {
   margin-inline-start: 0.4em;
+}
+
+.with-cost {
+  padding-inline-end: calc(var(--slant) + 0.45em);
+}
+
+.arrow.with-cost {
+  padding-inline-end: calc(var(--point) + 0.45em);
 }
 
 .arrow {

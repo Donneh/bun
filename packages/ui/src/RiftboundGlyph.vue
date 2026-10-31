@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { type GlyphName, glyphLabel, glyphMarkup, isDiscGlyph } from "./glyph.ts";
+import { type GlyphName, glyphLabel, glyphMarkup } from "./glyph.ts";
 
 const props = defineProps<{ name: GlyphName; label?: string | undefined; decorative?: boolean | undefined }>();
 
@@ -12,7 +12,7 @@ const accessibleName = computed(() => (props.decorative ? undefined : (props.lab
 <template>
   <span
     class="glyph"
-    :class="{ disc: isDiscGlyph(name) }"
+    :data-glyph="name"
     :role="accessibleName && 'img'"
     :aria-label="accessibleName"
     :title="accessibleName"
@@ -30,11 +30,6 @@ const accessibleName = computed(() => (props.decorative ? undefined : (props.lab
   margin-inline: 0.05em;
   vertical-align: -0.2em;
   line-height: 0;
-}
-
-.disc {
-  border-radius: var(--rk-radius-round);
-  box-shadow: 0 0 0 var(--rk-border-width) var(--rk-color-glyph-ring);
 }
 
 svg {
