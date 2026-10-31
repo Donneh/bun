@@ -70,9 +70,9 @@ Every test records a video and a final screenshot in `test-results/`. The E2E wo
 
 1. commits the first-screen JPEGs under `<head sha>/` to the ref `refs/screenshots/pr-<number>`, on top of that ref's previous commit, so older screenshots stay reachable and nothing is force-pushed;
 2. renders the comment with `verify-live/pull-request-comment-cli.ts`, with images from `https://raw.githubusercontent.com/<repository>/<commit>/<head sha>/`;
-3. updates the pull request comment that starts with `<!-- riftkeeper-screenshots -->`, or posts it the first time. It skips this when the pull request has moved on to a newer commit.
+3. updates the pull request comment that starts with `<!-- riftkeeper-screenshots -->`, or posts it the first time. When the run saved no screenshots, the comment says so for that commit instead, so older screenshots never pass for the current commit. The job does nothing when the pull request has moved on to a newer commit.
 
-The images live in git under `refs/screenshots/`, outside `refs/heads/`, because a pull request comment can only show images from a public URL: artifacts are zip files and the job summary cannot hold images. Neither `git clone` nor `git fetch` downloads refs outside branches and tags, and the branch list stays clean. A set of first screens is about 1.3 MB, where the full-page screenshots of a single run are about 100 MB, so the comment shows only the first screen of each page. The full-page screenshots are in the artifact. Pull requests from forks get no comment, because their token cannot write to the repository.
+The images live in git under `refs/screenshots/`, outside `refs/heads/`, because a pull request comment can only show images from a public URL: artifacts are zip files and the job summary cannot hold images. A normal `git clone` or `git fetch` downloads only branches and tags, and the branch list stays clean. A set of first screens is about 1.3 MB, where the full-page screenshots of a single run are about 100 MB, so the comment shows only the first screen of each page. The full-page screenshots are in the artifact. Pull requests from forks get no comment, because their token cannot write to the repository.
 
 ## Check
 

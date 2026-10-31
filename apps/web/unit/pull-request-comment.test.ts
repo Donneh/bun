@@ -37,6 +37,35 @@ describe("pullRequestComment", () => {
   test("lists the problems of failed pages under their screenshots", () => {
     const text = comment(reportsFor("/", "home", { "pixel-7-dark": ["the page scrolls sideways"] }));
     expect(text).toContain("1 of 4 pages failed");
-    expect(text).toContain("- Pixel 7 dark: the page scrolls sideways");
+    expect(text).toContain("- Pixel 7 dark: <code>the page scrolls sideways</code>");
+  });
+
+  test("shows the first line of at most three problems per page, escaped", () => {
+    const problems = [
+      "page error: boom\n    at x (app.js:1)\n# Heading injected",
+      "console error: <script>",
+      "failed request: 404 GET /a",
+      "failed request: 404 GET /b",
+      "failed request: 404 GET /c",
+    ];
+    const text = comment(reportsFor("/", "home", { "desktop-light": problems }));
+    expect(text).toContain("- Desktop light: <code>page error: boom</code>");
+    expect(text).not.toContain("# Heading injected");
+    expect(text).toContain("<code>console error: &lt;script&gt;</code>");
+    expect(text).not.toContain("GET /b");
+    expect(text).toContain("- Desktop light: 2 more in the run log");
+  });
+
+  test("stays under GitHub's comment limit when every page has many problems", () => {
+    const problems = Array.from({ length: 200 }, (_, index) => `failed request: ${"x".repeat(500)} ${index}`);
+    const reports = ["/", "/a", "/b", "/c"].flatMap((path) =>
+      reportsFor(path, path, {
+        "desktop-light": problems,
+        "desktop-dark": problems,
+        "pixel-7-light": problems,
+        "pixel-7-dark": problems,
+      }),
+    );
+    expect(comment(reports).length).toBeLessThan(65_536);
   });
 });

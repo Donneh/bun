@@ -53,7 +53,7 @@ jobs:
 
   screenshots:
     needs: web
-    if: ${{ !cancelled() && needs.web.outputs.screenshots == 'true' && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -68,21 +68,36 @@ jobs:
       HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       SCREENSHOTS_REF: refs/screenshots/pr-${{ github.event.pull_request.number }}
       MARKER: "<!-- riftkeeper-screenshots -->"
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      SAVED: ${{ needs.web.outputs.screenshots == 'true' }}
       GIT_AUTHOR_NAME: github-actions[bot]
       GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
       GIT_COMMITTER_NAME: github-actions[bot]
       GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
+      - name: Check that this run tested the head of the pull request
+        id: head
+        run: |
+          current=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
+          if [ "$current" = "$HEAD_SHA" ]; then
+            echo "current=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::The pull request moved on to $current, so this run leaves the comment to the newer run"
+          fi
+      - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
+        uses: actions/checkout@v4
+      - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
-      - uses: actions/download-artifact@v4
+      - if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
+        uses: actions/download-artifact@v4
         with:
           name: screenshots
           path: ${{ runner.temp }}/screenshots
       - name: Push the screenshots to ${{ env.SCREENSHOTS_REF }}
         id: push
+        if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
         run: |
           export GIT_INDEX_FILE="$RUNNER_TEMP/screenshots-index"
           parent=()
@@ -98,21 +113,28 @@ jobs:
           commit=$(git commit-tree "$(git write-tree)" "${parent[@]}" -m "Screenshots of $HEAD_SHA for #$PR")
           git push origin "$commit:$SCREENSHOTS_REF"
           echo "images=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$commit/$HEAD_SHA" >> "$GITHUB_OUTPUT"
-      - name: Post or update the screenshot comment
+      - name: Write the screenshot comment
+        if: ${{ steps.head.outputs.current == 'true' && env.SAVED == 'true' }}
         env:
           IMAGES: ${{ steps.push.outputs.images }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          current=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR" --jq .head.sha)
-          if [ "$current" != "$HEAD_SHA" ]; then
-            echo "::notice::The pull request moved on to $current, so the comment stays for the newer run"
-            exit 0
-          fi
           {
             echo "$MARKER"
             bun apps/web/verify-live/pull-request-comment-cli.ts \
               --reports "$RUNNER_TEMP/screenshots/reports.json" --images "$IMAGES" --commit "$HEAD_SHA" --run "$RUN_URL"
           } > "$RUNNER_TEMP/screenshot-comment.md"
+      - name: Write that this commit has no screenshots
+        if: ${{ steps.head.outputs.current == 'true' && env.SAVED != 'true' }}
+        run: |
+          {
+            echo "$MARKER"
+            echo "## Screenshots"
+            echo
+            echo "No screenshots of ${HEAD_SHA:0:7}: the [E2E run]($RUN_URL) failed before \`verify:live\` saved them."
+          } > "$RUNNER_TEMP/screenshot-comment.md"
+      - name: Post or update the screenshot comment
+        if: ${{ steps.head.outputs.current == 'true' }}
+        run: |
           id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' | head -n 1)
           if [ -n "$id" ]; then
