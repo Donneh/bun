@@ -18,7 +18,7 @@ const accessibleName = computed(() => (props.decorative ? undefined : (props.lab
     :title="accessibleName"
     :aria-hidden="decorative || undefined"
   >
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" v-html="markup" />
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true" v-html="markup" />
   </span>
 </template>
 
