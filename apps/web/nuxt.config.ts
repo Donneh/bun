@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   devServer: { port: 3001 },
   css: ["@riftkeeper/ui/styles.css"],
   runtimeConfig: {
-    public: { apiBase: "https://api.riftkeeper.app", previewLabel: "", previewHref: "" },
+    public: { apiBase: "https://api.riftkeeper.app" },
   },
   app: {
     head: {
