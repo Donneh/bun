@@ -63,7 +63,7 @@ GitHub secrets and variables and repository settings are changed by a human. Say
 Cloudflare account changes that OpenTofu does not manage, such as API token permissions or DNS records, go through the Cloudflare MCP `execute` tool. Whether an agent may run it without asking depends on the operator's local Claude Code settings; the shared project settings do not grant it.
 
 - The deploy token `riftkeeper-deploy` uses the legacy **Workers Scripts Write** on the account, and **Workers Routes Write**, **Zone Settings Write**, **Zone WAF Write** and **Dynamic URL Redirects Write** (the www redirect rule) on `riftkeeper.app`. The endpoints that create a Worker and attach a custom domain accept only Workers Scripts Write, not the newer Workers roles. A new Cloudflare resource type usually needs a new permission; check the endpoint's `x-api-token-group` with the Cloudflare MCP `search` tool before merging.
-- Secrets and variables live on the `production` environment in GitHub. The Preview workflow uses the `preview` environment instead: its own `CLOUDFLARE_API_TOKEN` with only **Workers Scripts Write** on the account, and `CLOUDFLARE_ACCOUNT_ID`. See "Previews" in `infrastructure/README.md`.
+- Secrets and variables live on the `production` environment in GitHub. The Preview workflow uses the `preview` environment instead: its own `CLOUDFLARE_API_TOKEN` with only **Workers Scripts Write** on the account, and `CLOUDFLARE_ACCOUNT_ID`. Never check out, install or run pull request code in a job that has that token. See "Previews" in `infrastructure/README.md`.
 
 ## Cloudflare
 

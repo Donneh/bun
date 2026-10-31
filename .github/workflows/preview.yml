@@ -11,72 +11,101 @@ concurrency:
   group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: ${{ github.event.action != 'closed' }}
 
+defaults:
+  run:
+    shell: bash
+
 env:
   PR: ${{ github.event.pull_request.number }}
   PREVIEW_NAME: pr-${{ github.event.pull_request.number }}
+  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
   MARKER: "<!-- riftkeeper-preview -->"
+  WORKER_NAME: riftkeeper-web
+  WRANGLER_VERSION: 4.154.0
   WRANGLER_SEND_METRICS: "false"
 
 jobs:
-  preview:
+  build:
     if: ${{ github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    permissions:
-      contents: read
-      pull-requests: write
-    environment:
-      name: preview
-      url: ${{ steps.upload.outputs.url }}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-      SCREENSHOTS: ${{ github.workspace }}/apps/web/test-results/preview
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: apps/web
     steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+        working-directory: .
+      - name: Build the page against the production API, with the preview bar
+        env:
+          NUXT_PUBLIC_PREVIEW_HREF: ${{ github.event.pull_request.html_url }}
+        run: |
+          NUXT_PUBLIC_PREVIEW_LABEL="Pull request #$PR at ${HEAD_SHA:0:7}" bun run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview-site
+          path: apps/web/.output/public/
+          if-no-files-found: error
+          retention-days: 1
+
+  upload:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: preview
+      url: ${{ steps.upload.outputs.url }}
+    outputs:
+      url: ${{ steps.upload.outputs.url }}
+      deployment_url: ${{ steps.upload.outputs.deployment_url }}
+    steps:
       - name: Check that previews are set up
         id: setup
-        working-directory: .
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "::notice title=No preview::The preview environment has no CLOUDFLARE_API_TOKEN secret or no CLOUDFLARE_ACCOUNT_ID variable, so this pull request gets no preview. See 'Previews' in infrastructure/README.md."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
       - if: ${{ steps.setup.outputs.ready == 'true' }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        run: bun install --frozen-lockfile
-        working-directory: .
-      - name: Build the page against the production API
+      - name: Install wrangler ${{ env.WRANGLER_VERSION }} from npm
         if: ${{ steps.setup.outputs.ready == 'true' }}
-        env:
-          NUXT_PUBLIC_PREVIEW_HREF: ${{ github.event.pull_request.html_url }}
+        run: npm install --prefix "$RUNNER_TEMP/wrangler" --no-audit --no-fund "wrangler@$WRANGLER_VERSION"
+      - if: ${{ steps.setup.outputs.ready == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: preview-site
+          path: ${{ runner.temp }}/site/public
+      - name: Write the wrangler configuration of an assets-only preview
+        if: ${{ steps.setup.outputs.ready == 'true' }}
         run: |
-          NUXT_PUBLIC_PREVIEW_LABEL="Pull request #$PR at ${HEAD_SHA:0:7}" bun run build
+          jq -n --arg name "$WORKER_NAME" '{
+            name: $name,
+            compatibility_date: "2026-10-23",
+            assets: { directory: "./public", not_found_handling: "single-page-application" },
+            previews: {}
+          }' > "$RUNNER_TEMP/site/wrangler.json"
       - name: Upload the preview ${{ env.PREVIEW_NAME }}
         id: upload
         if: ${{ steps.setup.outputs.ready == 'true' }}
+        working-directory: ${{ runner.temp }}/site
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
         run: |
-          node node_modules/wrangler/bin/wrangler.js preview --name "$PREVIEW_NAME" --tag "${HEAD_SHA:0:7}"
+          "$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler" preview --config wrangler.json --name "$PREVIEW_NAME" --tag "${HEAD_SHA:0:7}"
           url=$(jq -r 'select(.type == "preview") | .preview_urls[0] // empty' "$WRANGLER_OUTPUT_FILE_PATH")
           if [ -z "$url" ]; then
             echo "::error title=No preview URL::Cloudflare returned no preview URL. Preview URLs on workers.dev must be on for riftkeeper-web (subdomain.previews_enabled in infrastructure/main.tf)."
@@ -84,37 +113,61 @@ jobs:
           fi
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "deployment_url=$(jq -r 'select(.type == "preview") | .deployment_urls[0] // empty' "$WRANGLER_OUTPUT_FILE_PATH")" >> "$GITHUB_OUTPUT"
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        run: bunx playwright install --with-deps chromium
+
+  verify:
+    needs: upload
+    if: ${{ needs.upload.outputs.url != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      URL: ${{ needs.upload.outputs.url }}
+      SCREENSHOTS: ${{ github.workspace }}/apps/web/test-results/preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+        working-directory: .
+      - run: bunx playwright install --with-deps chromium
       - name: Check the preview in a browser
-        id: browser
-        if: ${{ steps.setup.outputs.ready == 'true' }}
-        env:
-          URL: ${{ steps.upload.outputs.url }}
         run: node verify-live/cli.ts "$URL" --out "$SCREENSHOTS"
       - name: Check that the preview is not indexed
-        id: noindex
-        if: ${{ steps.setup.outputs.ready == 'true' && !cancelled() && steps.upload.outputs.url != '' }}
-        env:
-          URL: ${{ steps.upload.outputs.url }}
+        if: ${{ !cancelled() }}
         run: |
           curl --fail --silent --show-error --head "$URL/" | grep -i '^x-robots-tag: .*noindex'
       - name: Upload the screenshots
-        if: ${{ steps.setup.outputs.ready == 'true' && !cancelled() }}
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
           name: preview-screenshots
           path: ${{ env.SCREENSHOTS }}
           if-no-files-found: ignore
           retention-days: 30
-      - name: Post or update the preview comment
-        if: ${{ steps.setup.outputs.ready == 'true' && !cancelled() && steps.upload.outputs.url != '' }}
-        working-directory: .
-        env:
-          URL: ${{ steps.upload.outputs.url }}
-          DEPLOYMENT_URL: ${{ steps.upload.outputs.deployment_url }}
-          CHECKS_PASSED: ${{ steps.browser.outcome == 'success' && steps.noindex.outcome == 'success' }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+  comment:
+    needs: [upload, verify]
+    if: ${{ !cancelled() && needs.upload.outputs.url != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      URL: ${{ needs.upload.outputs.url }}
+      DEPLOYMENT_URL: ${{ needs.upload.outputs.deployment_url }}
+      CHECKS: ${{ needs.verify.result }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Write the preview comment
         run: |
           {
             echo "$MARKER"
@@ -122,10 +175,10 @@ jobs:
             echo
             echo "**[$URL]($URL)** serves this pull request at ${HEAD_SHA:0:7}, built against the production API. The link stays the same on every push, and the preview is deleted when the pull request closes."
             echo
-            if [ "$CHECKS_PASSED" = "true" ]; then
+            if [ "$CHECKS" = "success" ]; then
               echo "The browser checks passed on desktop and phone, in light and dark: [screenshots]($RUN_URL)."
             else
-              echo "**The browser checks failed for ${HEAD_SHA:0:7}**, see [the run]($RUN_URL)."
+              echo "**The browser checks of ${HEAD_SHA:0:7} ended with \`$CHECKS\`**, see [the run]($RUN_URL)."
             fi
             if [ -n "$DEPLOYMENT_URL" ]; then
               echo
@@ -134,6 +187,8 @@ jobs:
             echo
             echo "The page shows a Preview bar and is not indexed. A preview is neither a Worker version nor a deployment, so production is unchanged."
           } > "$RUNNER_TEMP/preview-comment.md"
+      - name: Post or update the preview comment
+        run: |
           id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR/comments" \
             --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith($ENV.MARKER))) | .id' | head -n 1)
           if [ -n "$id" ]; then
@@ -147,7 +202,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
-      contents: read
       pull-requests: write
     environment: preview
     env:
@@ -159,31 +213,24 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        uses: actions/checkout@v4
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: package.json
       - if: ${{ steps.setup.outputs.ready == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 24
-      - if: ${{ steps.setup.outputs.ready == 'true' }}
-        run: bun install --frozen-lockfile
+      - name: Install wrangler ${{ env.WRANGLER_VERSION }} from npm
+        if: ${{ steps.setup.outputs.ready == 'true' }}
+        run: npm install --prefix "$RUNNER_TEMP/wrangler" --no-audit --no-fund "wrangler@$WRANGLER_VERSION"
       - name: Delete the preview ${{ env.PREVIEW_NAME }}
         if: ${{ steps.setup.outputs.ready == 'true' }}
-        working-directory: apps/web
+        working-directory: ${{ runner.temp }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          if ! node node_modules/wrangler/bin/wrangler.js preview delete --name "$PREVIEW_NAME" --skip-confirmation 2> "$RUNNER_TEMP/delete.log"; then
+          if ! "$RUNNER_TEMP/wrangler/node_modules/.bin/wrangler" preview delete --worker-name "$WORKER_NAME" --name "$PREVIEW_NAME" --skip-confirmation 2> "$RUNNER_TEMP/delete.log"; then
             cat "$RUNNER_TEMP/delete.log"
             grep -qi 'not found\|10025' "$RUNNER_TEMP/delete.log" || exit 1
           fi

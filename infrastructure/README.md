@@ -150,11 +150,13 @@ The version must be part of the current deployment. Otherwise Cloudflare ignores
 
 `.github/workflows/preview.yml` gives every pull request from a branch of this repository a [Worker Preview](https://developers.cloudflare.com/workers/previews/) of the web app, so the change can be tried on a phone before it is merged:
 
-1. It builds `apps/web` against the production API, with a "Preview" bar that links the pull request and a `robots: noindex` meta tag.
-2. `wrangler preview --name pr-<number>` creates or updates the Preview `pr-<number>` of `riftkeeper-web`, on `pr-<number>-riftkeeper-web.<subdomain>.workers.dev`. Its URL stays the same across pushes.
-3. `verify:live` checks the Preview URL in a browser on a desktop and a phone viewport, and a `curl` checks that Cloudflare sends `X-Robots-Tag: noindex`, which it adds to every `workers.dev` Preview URL. The screenshots are the `preview-screenshots` artifact of the run.
-4. It posts or updates one "Preview" comment with the link and whether the checks passed, also when they failed, and sets it as the `preview` environment's URL.
-5. When the pull request closes, the `cleanup` job deletes the Preview and says so in the comment.
+1. `build` checks out the pull request and builds `apps/web` against the production API, with a "Preview" bar that links the pull request and a `robots: noindex` meta tag. It uploads `.output/public` as the artifact `preview-site`. It has no secrets.
+2. `upload`, in the GitHub environment `preview`, checks out no code. It downloads `preview-site`, writes an assets-only wrangler configuration from fixed values in the workflow, installs wrangler at a fixed version from npm, and runs `wrangler preview --name pr-<number>`. That creates or updates the Preview `pr-<number>` of `riftkeeper-web`, on `pr-<number>-riftkeeper-web.<subdomain>.workers.dev`. Its URL stays the same across pushes. Only that step gets the token.
+3. `verify`, without secrets, runs `verify:live` against the Preview URL on a desktop and a phone viewport. A `curl` checks that Cloudflare sends `X-Robots-Tag: noindex`, which it adds to every `workers.dev` Preview URL. The screenshots are the `preview-screenshots` artifact of the run.
+4. `comment` checks out no code. It posts or updates one "Preview" comment with the link and whether `verify` passed, also when it failed.
+5. When the pull request closes, `cleanup` checks out no code and deletes the Preview with the same pinned wrangler, then says so in the comment.
+
+The pull request's code runs only in `build` and `verify`, which have no Cloudflare token and a read-only `GITHUB_TOKEN`. The jobs with the token read nothing from the pull request except the static files of the built page, which wrangler uploads as assets and never runs. One risk remains: a `pull_request` run uses the pull request's own copy of `preview.yml`. Anyone who can push a branch to this repository can therefore change the workflow and reach the token, just as they can reach the `production` environment, which has no protection rules. A required reviewer on the `preview` environment closes that.
 
 A Preview is not a Worker version and not a deployment: `wrangler preview` only calls the `/workers/workers/riftkeeper-web/previews` endpoints and the assets upload session. Production traffic, the live deployment and the version list do not change, and OpenTofu sees no drift. Check it with `GET https://api.riftkeeper.app/health`, `https://riftkeeper.app/_nuxt/builds/latest.json` and the deployments of `riftkeeper-web` before and after a Preview.
 
@@ -166,9 +168,10 @@ Only the web app gets a Preview. Its API is production, so an API change shows i
 
 The owner does this once. Until then the Preview workflow skips with a notice.
 
-1. Create a Cloudflare API token `riftkeeper-preview` with only **Workers Scripts Write** on the account. The preview endpoints accept it (the create endpoints list no permission in the API schema; the others list Workers Scripts Write and no narrower role). A separate token keeps the zone permissions of `riftkeeper-deploy` out of pull request jobs and can be revoked on its own. It can still upload and deploy Workers, so the workflow hands it only to the upload and delete steps, not to the install and build steps. Those steps still run the pull request's code first, so a reviewer should treat a dependency change in a pull request as able to reach this token. The workflow skips pull requests from forks, whose runs get no secrets anyway.
+1. Create a Cloudflare API token `riftkeeper-preview` with only **Workers Scripts Write** on the account. The preview endpoints accept it (the create endpoints list no permission in the API schema; the others list Workers Scripts Write and no narrower role). A separate token keeps the zone permissions of `riftkeeper-deploy` out of pull request runs and can be revoked on its own. Workers Scripts Write still lets it deploy any Worker on the account, production included. The workflow skips pull requests from forks, whose runs get no secrets anyway.
 2. In GitHub, add the secret `CLOUDFLARE_API_TOKEN` (the new token) and the variable `CLOUDFLARE_ACCOUNT_ID` to the environment `preview`. The first run of the Preview workflow creates the environment.
-3. Rerun the Preview workflow on an open pull request to get its link. Preview URLs work once the Deploy workflow has applied `previews_enabled`.
+3. Recommended: give the `preview` environment a required reviewer (Settings > Environments > `preview` > Required reviewers). A preview then waits for one click, and a pull request that edits `preview.yml` cannot reach the token unless someone approves it. Restricting the environment to selected branches does not fit: `main` alone would block every preview, and a branch name pattern does not help, because the author picks the branch name.
+4. Rerun the Preview workflow on an open pull request to get its link. Preview URLs work once the Deploy workflow has applied `previews_enabled`.
 
 The account's `workers.dev` subdomain must exist; it shows in `GET /accounts/{account_id}/workers/subdomain`.
 
