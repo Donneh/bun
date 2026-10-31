@@ -192,7 +192,7 @@ async function loadNextPage() {
       :eyebrow="eyebrow"
       title="Search the whole set. Instantly."
       subtitle="Find cards by name, domain, cost, rarity or card text."
-      compact
+      flush
       :decorated="false"
     />
     <SearchBar ref="searchBar" v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />

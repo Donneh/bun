@@ -31,12 +31,6 @@ describe("AppShell", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Card not found" })).toBeTruthy();
   });
 
-  test("narrows the page to the detail width on request", () => {
-    const { container } = render(AppShell, { props: { narrow: true }, slots: { default: "<p>Content</p>" } });
-
-    expect(container.firstElementChild?.classList.contains("narrow")).toBe(true);
-  });
-
   test("shows the footer after main", () => {
     render(AppShell, { slots: { default: "<p>Content</p>", footer: "<footer>Notice</footer>" } });
 

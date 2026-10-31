@@ -1,9 +1,9 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ narrow?: boolean; title?: string | undefined }>(), { narrow: false });
+defineProps<{ title?: string | undefined }>();
 </script>
 
 <template>
-  <div class="shell" :class="{ narrow, 'with-header': $slots.header }">
+  <div class="shell" :class="{ 'with-header': $slots.header }">
     <slot name="backdrop" />
     <slot name="header" />
     <main class="main">
@@ -27,10 +27,6 @@ withDefaults(defineProps<{ narrow?: boolean; title?: string | undefined }>(), { 
   overflow-x: clip;
   background: var(--rk-color-background);
   color: var(--rk-color-text);
-}
-
-.shell.narrow {
-  --rk-page-width: var(--rk-content-width-narrow);
 }
 
 .main,
