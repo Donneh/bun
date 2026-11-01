@@ -2,9 +2,14 @@ name: E2E
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number }}-${{ github.event.action == 'edited' && !github.event.changes.body && github.run_id || 'latest' }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -18,8 +23,9 @@ env:
 
 jobs:
   web:
+    if: ${{ github.event.action != 'edited' || github.event.changes.body }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: apps/web
@@ -45,6 +51,8 @@ jobs:
         working-directory: .
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
+        env:
+          PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
       - run: bun run test:dev
       - name: Write the screenshot comment
         id: comment
@@ -54,11 +62,17 @@ jobs:
           E2E_RESULT: ${{ job.status }}
         run: |
           if [ -f test-results/verify-live/reports.json ]; then
+            mkdir -p test-results/pull-request-screenshots
             {
               echo "$MARKER"
               bun verify-live/pull-request-comment-cli.ts --reports test-results/verify-live/reports.json \
+                --requested test-results/verify-live/requested-paths.json \
                 --images "$IMAGES_PLACEHOLDER" --commit "$HEAD_SHA" --run "$RUN_URL" --e2e "$E2E_RESULT"
-            } > test-results/verify-live/pull-request-comment.md
+            } > test-results/pull-request-screenshots/pull-request-comment.md
+            grep -o "$IMAGES_PLACEHOLDER/[a-z0-9-]*\.jpg" test-results/pull-request-screenshots/pull-request-comment.md \
+              | sort -u | while read -r image; do
+                cp "test-results/verify-live/${image##*/}" test-results/pull-request-screenshots/
+              done
             echo "saved=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Upload the screenshots for the pull request
@@ -68,9 +82,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots
-          path: |
-            apps/web/test-results/verify-live/*.jpg
-            apps/web/test-results/verify-live/pull-request-comment.md
+          path: apps/web/test-results/pull-request-screenshots/
           if-no-files-found: error
           retention-days: 1
       - name: Upload videos and screenshots
