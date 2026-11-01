@@ -1,3 +1,4 @@
+import { SMALLEST_PRICE } from "@riftkeeper/cards/prices";
 import { z } from "zod";
 
 export const TCGCSV_BASE_URL = "https://tcgcsv.com";
@@ -5,7 +6,11 @@ export const RIFTBOUND_CATEGORY_ID = 89;
 export const PRICES_USER_AGENT = "riftkeeper-prices/1.0 (+https://riftkeeper.app; one sync per night)";
 const FETCH_TIMEOUT_MS = 30_000;
 
-const PriceAmountSchema = z.number().nonnegative().nullable();
+const PriceAmountSchema = z
+  .number()
+  .nonnegative()
+  .nullable()
+  .transform((amount) => (amount !== null && amount >= SMALLEST_PRICE ? amount : null));
 
 const TcgcsvGroupSchema = z.object({
   groupId: z.int().positive(),
