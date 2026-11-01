@@ -1,5 +1,6 @@
 import { cpSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import ts from "typescript";
 
 const generatedEntries = new Set([
   "node_modules",
@@ -25,7 +26,10 @@ export function copyAppForE2e(appDir: string, copyDir: string) {
     if (isGenerated(entry) || entry === "tsconfig.json") continue;
     cpSync(join(appDir, entry), join(copyDir, entry), { recursive: true });
   }
-  const tsConfig: TsConfig = JSON.parse(readFileSync(join(appDir, "tsconfig.json"), "utf8"));
+  const tsConfigPath = join(appDir, "tsconfig.json");
+  const { config, error } = ts.parseConfigFileTextToJson(tsConfigPath, readFileSync(tsConfigPath, "utf8"));
+  if (error) throw new Error(`${tsConfigPath}: ${ts.flattenDiagnosticMessageText(error.messageText, "\n")}`);
+  const tsConfig: TsConfig = config;
   const nuxtReferences = tsConfig.references.filter(({ path }) => path.startsWith("./.nuxt/"));
   writeFileSync(join(copyDir, "tsconfig.json"), JSON.stringify({ ...tsConfig, references: nuxtReferences }));
 }
