@@ -1,5 +1,14 @@
-import type { Card, Domain, Printing, Variant } from "@riftkeeper/cards";
-import type { CardInfoContent, CardStat, GlyphName, GlyphTextPart, PrintingSummary } from "@riftkeeper/ui";
+import type { Card, Domain, Variant } from "@riftkeeper/cards";
+import type { PricedCard, PricedPrinting, PriceQuote, PrintingPrices } from "@riftkeeper/cards/prices";
+import type {
+  CardInfoContent,
+  CardStat,
+  GlyphName,
+  GlyphTextPart,
+  PriceFigure,
+  PricingContent,
+  PrintingSummary,
+} from "@riftkeeper/ui";
 import { isGlyphName } from "@riftkeeper/ui/glyph";
 import { responsiveImage } from "./card-images.ts";
 
@@ -74,7 +83,55 @@ function stats(card: Card): CardStat[] {
   ].filter((entry): entry is CardStat => entry !== null);
 }
 
-export function cardInfo(card: Card, printing: Printing): CardInfoContent {
+const FINISHES = [
+  { key: "normal", label: "Normal" },
+  { key: "foil", label: "Foil" },
+] as const;
+
+const PRICE_DATE = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
+
+function finishQuotes(prices: PrintingPrices): { finish: string; quote: PriceQuote }[] {
+  return FINISHES.flatMap(({ key, label }) => {
+    const quote = prices[key];
+    return quote === undefined ? [] : [{ finish: label, quote }];
+  });
+}
+
+type Money = (amount: number) => string;
+
+function moneyFormat(currency: string): Money {
+  const format = new Intl.NumberFormat("en-US", { style: "currency", currency });
+  return (amount) => format.format(amount);
+}
+
+function figure(label: string, amount: number | null, money: Money): PriceFigure[] {
+  return amount === null ? [] : [{ label, amount: money(amount) }];
+}
+
+function pricing(prices: PrintingPrices | null): PricingContent | null {
+  if (prices === null) return null;
+  const money = moneyFormat(prices.currency);
+  const finishes = finishQuotes(prices)
+    .map(({ finish, quote }) => ({
+      finish,
+      market: quote.market === null ? null : money(quote.market),
+      range: [...figure("Low", quote.low, money), ...figure("High", quote.high, money)],
+    }))
+    .filter((finish) => finish.market !== null || finish.range.length > 0);
+  if (finishes.length === 0) return null;
+  return {
+    finishes,
+    attribution: `Prices: TCGplayer market price via TCGCSV, updated ${PRICE_DATE.format(new Date(prices.updatedAt))}`,
+  };
+}
+
+function marketPrices(prices: PrintingPrices | null): PriceFigure[] {
+  if (prices === null) return [];
+  const money = moneyFormat(prices.currency);
+  return finishQuotes(prices).flatMap(({ finish, quote }) => figure(finish, quote.market, money));
+}
+
+export function cardInfo(card: Card, printing: PricedPrinting): CardInfoContent {
   return {
     name: card.name,
     subtitle: card.subtitle,
@@ -83,10 +140,11 @@ export function cardInfo(card: Card, printing: Printing): CardInfoContent {
     rules: [card.ability, card.effect].filter((text): text is string => Boolean(text)),
     tags: card.tags.map((tag) => ({ label: tag, href: searchHref(`t:${quotedValue(tag)}`) })),
     artist: printing.artist,
+    pricing: pricing(printing.prices),
   };
 }
 
-export function printingSummaries(card: Card): PrintingSummary[] {
+export function printingSummaries(card: PricedCard): PrintingSummary[] {
   return card.printings.map((printing) => ({
     id: printing.id,
     setName: printing.set.name,
@@ -97,11 +155,12 @@ export function printingSummaries(card: Card): PrintingSummary[] {
     imageUrl: printing.imageUrl,
     orientation: printing.orientation,
     srcset: responsiveImage(printing.imageUrl, printing.orientation, "thumbnail").srcset,
+    prices: marketPrices(printing.prices),
   }));
 }
 
-export function selectedPrinting(card: Card, requested: unknown): Printing {
+export function selectedPrinting(card: PricedCard, requested: unknown): PricedPrinting {
   const [first] = card.printings;
   const match = card.printings.find((printing) => printing.id === requested);
-  return match ?? (first as Printing);
+  return match ?? (first as PricedPrinting);
 }

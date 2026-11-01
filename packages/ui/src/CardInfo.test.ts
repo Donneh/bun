@@ -24,9 +24,13 @@ const ahri: CardInfoContent = {
   rules: ["When I attack, give an enemy unit -2 :rb_might:.", "[Ganking]"],
   tags: [{ label: "Ionia", href: "/?q=t%3AIonia" }],
   artist: "Six More Vodka",
+  pricing: {
+    finishes: [{ finish: "Foil", market: "$12.34", range: [{ label: "Low", amount: "$10.00" }] }],
+    attribution: "Prices: TCGplayer market price via TCGCSV, updated Oct 31, 2026",
+  },
 };
 
-const printing = { setName: "Origins", orientation: "portrait" as const };
+const printing = { setName: "Origins", orientation: "portrait" as const, prices: [] };
 const printings = [
   { ...printing, id: "ogn-119", code: "OGN-119/298", details: ["Standard"], imageUrl: "https://e.com/1.png" },
   { ...printing, id: "ogn-119a", code: "OGN-119a/298", details: ["Alt art"], imageUrl: "https://e.com/2.png" },
@@ -49,17 +53,28 @@ describe("CardInfo", () => {
   test("names every stat and its value, also when the glyph alone shows the value", () => {
     const { container } = renderInfo();
 
-    const terms = [...container.querySelectorAll("dt")].map((term) => term.textContent);
-    const values = [...container.querySelectorAll("dd")].map((value) => value.textContent?.trim());
+    const stats = container.querySelector("dl") as HTMLElement;
+    const terms = [...stats.querySelectorAll("dt")].map((term) => term.textContent);
+    const values = [...stats.querySelectorAll("dd")].map((value) => value.textContent?.trim());
     expect(terms).toEqual(["Energy", "Might"]);
     expect(values).toEqual(["3", "3"]);
   });
 
-  test("leaves out the stat row, tags and credit when the card has none", () => {
-    const { container } = renderInfo({ ...ahri, stats: [], tags: [], artist: null });
+  test("leaves out the stat row, pricing, tags and credit when the card has none", () => {
+    const { container } = renderInfo({ ...ahri, stats: [], tags: [], artist: null, pricing: null });
 
     expect(container.querySelector("dl")).toBeNull();
     expect(container.querySelector("footer")).toBeNull();
+    expect(screen.queryByRole("region", { name: "Market price" })).toBeNull();
+  });
+
+  test("shows the pricing of the chosen printing between the rules text and the printings", () => {
+    renderInfo();
+
+    const pricing = screen.getByRole("region", { name: "Market price" });
+    expect(pricing.textContent).toContain("$12.34");
+    const printings = screen.getByRole("list", { name: "Printings" });
+    expect(pricing.compareDocumentPosition(printings) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   test("shows the ability and the effect as rules text", () => {

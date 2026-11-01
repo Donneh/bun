@@ -1,14 +1,16 @@
+import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { basename, join, relative } from "node:path";
 import { type Browser, type BrowserContextOptions, devices, type Page } from "@playwright/test";
-import type { VerifyOptions } from "./arguments.ts";
+import { SEARCH_QUERY, type VerifyOptions } from "./arguments.ts";
+import { type RejectedLine, type RequestedPaths, type ScreenshotRequest, samePath } from "./screenshot-request.ts";
 
-export const SEARCH_QUERY = "c:fury cost:<=2";
 export const UNKNOWN_PATH = "/no-such-page";
-export const COLLECTION_PATH = "/collection";
 export const REPORTS_FILE = "reports.json";
+export const REQUESTED_PATHS_FILE = "requested-paths.json";
 const SCROLL_PAUSE_MS = 150;
-const FIRST_SCREEN_JPEG_QUALITY = 80;
+const JPEG_QUALITY = 80;
+const SLUG_LENGTH = 60;
 
 export const VIEWPORTS = {
   desktop: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 900 } },
@@ -45,6 +47,7 @@ export interface PageReport {
   readonly scrollsSideways: boolean;
   readonly screenshot: string;
   readonly firstScreen: string;
+  readonly fullPage: string;
 }
 
 export interface SavedReport {
@@ -53,6 +56,7 @@ export interface SavedReport {
   readonly colorScheme: ColorScheme;
   readonly screenshot: string;
   readonly firstScreen: string;
+  readonly fullPage: string;
   readonly problems: readonly string[];
 }
 
@@ -86,24 +90,58 @@ function screenshotStem(path: string, viewport: ViewportName, colorScheme: Color
   const slug = decodeURIComponent(path)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
+    .slice(0, SLUG_LENGTH)
     .replace(/^-|-$/g, "");
-  return `${slug || "home"}-${viewport}-${colorScheme}`;
+  const hash = createHash("sha256").update(path).digest("hex").slice(0, 8);
+  return `${slug || "home"}-${hash}-${viewport}-${colorScheme}`;
 }
 
-export async function defaultPaths(browser: Browser, baseUrl: string, headers: Readonly<Record<string, string>>) {
-  const searchPath = `/?q=${encodeURIComponent(SEARCH_QUERY)}`;
+function searchPath(query: string): string {
+  return `/?q=${encodeURIComponent(query)}`;
+}
+
+async function firstCardPath(
+  browser: Browser,
+  baseUrl: string,
+  headers: Readonly<Record<string, string>>,
+  query: string,
+): Promise<string | undefined> {
   const context = await browser.newContext({ baseURL: baseUrl, extraHTTPHeaders: headers });
   try {
     const page = await context.newPage();
     const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
-    await page.goto(searchPath);
-    const { data } = (await (await searchResponse).json()) as { data: { id: string }[] };
-    const [card] = data;
-    if (!card) throw new Error(`The search ${SEARCH_QUERY} on ${baseUrl} found no card to check`);
-    return ["/", searchPath, `/cards/${card.id}`, COLLECTION_PATH, UNKNOWN_PATH];
+    await page.goto(searchPath(query));
+    const { data } = (await (await searchResponse).json()) as { data?: { id: string }[] };
+    const card = data?.[0];
+    return card === undefined ? undefined : `/cards/${encodeURIComponent(card.id)}`;
   } finally {
     await context.close();
   }
+}
+
+export async function defaultPaths(browser: Browser, baseUrl: string, headers: Readonly<Record<string, string>>) {
+  const cardPath = await firstCardPath(browser, baseUrl, headers, SEARCH_QUERY);
+  if (cardPath === undefined) throw new Error(`The search ${SEARCH_QUERY} on ${baseUrl} found no card to check`);
+  return ["/", searchPath(SEARCH_QUERY), cardPath, UNKNOWN_PATH];
+}
+
+export async function resolveRequestedPaths(
+  browser: Browser,
+  baseUrl: string,
+  request: ScreenshotRequest,
+  shownPaths: readonly string[],
+): Promise<RequestedPaths> {
+  const paths: string[] = [];
+  const rejected: RejectedLine[] = [...request.rejected];
+  for (const page of request.pages) {
+    const path =
+      "path" in page ? page.path : await firstCardPath(browser, baseUrl, {}, page.cardSearch).catch(() => undefined);
+    if (path === undefined) rejected.push({ line: page.line, reason: "no-card" });
+    else if ([...shownPaths, ...paths].some((shown) => samePath(shown, path)))
+      rejected.push({ line: page.line, reason: "duplicate" });
+    else paths.push(path);
+  }
+  return { paths, rejected };
 }
 
 export async function checkPage(browser: Browser, check: PageCheck): Promise<PageReport> {
@@ -152,7 +190,9 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
     const stem = join(check.outDir, screenshotStem(check.path, check.viewport, check.colorScheme));
     const screenshot = `${stem}.png`;
     const firstScreen = `${stem}-first-screen.jpg`;
-    await page.screenshot({ path: firstScreen, type: "jpeg", quality: FIRST_SCREEN_JPEG_QUALITY, scale: "css" });
+    const fullPage = `${stem}-full-page.jpg`;
+    await page.screenshot({ path: firstScreen, type: "jpeg", quality: JPEG_QUALITY, scale: "css" });
+    await page.screenshot({ path: fullPage, type: "jpeg", quality: JPEG_QUALITY, scale: "css", fullPage: true });
     await page.screenshot({ path: screenshot, fullPage: true });
 
     return {
@@ -170,6 +210,7 @@ export async function checkPage(browser: Browser, check: PageCheck): Promise<Pag
       scrollsSideways,
       screenshot,
       firstScreen,
+      fullPage,
     };
   } finally {
     await context.close();
@@ -198,6 +239,7 @@ function savedReport(report: PageReport): SavedReport {
     colorScheme: report.colorScheme,
     screenshot: basename(report.screenshot),
     firstScreen: basename(report.firstScreen),
+    fullPage: basename(report.fullPage),
     problems: problems(report),
   };
 }
