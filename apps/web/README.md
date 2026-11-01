@@ -54,7 +54,7 @@ bun run test:e2e                   # playwright test, which builds the app first
 
 Every test runs twice: in desktop Chromium (`chromium`) and at a phone viewport with touch (`mobile`, the Pixel 7 profile).
 
-Playwright starts the API with `wrangler dev` on port 8787. It then runs `nuxt generate` with `NUXT_PUBLIC_API_BASE` pointed at that API, and serves the build with `wrangler dev` on port 3100, so the test exercises the same static assets and not-found handling as production. `E2E_API_PORT` and `E2E_WEB_PORT` override the two ports, so two checkouts can run the test at the same time:
+Playwright starts the API with `wrangler dev` on port 8787. It then copies everything in `apps/web` except installed packages, build output and test results into `.e2e-copy/` with `e2e-build/cli.ts`, runs `nuxt generate` there with `NUXT_PUBLIC_API_BASE` pointed at that API, and serves `.e2e-copy/.output/public` with `wrangler dev` on port 3100, so the test exercises the same static assets and not-found handling as production. The copy has its own `.nuxt` and `.output`, so `bun run check`, which builds `.output` against production and clears `.nuxt`, can run at the same time in the same checkout. A separate Nuxt `buildDir` is not enough: Vite reads `tsconfig.json`, which points into `.nuxt`. `E2E_API_PORT` and `E2E_WEB_PORT` override the two ports, so two checkouts can run the test at the same time:
 
 ```sh
 E2E_API_PORT=8797 E2E_WEB_PORT=3197 bun run test:e2e
