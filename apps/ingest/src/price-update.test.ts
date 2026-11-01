@@ -1,9 +1,15 @@
 import { describe, expect, test } from "bun:test";
 import { PrintingIdSchema } from "@riftkeeper/cards";
+import { parsePriceHistory, recordPriceDay } from "@riftkeeper/cards/price-history";
 import { parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { makePriceSnapshot } from "@riftkeeper/cards/testing";
 import type { PriceMatch } from "./match-prices.ts";
-import { decidePriceUpdate, renderPriceSummary, serializePriceSnapshot } from "./price-update.ts";
+import {
+  decidePriceUpdate,
+  renderPriceSummary,
+  serializePriceHistory,
+  serializePriceSnapshot,
+} from "./price-update.ts";
 
 const quote = { market: 0.25, low: 0.1, mid: 0.3, high: 2 };
 const updatedAt = "2026-10-31T20:05:59.000Z";
@@ -123,5 +129,23 @@ describe("serializePriceSnapshot", () => {
       `    "ogn-002": ${JSON.stringify({ normal: quote, foil: quote })}`,
     ]);
     expect(parsePriceSnapshot({ json: JSON.parse(text), path: "prices.json" })).toEqual(snapshot);
+  });
+});
+
+describe("serializePriceHistory", () => {
+  test("writes one printing per line with its series and parses back to the same history", () => {
+    const history = recordPriceDay(
+      null,
+      makePriceSnapshot({ printings: Object.fromEntries(priced({ ogn: 2, ogs: 0 })) }),
+    );
+
+    const text = serializePriceHistory(history);
+
+    expect(text).toContain(`  "dates": ["2026-10-31"],`);
+    expect(text.split("\n").filter((line) => line.startsWith('    "'))).toEqual([
+      `    "ogn-001": ${JSON.stringify({ normal: [quote.market], foil: [quote.market] })},`,
+      `    "ogn-002": ${JSON.stringify({ normal: [quote.market], foil: [quote.market] })}`,
+    ]);
+    expect(parsePriceHistory({ json: JSON.parse(text), path: "price-history.json" })).toEqual(history);
   });
 });

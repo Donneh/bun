@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/vue";
 import { describe, expect, test } from "vitest";
 import CardPricing from "./CardPricing.vue";
-import type { PricingContent } from "./card-detail.ts";
+import type { FinishPricing, PricingContent } from "./card-detail.ts";
 
 const pricing: PricingContent = {
   finishes: [
@@ -38,6 +38,23 @@ describe("CardPricing", () => {
     const foil = screen.getAllByRole("listitem")[1] as HTMLElement;
     expect(foil.textContent).not.toMatch(/\$0\.00|—/);
     expect(foil.querySelector("strong")).toBeNull();
+  });
+
+  test("shows the change and a sparkline for a finish with a trend, and neither without one", () => {
+    const trend = {
+      change: "▲ 12.5%",
+      period: "30 days",
+      description: "Up 12.5% in 30 days",
+      values: [1, 1.1, null, 1.125],
+    };
+    const [normal, foil] = pricing.finishes as [FinishPricing, FinishPricing];
+    render(CardPricing, { props: { pricing: { ...pricing, finishes: [{ ...normal, trend }, foil] } } });
+
+    const [withTrend, withoutTrend] = screen.getAllByRole("listitem") as [HTMLElement, HTMLElement];
+    expect(within(withTrend).getByRole("img", { name: "Up 12.5% in 30 days" })).toBeTruthy();
+    expect(withTrend.textContent).toContain("▲ 12.5%");
+    expect(withTrend.textContent).toContain("30 days");
+    expect(within(withoutTrend).queryByRole("img")).toBeNull();
   });
 
   test("credits the source and the date of the prices", () => {

@@ -18,10 +18,18 @@ export interface PriceFigure {
   readonly amount: string;
 }
 
+export interface PriceTrend {
+  readonly change: string;
+  readonly period: string;
+  readonly description: string;
+  readonly values: readonly (number | null)[];
+}
+
 export interface FinishPricing {
   readonly finish: string;
   readonly market: string | null;
   readonly range: readonly PriceFigure[];
+  readonly trend?: PriceTrend;
 }
 
 export interface PricingContent {

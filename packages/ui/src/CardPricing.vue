@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useId } from "vue";
 import type { PricingContent } from "./card-detail.ts";
+import PriceSparkline from "./PriceSparkline.vue";
 
 defineProps<{ pricing: PricingContent }>();
 
@@ -14,6 +15,11 @@ const headingId = useId();
       <li v-for="finish in pricing.finishes" :key="finish.finish" class="finish">
         <span class="finish-name">{{ finish.finish }}</span>
         <strong v-if="finish.market" class="market">{{ finish.market }}</strong>
+        <div v-if="finish.trend" class="trend">
+          <span class="change" aria-hidden="true">{{ finish.trend.change }}</span>
+          <span class="period" aria-hidden="true">{{ finish.trend.period }}</span>
+          <PriceSparkline :values="finish.trend.values" :label="finish.trend.description" />
+        </div>
         <dl v-if="finish.range.length > 0" class="range">
           <div v-for="figure in finish.range" :key="figure.label" class="figure">
             <dt class="figure-label">{{ figure.label }}</dt>
@@ -61,6 +67,24 @@ const headingId = useId();
 .market {
   font: var(--rk-font-weight-bold) 1.75rem / 1 var(--rk-font-family);
   font-variant-numeric: tabular-nums;
+}
+
+.trend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rk-space-1) var(--rk-space-2);
+  align-items: center;
+}
+
+.change {
+  font-size: var(--rk-font-size-sm);
+  font-weight: var(--rk-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+.period {
+  color: var(--rk-color-text-muted);
+  font: var(--rk-font-size-xs) var(--rk-font-family-mono);
 }
 
 .range {

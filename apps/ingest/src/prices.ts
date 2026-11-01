@@ -1,4 +1,5 @@
 import { parseArgs } from "node:util";
+import { type PriceHistory, parsePriceHistory, recordPriceDay } from "@riftkeeper/cards/price-history";
 import { type PriceSnapshot, parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { matchPrices } from "./match-prices.ts";
 import {
@@ -6,6 +7,7 @@ import {
   describePriceUpdate,
   type PriceUpdate,
   renderPriceSummary,
+  serializePriceHistory,
   serializePriceSnapshot,
 } from "./price-update.ts";
 import { readCardSnapshot } from "./snapshot-file.ts";
@@ -18,6 +20,7 @@ const { values: options } = parseArgs({
   options: {
     cards: { type: "string", default: Bun.fileURLToPath(new URL("cards.json", DATA_DIRECTORY)) },
     prices: { type: "string", default: Bun.fileURLToPath(new URL("prices.json", DATA_DIRECTORY)) },
+    history: { type: "string", default: Bun.fileURLToPath(new URL("price-history.json", DATA_DIRECTORY)) },
     summary: { type: "string" },
     "pr-body": { type: "string" },
   },
@@ -28,6 +31,12 @@ async function readPreviousPrices(path: string): Promise<PriceSnapshot | null> {
   const file = Bun.file(path);
   if (!(await file.exists())) return null;
   return parsePriceSnapshot({ json: await file.json(), path });
+}
+
+async function readPriceHistory(path: string): Promise<PriceHistory | null> {
+  const file = Bun.file(path);
+  if (!(await file.exists())) return null;
+  return parsePriceHistory({ json: await file.json(), path });
 }
 
 async function update(): Promise<PriceUpdate> {
@@ -45,7 +54,11 @@ async function update(): Promise<PriceUpdate> {
 }
 
 const result = await update();
-if (result.kind === "updated") await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
+if (result.kind === "updated") {
+  const history = recordPriceDay(await readPriceHistory(options.history), result.snapshot);
+  await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
+  await Bun.write(options.history, serializePriceHistory(history));
+}
 const summary = renderPriceSummary(result);
 if (options.summary !== undefined) await Bun.write(options.summary, summary);
 if (options["pr-body"] !== undefined && result.kind === "updated") await Bun.write(options["pr-body"], summary);

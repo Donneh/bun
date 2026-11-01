@@ -1,3 +1,4 @@
+import type { PriceHistory } from "@riftkeeper/cards/price-history";
 import { PRICE_CURRENCY, PRICE_SOURCE, type PriceSnapshot, PriceSnapshotSchema } from "@riftkeeper/cards/prices";
 import { compareStrings } from "./compare-strings.ts";
 import type { PriceMatch } from "./match-prices.ts";
@@ -15,19 +16,27 @@ export type PriceUpdate =
     }
   | { readonly kind: "failed"; readonly message: string; readonly kept: PriceSnapshot | null };
 
-export function serializePriceSnapshot(snapshot: PriceSnapshot): string {
-  const printings = Object.entries(snapshot.printings)
+type FinishEntries = Readonly<Record<string, { readonly normal?: unknown; readonly foil?: unknown }>>;
+
+function serializeOnePrintingPerLine(fields: Readonly<Record<string, unknown>>, printings: FinishEntries): string {
+  const lines = Object.entries(printings)
     .toSorted(([a], [b]) => compareStrings(a, b))
     .map(([id, { normal, foil }]) => `    ${JSON.stringify(id)}: ${JSON.stringify({ normal, foil })}`);
   return [
     "{",
-    `  "currency": ${JSON.stringify(snapshot.currency)},`,
-    `  "source": ${JSON.stringify(snapshot.source)},`,
-    `  "updatedAt": ${JSON.stringify(snapshot.updatedAt)},`,
-    `  "printings": {${printings.length === 0 ? "}" : `\n${printings.join(",\n")}\n  }`}`,
+    ...Object.entries(fields).map(([key, value]) => `  ${JSON.stringify(key)}: ${JSON.stringify(value)},`),
+    `  "printings": {${lines.length === 0 ? "}" : `\n${lines.join(",\n")}\n  }`}`,
     "}",
     "",
   ].join("\n");
+}
+
+export function serializePriceSnapshot({ currency, source, updatedAt, printings }: PriceSnapshot): string {
+  return serializeOnePrintingPerLine({ currency, source, updatedAt }, printings);
+}
+
+export function serializePriceHistory({ currency, source, dates, printings }: PriceHistory): string {
+  return serializeOnePrintingPerLine({ currency, source, dates }, printings);
 }
 
 function toSnapshot({ match, updatedAt }: { match: PriceMatch; updatedAt: string }): PriceSnapshot {

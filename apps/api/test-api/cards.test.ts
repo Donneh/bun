@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { PRICE_HISTORY_DAYS, PriceHistorySchema } from "@riftkeeper/cards/price-history";
 import { PricedCardSchema } from "@riftkeeper/cards/prices";
 import { z } from "zod";
 
@@ -91,6 +92,35 @@ describe("printing prices", () => {
     const printings = CardResponseSchema.parse(body).data.printings;
     expect(printings.map((printing) => printing.prices)).toEqual(card.printings.map((printing) => printing.prices));
     expect(printings.some((printing) => printing.prices !== null)).toBe(true);
+  });
+});
+
+describe("GET /cards/:id/price-history", () => {
+  test("ends on the day of the current prices, with today's market price per finish of each printing", async () => {
+    const card = (await getCardList()).find((candidate) => candidate.printings.some((printing) => printing.prices));
+    if (card === undefined) throw new Error("No card has a priced printing");
+
+    const { status, body } = await get(`/cards/${card.id}/price-history`);
+
+    expect(status).toBe(200);
+    const history = PriceHistorySchema.parse(body.data);
+    expect(history.dates.length).toBeLessThanOrEqual(PRICE_HISTORY_DAYS + 1);
+    expect(Object.keys(history.printings).every((id) => card.printings.some((printing) => printing.id === id))).toBe(
+      true,
+    );
+    for (const printing of card.printings) {
+      if (printing.prices === null) continue;
+      expect(history.dates.at(-1)).toBe(printing.prices.updatedAt.slice(0, 10));
+      for (const finish of ["normal", "foil"] as const)
+        expect(history.printings[printing.id]?.[finish]?.at(-1) ?? null).toBe(printing.prices[finish]?.market ?? null);
+    }
+  });
+
+  test("responds 404 card_not_found for an unknown id", async () => {
+    const { status, body } = await get("/cards/no-such-card/price-history");
+
+    expect(status).toBe(404);
+    expect(ErrorResponseSchema.parse(body).error.code).toBe("card_not_found");
   });
 });
 

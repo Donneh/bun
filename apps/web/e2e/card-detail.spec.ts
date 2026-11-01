@@ -31,7 +31,9 @@ const tiles = (page: Page) => results(page).getByRole("link");
 const printingButtons = (page: Page) => page.getByRole("list", { name: "Printings" }).getByRole("button");
 const cardImage = (page: Page, name: string) => page.getByRole("article").getByRole("img", { name, exact: true });
 const isSearchRequest = (url: URL) => url.origin === apiBase && url.pathname === "/search";
-const isCardRequest = (url: URL) => url.origin === apiBase && url.pathname.startsWith("/cards/");
+const isCardRequest = (url: URL) => url.origin === apiBase && /^\/cards\/[^/]+$/.test(url.pathname);
+const isPriceHistoryRequest = (url: URL) =>
+  url.origin === apiBase && /^\/cards\/[^/]+\/price-history$/.test(url.pathname);
 
 async function apiSearch(request: APIRequestContext, query: string): Promise<ApiSearch> {
   const response = await request.get(`${apiBase}/search`, { params: { q: query } });
@@ -271,6 +273,75 @@ test("a card without prices shows no pricing and no zeros", async ({ page, reque
   await expect(page.getByRole("region", { name: "Market price" })).toHaveCount(0);
   await expect(page.getByText(/TCGCSV/)).toHaveCount(0);
   await expect(page.getByRole("article")).not.toContainText("$");
+});
+
+interface ApiPriceHistory {
+  readonly dates: readonly string[];
+  readonly printings: Readonly<
+    Record<string, { readonly normal?: readonly (number | null)[]; readonly foil?: readonly (number | null)[] }>
+  >;
+}
+
+async function cardWithPricedFinish(request: APIRequestContext) {
+  const { data } = await apiSearch(request, "type:unit");
+  for (const card of data) {
+    const printing = card.printings[0] as ApiPrinting;
+    const finish = (["normal", "foil"] as const).find((key) => (printing.prices?.[key]?.market ?? 0) > 0);
+    if (finish) return { card, printing, finish, market: printing.prices?.[finish]?.market as number };
+  }
+  throw new Error("No unit on the first page has a market price for its first printing");
+}
+
+async function routePriceHistory(page: Page, change: (history: ApiPriceHistory) => ApiPriceHistory) {
+  await page.route(isPriceHistoryRequest, async (route) => {
+    const response = await route.fetch();
+    const { data } = (await response.json()) as { data: ApiPriceHistory };
+    await route.fulfill({ response, json: { data: change(data) } });
+  });
+}
+
+function daysUntil(latest: string, count: number) {
+  return Array.from({ length: count }, (_, index) =>
+    new Date(Date.parse(latest) - (count - 1 - index) * 86_400_000).toISOString().slice(0, 10),
+  );
+}
+
+test("a printing with a month of price history shows the 30-day change and a sparkline", async ({ page, request }) => {
+  const { card, printing, finish, market } = await cardWithPricedFinish(request);
+  await routePriceHistory(page, (history) => {
+    const dates = daysUntil(history.dates.at(-1) as string, 31);
+    const series = dates.map((_, index) => (index === dates.length - 1 ? market : market / 2));
+    return { ...history, dates, printings: { [printing.id]: { [finish]: series } } };
+  });
+
+  await page.goto(`/cards/${card.id}`);
+
+  const pricing = page.getByRole("region", { name: "Market price" });
+  await expect(pricing.getByRole("img", { name: "Up 100% in 30 days" })).toBeVisible();
+  await expect(pricing).toContainText(/▲ 100%\s*30 days/);
+});
+
+test("a printing with less than a week of price history shows no trend", async ({ page, request }) => {
+  const { card } = await cardWithPricedFinish(request);
+  await routePriceHistory(page, (history) => {
+    const keep = Math.min(history.dates.length, 6);
+    const printings = Object.fromEntries(
+      Object.entries(history.printings).map(([id, series]) => [
+        id,
+        Object.fromEntries(Object.entries(series).map(([finish, values]) => [finish, values?.slice(-keep)])),
+      ]),
+    );
+    return { ...history, dates: history.dates.slice(-keep), printings };
+  });
+  const historyLoaded = page.waitForResponse((response) => isPriceHistoryRequest(new URL(response.url())));
+
+  await page.goto(`/cards/${card.id}`);
+  await historyLoaded;
+
+  const pricing = page.getByRole("region", { name: "Market price" });
+  await expect(pricing).toBeVisible();
+  await expect(pricing.getByRole("img")).toHaveCount(0);
+  await expect(pricing).not.toContainText(/[▲▼]/);
 });
 
 test("a slow card shows a skeleton of the page", async ({ page, request }) => {
