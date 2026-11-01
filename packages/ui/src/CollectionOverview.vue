@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { type CollectionTally, type CollectionValue, copies, printings } from "./collection.ts";
+import CollectionStorageNote from "./CollectionStorageNote.vue";
+import { type CollectionStorage, type CollectionTally, type CollectionValue, copies, printings } from "./collection.ts";
 
 const props = withDefaults(
   defineProps<{
     totals: CollectionTally;
-    saved: boolean;
+    storage: CollectionStorage;
+    backupKey?: string | null;
     value?: CollectionValue | null;
     unknown?: number;
     title?: string;
   }>(),
-  { value: null, unknown: 0, title: "Collection" },
+  { backupKey: null, value: null, unknown: 0, title: "Collection" },
 );
 
 const summary = computed(() =>
@@ -31,13 +33,8 @@ const summary = computed(() =>
     <p v-if="unknown > 0" class="note">
       {{ printings(unknown) }} in this collection {{ unknown === 1 ? "is" : "are" }} not in the card list.
     </p>
-    <p class="note" :class="{ blocked: !saved }">
-      {{
-        saved
-          ? "Your collection is saved in this browser only. Export it to keep a backup or to move it to another browser."
-          : "This browser blocks storage, so the collection is lost when the page reloads. Export it to keep it."
-      }}
-    </p>
+    <CollectionStorageNote :state="storage" :backup-key="backupKey" />
+    <p class="note">Export the collection to keep a backup or to move it to another browser.</p>
   </header>
 </template>
 
@@ -74,7 +71,4 @@ const summary = computed(() =>
   margin: 0;
 }
 
-.note.blocked {
-  color: var(--rk-color-warning-text);
-}
 </style>

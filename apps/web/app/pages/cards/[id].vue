@@ -157,7 +157,8 @@ function choosePrinting(id: string) {
         <template v-if="ownership" #collection>
           <CollectionControls
             v-bind="ownership"
-            :saved="collection.saved.value"
+            :storage="collection.storage.value"
+      :backup-key="collection.backupKey.value"
             @update:owned="setOwned"
             @update:wishlisted="setWishlisted"
           />

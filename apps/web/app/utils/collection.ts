@@ -16,9 +16,17 @@ export interface Collection {
   readonly printings: Readonly<Record<string, CollectionEntry>>;
 }
 
+export type StorageState =
+  | { readonly kind: "saved" }
+  | { readonly kind: "blocked" }
+  | { readonly kind: "failed" }
+  | { readonly kind: "unreadable"; readonly original: string }
+  | { readonly kind: "protected"; readonly original: string }
+  | { readonly kind: "recovered"; readonly backupKey: string };
+
 export interface StoredCollection {
   readonly collection: Collection;
-  readonly saved: boolean;
+  readonly storage: StorageState;
 }
 
 export type ImportMode = "merge" | "replace";
@@ -53,8 +61,14 @@ const EntrySchema = z.object(
 
 const CODE_RULE = "must be a printing code of 1 to 64 characters";
 
+const RESERVED_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 const PrintingsSchema = z.record(
-  z.string().check(z.minLength(1, { error: CODE_RULE }), z.maxLength(64, { error: CODE_RULE })),
+  z.string().check(
+    z.minLength(1, { error: CODE_RULE }),
+    z.maxLength(64, { error: CODE_RULE }),
+    z.refine((code) => !RESERVED_KEYS.has(code), { error: "is not a printing code" }),
+  ),
   EntrySchema,
   { error: "must map printing codes to entries" },
 );
@@ -79,7 +93,7 @@ function collectionOf(printings: Readonly<Record<string, CollectionEntry>>): Col
 }
 
 export function entryFor(collection: Collection, code: string): CollectionEntry {
-  return collection.printings[code] ?? NO_ENTRY;
+  return Object.hasOwn(collection.printings, code) ? (collection.printings[code] ?? NO_ENTRY) : NO_ENTRY;
 }
 
 export function setOwned(collection: Collection, code: string, owned: number): Collection {
@@ -165,14 +179,29 @@ export function parseCollectionFile(text: string): ParsedFile {
   return { kind: "collection", collection: collectionOf(file.data.printings) };
 }
 
-function storedCollection(stored: string | null): Collection {
-  if (stored === null) return EMPTY_COLLECTION;
+function parseJson(text: string): unknown {
   try {
-    const parsed = StoredSchema.safeParse(JSON.parse(stored));
-    return parsed.success ? collectionOf(parsed.data.printings) : EMPTY_COLLECTION;
+    return JSON.parse(text);
   } catch {
-    return EMPTY_COLLECTION;
+    return undefined;
   }
+}
+
+function salvagedEntries(json: unknown): Collection {
+  const printings = (json as { printings?: unknown } | null)?.printings;
+  if (typeof printings !== "object" || printings === null) return EMPTY_COLLECTION;
+  const readable = Object.entries(printings).flatMap(([code, entry]) => {
+    const parsed = PrintingsSchema.safeParse({ [code]: entry });
+    return parsed.success ? Object.entries(parsed.data) : [];
+  });
+  return collectionOf(Object.fromEntries(readable));
+}
+
+function storedCollection(stored: string): StoredCollection {
+  const json = parseJson(stored);
+  const parsed = StoredSchema.safeParse(json);
+  if (parsed.success) return { collection: collectionOf(parsed.data.printings), storage: { kind: "saved" } };
+  return { collection: salvagedEntries(json), storage: { kind: "unreadable", original: stored } };
 }
 
 export function loadCollection(storage: StorageAccess): StoredCollection {
@@ -180,16 +209,36 @@ export function loadCollection(storage: StorageAccess): StoredCollection {
   try {
     stored = storage().getItem(COLLECTION_STORAGE_KEY);
   } catch {
-    return { collection: EMPTY_COLLECTION, saved: false };
+    return { collection: EMPTY_COLLECTION, storage: { kind: "blocked" } };
   }
-  return { collection: storedCollection(stored), saved: true };
+  return stored === null ? { collection: EMPTY_COLLECTION, storage: { kind: "saved" } } : storedCollection(stored);
 }
 
-export function saveCollection(storage: StorageAccess, collection: Collection): boolean {
+export const backupKey = (at: Date) => `${COLLECTION_STORAGE_KEY}-backup-${at.toISOString()}`;
+
+function write(storage: StorageAccess, key: string, value: string): boolean {
   try {
-    storage().setItem(COLLECTION_STORAGE_KEY, JSON.stringify(collection));
+    storage().setItem(key, value);
     return true;
   } catch {
     return false;
   }
+}
+
+export function saveCollection(
+  storage: StorageAccess,
+  collection: Collection,
+  current: StorageState,
+  now: Date,
+): StorageState {
+  if (current.kind === "unreadable" || current.kind === "protected") {
+    const key = backupKey(now);
+    if (!write(storage, key, current.original)) return { kind: "protected", original: current.original };
+    return write(storage, COLLECTION_STORAGE_KEY, JSON.stringify(collection))
+      ? { kind: "recovered", backupKey: key }
+      : { kind: "failed" };
+  }
+  if (write(storage, COLLECTION_STORAGE_KEY, JSON.stringify(collection)))
+    return current.kind === "recovered" ? current : { kind: "saved" };
+  return current.kind === "blocked" ? current : { kind: "failed" };
 }

@@ -12,17 +12,22 @@ export function useCollection() {
   const state = useState<StoredCollection>("collection", () => loadCollection(browserStorage));
 
   function update(next: Collection) {
-    state.value = { collection: next, saved: saveCollection(browserStorage, next) };
+    const storage = saveCollection(browserStorage, next, state.value.storage, new Date());
+    state.value = { collection: next, storage };
+    return storage;
   }
 
   function reload() {
     const stored = loadCollection(browserStorage);
-    if (stored.saved) state.value = stored;
+    if (stored.storage.kind !== "saved") return;
+    const current = state.value.storage;
+    state.value = current.kind === "recovered" ? { ...stored, storage: current } : stored;
   }
 
   return {
     collection: computed(() => state.value.collection),
-    saved: computed(() => state.value.saved),
+    storage: computed(() => state.value.storage.kind),
+    backupKey: computed(() => (state.value.storage.kind === "recovered" ? state.value.storage.backupKey : null)),
     setOwned: (code: string, owned: number) => update(setOwned(state.value.collection, code, owned)),
     setWishlisted: (code: string, wishlist: boolean) => update(setWishlisted(state.value.collection, code, wishlist)),
     replace: update,

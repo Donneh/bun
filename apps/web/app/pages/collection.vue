@@ -31,7 +31,7 @@ type ImportState =
   | { readonly kind: "rejected"; readonly message: string }
   | { readonly kind: "done"; readonly message: string };
 
-const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_PLACEHOLDERS = 12;
 
 const theme = useTheme();
@@ -91,10 +91,14 @@ async function chooseFile(file: File) {
 function applyImport(mode: ImportMode) {
   if (importState.value.kind !== "previewing") return;
   const { fileName, incoming } = importState.value;
-  collection.replace(importedCollection(current.value, incoming, mode));
+  const storage = collection.replace(importedCollection(current.value, incoming, mode));
+  const done = mode === "merge" ? `Merged ${fileName} into the collection.` : `Replaced the collection with ${fileName}.`;
   importState.value = {
     kind: "done",
-    message: mode === "merge" ? `Merged ${fileName} into the collection.` : `Replaced the collection with ${fileName}.`,
+    message:
+      storage.kind === "saved" || storage.kind === "recovered"
+        ? done
+        : `${done} It could not be saved in this browser, so it is lost when the page reloads.`,
   };
 }
 
@@ -116,7 +120,8 @@ function cancelImport() {
     </template>
     <CollectionOverview
       :totals="totals"
-      :saved="collection.saved.value"
+      :storage="collection.storage.value"
+      :backup-key="collection.backupKey.value"
       :value="view?.value ?? null"
       :unknown="view?.unknown ?? 0"
     />

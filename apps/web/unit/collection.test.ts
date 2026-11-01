@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  backupKey,
   COLLECTION_STORAGE_KEY,
   type Collection,
   collectionFile,
@@ -192,30 +193,102 @@ describe("the export file", () => {
 });
 
 describe("browser storage", () => {
+  const now = new Date("2026-11-01T12:00:00Z");
+  const collection = collectionWith({ "OGN-119/298": { owned: 2, wishlist: true } });
+
   test("starts empty without a stored collection", () => {
-    expect(loadCollection(memoryStorage().access)).toEqual({ collection: EMPTY_COLLECTION, saved: true });
+    expect(loadCollection(memoryStorage().access)).toEqual({
+      collection: EMPTY_COLLECTION,
+      storage: { kind: "saved" },
+    });
   });
 
   test("reads back what it saved", () => {
     const storage = memoryStorage();
-    const collection = collectionWith({ "OGN-119/298": { owned: 2, wishlist: true } });
 
-    expect(saveCollection(storage.access, collection)).toBe(true);
-    expect(loadCollection(storage.access)).toEqual({ collection, saved: true });
+    expect(saveCollection(storage.access, collection, { kind: "saved" }, now)).toEqual({ kind: "saved" });
+    expect(loadCollection(storage.access)).toEqual({ collection, storage: { kind: "saved" } });
   });
 
-  test("starts empty when the stored value is unreadable", () => {
-    const storage = memoryStorage({ [COLLECTION_STORAGE_KEY]: "{ broken" });
+  const unreadable = {
+    "text that is not JSON": "{ broken",
+    "a newer version": JSON.stringify({ version: 2, printings: { "OGN-119/298": { owned: 2, wishlist: true } } }),
+    "a count above the maximum": JSON.stringify({
+      version: 1,
+      printings: {
+        "OGN-119/298": { owned: 2, wishlist: true },
+        "OGN-001/298": { owned: MAX_OWNED + 1, wishlist: false },
+      },
+    }),
+  };
 
-    expect(loadCollection(storage.access)).toEqual({ collection: EMPTY_COLLECTION, saved: true });
+  for (const [name, original] of Object.entries(unreadable))
+    test(`keeps ${name} untouched until the first change copies it to a backup`, () => {
+      const storage = memoryStorage({ [COLLECTION_STORAGE_KEY]: original });
+
+      const loaded = loadCollection(storage.access);
+      expect(loaded.storage).toEqual({ kind: "unreadable", original });
+      expect(storage.values.get(COLLECTION_STORAGE_KEY)).toBe(original);
+
+      const edited = setOwned(loaded.collection, "SFD-001/221", 1);
+      const saved = saveCollection(storage.access, edited, loaded.storage, now);
+
+      expect(saved).toEqual({ kind: "recovered", backupKey: backupKey(now) });
+      expect(storage.values.get(backupKey(now))).toBe(original);
+      expect(JSON.parse(storage.values.get(COLLECTION_STORAGE_KEY) ?? "null")).toEqual(edited);
+      expect(saveCollection(storage.access, edited, saved, new Date("2026-11-02T00:00:00Z"))).toEqual(saved);
+      expect([...storage.values.keys()].filter((key) => key.includes("backup"))).toHaveLength(1);
+    });
+
+  test("salvages the entries of an unreadable collection that still parse", () => {
+    const storage = memoryStorage({ [COLLECTION_STORAGE_KEY]: unreadable["a count above the maximum"] });
+
+    expect(loadCollection(storage.access).collection).toEqual(collection);
+  });
+
+  test("never overwrites an unreadable collection when no backup can be made", () => {
+    const original = "{ broken";
+    const values = new Map([[COLLECTION_STORAGE_KEY, original]]);
+    const noRoomForBackups = () => ({
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        if (key !== COLLECTION_STORAGE_KEY) throw new DOMException("Quota exceeded", "QuotaExceededError");
+        values.set(key, value);
+      },
+    });
+
+    const loaded = loadCollection(noRoomForBackups);
+
+    expect(saveCollection(noRoomForBackups, collection, loaded.storage, now)).toEqual({ kind: "protected", original });
+    expect(values.get(COLLECTION_STORAGE_KEY)).toBe(original);
   });
 
   test("reports blocked storage instead of throwing", () => {
-    expect(loadCollection(deniedStorage)).toEqual({ collection: EMPTY_COLLECTION, saved: false });
-    expect(saveCollection(deniedStorage, EMPTY_COLLECTION)).toBe(false);
+    expect(loadCollection(deniedStorage)).toEqual({ collection: EMPTY_COLLECTION, storage: { kind: "blocked" } });
+    expect(saveCollection(deniedStorage, collection, { kind: "blocked" }, now)).toEqual({ kind: "blocked" });
   });
 
-  test("reports a full storage instead of throwing", () => {
-    expect(saveCollection(fullStorage, EMPTY_COLLECTION)).toBe(false);
+  test("reports a change it could not save instead of throwing", () => {
+    expect(saveCollection(fullStorage, collection, { kind: "saved" }, now)).toEqual({ kind: "failed" });
+  });
+});
+
+describe("printing codes", () => {
+  test("treat names on Object.prototype as unknown printings", () => {
+    expect(entryFor(EMPTY_COLLECTION, "toString")).toEqual({ owned: 0, wishlist: false });
+    expect(entryFor(EMPTY_COLLECTION, "constructor")).toEqual({ owned: 0, wishlist: false });
+  });
+
+  const fileWithKey = (key: string) =>
+    `{"format":"riftkeeper-collection","version":1,"printings":{"${key}":{"owned":1,"wishlist":false}}}`;
+
+  test("reject object keys such as constructor in an imported file", () => {
+    const parsed = parseCollectionFile(fileWithKey("constructor"));
+
+    expect(parsed.kind === "invalid" ? parsed.message : "").toMatch(/printings › constructor/);
+  });
+
+  test("never import a __proto__ key", () => {
+    expect(parseCollectionFile(fileWithKey("__proto__"))).toEqual({ kind: "collection", collection: EMPTY_COLLECTION });
   });
 });

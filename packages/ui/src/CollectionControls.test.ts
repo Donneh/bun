@@ -10,7 +10,7 @@ const props = {
   copiesOfCard: 2,
   ownedPrintings: 1,
   printingCount: 5,
-  saved: true,
+  storage: "saved" as const,
 };
 
 describe("CollectionControls", () => {
@@ -66,7 +66,7 @@ describe("CollectionControls", () => {
     const { rerender } = render(CollectionControls, { props });
     expect(screen.getByText("Saved in this browser only.")).toBeTruthy();
 
-    await rerender({ ...props, saved: false });
+    await rerender({ ...props, storage: "blocked" });
     expect(screen.getByText(/blocks storage/)).toBeTruthy();
   });
 });

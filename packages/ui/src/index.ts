@@ -11,6 +11,7 @@ export { default as CardTile } from "./CardTile.vue";
 export { default as CardTileSkeleton } from "./CardTileSkeleton.vue";
 export { default as CollectionControls } from "./CollectionControls.vue";
 export { default as CollectionOverview } from "./CollectionOverview.vue";
+export { default as CollectionStorageNote } from "./CollectionStorageNote.vue";
 export { default as CollectionTransfer } from "./CollectionTransfer.vue";
 export type {
   CardInfoContent,
@@ -22,7 +23,14 @@ export type {
   PrintingSummary,
 } from "./card-detail.ts";
 export type { CardOrientation, CardSummary } from "./card-summary.ts";
-export type { CollectionTally, CollectionValue, ImportMode, ImportOption, ImportPreview } from "./collection.ts";
+export type {
+  CollectionStorage,
+  CollectionTally,
+  CollectionValue,
+  ImportMode,
+  ImportOption,
+  ImportPreview,
+} from "./collection.ts";
 export { default as Dither } from "./Dither.vue";
 export { default as DomainBackdrop } from "./DomainBackdrop.vue";
 export type { DitherColor, DitherPattern } from "./dither.ts";

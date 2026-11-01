@@ -6,6 +6,8 @@ export interface CollectionTally {
 
 export type ImportMode = "merge" | "replace";
 
+export type CollectionStorage = "saved" | "blocked" | "failed" | "unreadable" | "protected" | "recovered";
+
 export interface ImportOption {
   readonly mode: ImportMode;
   readonly added: number;

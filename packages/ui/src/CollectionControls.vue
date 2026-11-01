@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useId } from "vue";
-import { copies } from "./collection.ts";
+import CollectionStorageNote from "./CollectionStorageNote.vue";
+import { type CollectionStorage, copies } from "./collection.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -8,10 +9,11 @@ const props = withDefaults(
     copiesOfCard: number;
     ownedPrintings: number;
     printingCount: number;
-    saved: boolean;
+    storage: CollectionStorage;
+    backupKey?: string | null;
     max?: number;
   }>(),
-  { max: 999 },
+  { backupKey: null, max: 999 },
 );
 
 const owned = defineModel<number>("owned", { required: true });
@@ -70,13 +72,7 @@ const summary = computed(() => {
         <span>Wishlist</span>
       </button>
     </div>
-    <p class="note" :class="{ blocked: !saved }">
-      {{
-        saved
-          ? "Saved in this browser only."
-          : "This browser blocks storage, so the collection is lost when the page reloads."
-      }}
-    </p>
+    <CollectionStorageNote :state="storage" :backup-key="backupKey" />
   </section>
 </template>
 
@@ -212,15 +208,5 @@ const summary = computed(() => {
 .wishlist:focus-visible {
   outline: var(--rk-focus-width) solid var(--rk-color-accent);
   outline-offset: 2px;
-}
-
-.note {
-  margin: 0;
-  color: var(--rk-color-text-muted);
-  font: var(--rk-font-size-xs) var(--rk-font-family-detail);
-}
-
-.note.blocked {
-  color: var(--rk-color-warning-text);
 }
 </style>

@@ -235,6 +235,49 @@ test("a file that is not a collection export is rejected with a clear message an
   await expect(ownedTiles(page)).toHaveCount(1);
 });
 
+test("a stored collection that cannot be read is backed up before the first change overwrites it", async ({
+  page,
+  request,
+}) => {
+  const card = await cardWithPrintings(request, 1);
+  const [first] = card.printings as [ApiPrinting];
+  const original = JSON.stringify({
+    version: 1,
+    printings: { [first.publicCode]: { owned: 2, wishlist: false }, "OGN-000/298": { owned: 1000, wishlist: false } },
+  });
+  await page.addInitScript(
+    ([key, value]) => {
+      if (window.sessionStorage.getItem("seeded") === null) {
+        window.sessionStorage.setItem("seeded", "yes");
+        window.localStorage.setItem(key, value);
+      }
+    },
+    [STORAGE_KEY, original] as const,
+  );
+
+  await page.goto(`/cards/${card.id}`);
+
+  await expect(page.getByText(/collection stored in this browser could not be read/)).toBeVisible();
+  await expect(ownedCount(page, first.publicCode)).toHaveText("2");
+  expect(await storedCollection(page)).toBe(original);
+
+  await addCopy(page, first.publicCode);
+
+  await expect(
+    page.getByText(/The original is kept in this browser under riftkeeper-collection-backup-/),
+  ).toBeVisible();
+  const backups = await page.evaluate(() =>
+    Object.keys(window.localStorage)
+      .filter((key) => key.startsWith("riftkeeper-collection-backup-"))
+      .map((key) => window.localStorage.getItem(key)),
+  );
+  expect(backups).toEqual([original]);
+  expect(JSON.parse((await storedCollection(page)) ?? "null")).toEqual({
+    version: 1,
+    printings: { [first.publicCode]: { owned: 3, wishlist: false } },
+  });
+});
+
 test("the collection works for the visit when the browser blocks storage", async ({ page, request }) => {
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", {
