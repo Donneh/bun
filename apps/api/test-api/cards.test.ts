@@ -103,7 +103,7 @@ describe("GET /cards/:id/price-history", () => {
     const { status, body } = await get(`/cards/${card.id}/price-history`);
 
     expect(status).toBe(200);
-    const history = PriceHistorySchema.parse(body.data);
+    const history = z.object({ data: PriceHistorySchema }).parse(body).data;
     expect(history.dates.length).toBeLessThanOrEqual(PRICE_HISTORY_DAYS + 1);
     expect(Object.keys(history.printings).every((id) => card.printings.some((printing) => printing.id === id))).toBe(
       true,
