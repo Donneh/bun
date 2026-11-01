@@ -4,6 +4,7 @@ import { expect, failedResponse, test } from "./browser-console.ts";
 
 const searchBox = (page: Page) => page.getByRole("searchbox", { name: "Search cards" });
 const results = (page: Page) => page.getByRole("list", { name: "Search results" });
+const currentResults = (page: Page) => results(page).and(page.locator("[aria-busy='false']"));
 const filters = (page: Page) => page.getByRole("list", { name: "Filters" });
 const sortBy = (page: Page) => page.getByRole("combobox", { name: "Sort by" });
 const sortDirection = (page: Page) => page.getByRole("button", { name: /^Direction:/ });
@@ -320,7 +321,7 @@ test("a slow search shows the loading state", async ({ page }) => {
   await search(page, "c:calm");
 
   await expect(page.getByRole("status").getByText("Searching…")).toBeVisible();
-  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+  await expect(currentResults(page).getByRole("listitem").first()).toBeVisible();
 });
 
 async function delaySearches(page: Page, ms: number) {
@@ -500,7 +501,7 @@ test("landscape cards keep their landscape shape", async ({ page }) => {
   await page.goto("/");
   await search(page, "type:battlefield");
 
-  const image = results(page).getByRole("img").first();
+  const image = currentResults(page).getByRole("img").first();
   await expect(image).toBeVisible();
   const box = await image.boundingBox();
   expect(box?.width).toBeGreaterThan(box?.height ?? Number.POSITIVE_INFINITY);
@@ -563,7 +564,7 @@ test("the next page shows placeholder tiles while it loads", async ({ page }) =>
   });
   await page.goto("/");
   await search(page, "type:unit");
-  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+  await expect(currentResults(page).getByRole("listitem").first()).toBeVisible();
   const firstPage = await results(page).getByRole("listitem").count();
 
   await scrollToEnd(page);
@@ -583,7 +584,7 @@ test("a failed page shows the error and can be retried", async ({ page, browserC
   );
   await page.goto("/");
   await search(page, "type:unit");
-  await expect(results(page).getByRole("listitem").first()).toBeVisible();
+  await expect(currentResults(page).getByRole("listitem").first()).toBeVisible();
   const firstPage = await results(page).getByRole("listitem").count();
 
   await scrollToEnd(page);
