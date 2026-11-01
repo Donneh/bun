@@ -36,6 +36,11 @@ withDefaults(defineProps<{ orientation?: CardOrientation; label?: string }>(), {
       </div>
       <div class="section">
         <span class="line label" />
+        <span class="line value" />
+        <span class="line short" />
+      </div>
+      <div class="section">
+        <span class="line label" />
         <span v-for="index in 2" :key="index" class="printing">
           <span class="thumbnail" />
           <span class="line text" />

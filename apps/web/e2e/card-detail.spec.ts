@@ -2,10 +2,15 @@ import type { APIRequestContext, Page } from "@playwright/test";
 import { apiBase } from "../playwright.config.ts";
 import { expect, failedResponse, test, unknownCardResponse } from "./browser-console.ts";
 
+interface ApiQuote {
+  readonly market: number | null;
+}
+
 interface ApiPrinting {
   readonly id: string;
   readonly imageUrl: string;
   readonly orientation: "portrait" | "landscape";
+  readonly prices: { readonly normal?: ApiQuote; readonly foil?: ApiQuote } | null;
 }
 
 interface ApiCard {
@@ -220,6 +225,52 @@ test("choosing a printing swaps the image and is kept in the URL", async ({ page
 
   await expect(printingButtons(page).nth(1)).toHaveAttribute("aria-pressed", "true");
   await expect(cardImage(page, card.name)).toHaveAttribute("src", second?.imageUrl ?? "");
+});
+
+test("a priced printing shows its market price per finish with the source and date, and each printing its prices", async ({
+  page,
+  request,
+}) => {
+  const pricedFinishes = (printing: ApiPrinting) =>
+    (["normal", "foil"] as const).filter((finish) => typeof printing.prices?.[finish]?.market === "number");
+  const { data } = await apiSearch(request, "type:unit");
+  const card = data.find((candidate) => pricedFinishes(candidate.printings[0] as ApiPrinting).length > 0);
+  expect(card, "a unit on the first page has a market price for its first printing").toBeDefined();
+  const { id, printings } = card as ApiCard;
+
+  await page.goto(`/cards/${id}`);
+
+  const pricing = page.getByRole("region", { name: "Market price" });
+  await expect(pricing).toBeVisible();
+  for (const finish of pricedFinishes(printings[0] as ApiPrinting))
+    await expect(pricing).toContainText(new RegExp(`${finish}\\s*\\$\\d`, "i"));
+  await expect(
+    pricing.getByText(/^Prices: TCGplayer market price via TCGCSV, updated \w{3} \d{1,2}, \d{4}$/),
+  ).toBeVisible();
+  await expect(printingButtons(page)).toHaveCount(printings.length);
+  for (const [index, printing] of printings.entries()) {
+    const button = printingButtons(page).nth(index);
+    const finishes = pricedFinishes(printing);
+    if (finishes.length === 0) await expect(button).not.toContainText("$");
+    for (const finish of finishes) await expect(button).toContainText(new RegExp(`${finish} \\$\\d`, "i"));
+  }
+});
+
+test("a card without prices shows no pricing and no zeros", async ({ page, request }) => {
+  const card = await cardWithPrintings(request, 1);
+  await page.route(isCardRequest, async (route) => {
+    const response = await route.fetch();
+    const { data } = (await response.json()) as { data: ApiCard };
+    const printings = data.printings.map((printing) => ({ ...printing, prices: null }));
+    await route.fulfill({ response, json: { data: { ...data, printings } } });
+  });
+
+  await page.goto(`/cards/${card.id}`);
+
+  await expect(printingButtons(page)).toHaveCount(card.printings.length);
+  await expect(page.getByRole("region", { name: "Market price" })).toHaveCount(0);
+  await expect(page.getByText(/TCGCSV/)).toHaveCount(0);
+  await expect(page.getByRole("article")).not.toContainText("$");
 });
 
 test("a slow card shows a skeleton of the page", async ({ page, request }) => {
