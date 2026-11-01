@@ -1,9 +1,11 @@
 import { parseArgs } from "node:util";
-import { type PriceHistory, parsePriceHistory, recordPriceDay } from "@riftkeeper/cards/price-history";
+import { parsePriceHistory } from "@riftkeeper/cards/price-history";
 import { type PriceSnapshot, parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { matchPrices } from "./match-prices.ts";
 import {
+  decideHistoryUpdate,
   decidePriceUpdate,
+  describeHistoryUpdate,
   describePriceUpdate,
   type PriceUpdate,
   renderPriceSummary,
@@ -33,12 +35,6 @@ async function readPreviousPrices(path: string): Promise<PriceSnapshot | null> {
   return parsePriceSnapshot({ json: await file.json(), path });
 }
 
-async function readPriceHistory(path: string): Promise<PriceHistory | null> {
-  const file = Bun.file(path);
-  if (!(await file.exists())) return null;
-  return parsePriceHistory({ json: await file.json(), path });
-}
-
 async function update(): Promise<PriceUpdate> {
   let previous: PriceSnapshot | null = null;
   try {
@@ -54,14 +50,22 @@ async function update(): Promise<PriceUpdate> {
 }
 
 const result = await update();
-if (result.kind === "updated") {
-  const history = recordPriceDay(await readPriceHistory(options.history), result.snapshot);
-  await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
-  await Bun.write(options.history, serializePriceHistory(history));
-}
-const summary = renderPriceSummary(result);
+if (result.kind === "updated") await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
+
+const historyFile = Bun.file(options.history);
+const historyText = (await historyFile.exists()) ? await historyFile.text() : null;
+const history = decideHistoryUpdate({
+  update: result,
+  readPrevious: () =>
+    historyText === null ? null : parsePriceHistory({ json: JSON.parse(historyText), path: options.history }),
+});
+if (history?.kind === "recorded") await Bun.write(options.history, serializePriceHistory(history.history));
+
+const historyLine = history === null ? [] : [describeHistoryUpdate(history), ""];
+const summary = [renderPriceSummary(result), ...historyLine].join("\n");
 if (options.summary !== undefined) await Bun.write(options.summary, summary);
-if (options["pr-body"] !== undefined && result.kind === "updated") await Bun.write(options["pr-body"], summary);
+const changed = result.kind === "updated" || history?.kind === "recorded";
+if (options["pr-body"] !== undefined && changed) await Bun.write(options["pr-body"], summary);
 
 const description = describePriceUpdate(result);
 if (result.kind === "failed" || result.kind === "rejected") {
@@ -70,3 +74,5 @@ if (result.kind === "failed" || result.kind === "rejected") {
 } else {
   console.log(description);
 }
+if (history?.kind === "failed") console.error(describeHistoryUpdate(history));
+else if (history !== null) console.log(describeHistoryUpdate(history));

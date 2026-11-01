@@ -16,7 +16,7 @@ describe("price snapshot", () => {
     );
   });
 
-  test("the price history ends on the day of the committed prices", () => {
-    expect(priceHistory.dates.at(-1)).toBe(prices.updatedAt.slice(0, 10));
+  test("the price history ends no later than the day of the committed prices", () => {
+    expect((priceHistory.dates.at(-1) ?? "") <= prices.updatedAt.slice(0, 10)).toBe(true);
   });
 });

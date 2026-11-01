@@ -1,4 +1,4 @@
-import type { PriceHistory } from "@riftkeeper/cards/price-history";
+import { type PriceHistory, recordPriceDay } from "@riftkeeper/cards/price-history";
 import { PRICE_CURRENCY, PRICE_SOURCE, type PriceSnapshot, PriceSnapshotSchema } from "@riftkeeper/cards/prices";
 import { compareStrings } from "./compare-strings.ts";
 import type { PriceMatch } from "./match-prices.ts";
@@ -15,6 +15,44 @@ export type PriceUpdate =
       readonly kept: PriceSnapshot | null;
     }
   | { readonly kind: "failed"; readonly message: string; readonly kept: PriceSnapshot | null };
+
+export type HistoryUpdate =
+  | { readonly kind: "recorded"; readonly history: PriceHistory }
+  | { readonly kind: "current"; readonly day: string }
+  | { readonly kind: "failed"; readonly message: string };
+
+export function decideHistoryUpdate({
+  update,
+  readPrevious,
+}: {
+  update: PriceUpdate;
+  readPrevious: () => PriceHistory | null;
+}): HistoryUpdate | null {
+  if (update.kind !== "updated" && update.kind !== "unchanged") return null;
+  const day = update.snapshot.updatedAt.slice(0, 10);
+  try {
+    const previous = readPrevious();
+    if (update.kind === "unchanged" && previous?.dates.at(-1) === day) return { kind: "current", day };
+    return { kind: "recorded", history: recordPriceDay(previous, update.snapshot) };
+  } catch (error) {
+    return { kind: "failed", message: error instanceof Error ? error.message : String(error) };
+  }
+}
+
+export function describeHistoryUpdate(update: HistoryUpdate): string {
+  switch (update.kind) {
+    case "recorded":
+      return `Price history recorded ${update.history.dates.at(-1)} (${update.history.dates.length} days).`;
+    case "current":
+      return `Price history already has ${update.day}.`;
+    case "failed":
+      return `Price history not updated: ${update.message.split("\n")[0]}`;
+    default: {
+      const _exhaustive: never = update;
+      return _exhaustive;
+    }
+  }
+}
 
 type FinishEntries = Readonly<Record<string, { readonly normal?: unknown; readonly foil?: unknown }>>;
 

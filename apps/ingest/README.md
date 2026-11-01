@@ -48,12 +48,12 @@ One-time repository setup: store a fine-grained personal access token, limited t
 
 ## Prices
 
-`bun run prices` fetches TCGplayer prices in USD from [TCGCSV](https://tcgcsv.com/), a free daily mirror of TCGplayer's catalogue, and writes `apps/api/data/prices.json`. When the prices changed, it also records the day's market prices in `apps/api/data/price-history.json`.
+`bun run prices` fetches TCGplayer prices in USD from [TCGCSV](https://tcgcsv.com/), a free daily mirror of TCGplayer's catalogue, and writes `apps/api/data/prices.json`. It also records the day's market prices in `apps/api/data/price-history.json` when that day is not there yet.
 
 ```sh
 bun run prices                          # refresh apps/api/data/prices.json
 bun run prices --summary summary.md     # also write a markdown summary of the run
-bun run prices --pr-body body.md        # also write the summary as a PR body, only when the prices changed
+bun run prices --pr-body body.md        # also write the summary as a PR body, only when the prices or the history changed
 bun run prices --cards other/cards.json --prices other/prices.json --history other/price-history.json
 ```
 
@@ -65,7 +65,7 @@ The command never writes a partial snapshot. When a request fails, TCGCSV return
 
 ### Price history
 
-`price-history.json` keeps the market price of each printing per finish for the last 30 days, which the card page needs for its 30-day change and sparkline, because TCGCSV only gives today's prices. Each run that writes new prices records them under the UTC day of `updatedAt`, the day TCGCSV built them, and drops days more than 30 days before the newest one. Recording the same build again replaces that day, so a rerun changes nothing. A run that fails or is rejected writes neither file, and a night without a run records nothing, so a missed day stays a gap instead of repeating the day before. The price pull request carries both files. Git keeps every earlier version of the file, so the full history stays recoverable even though the file holds only 30 days.
+`price-history.json` keeps the market price of each printing per finish for the last 30 days, which the card page needs for its 30-day change and sparkline, because TCGCSV only gives today's prices. Each run that writes new prices records them under the UTC day of `updatedAt`, the day TCGCSV built them, and drops days more than 30 days before the newest one. Recording the same build again replaces that day, so a rerun changes nothing. A run that fails or is rejected writes neither file, and a night without a run records nothing, so a missed day stays a gap instead of repeating the day before. When the prices are unchanged but the history does not have their day yet, for example because an earlier price pull request merged without it, the run records that day, so the next run repairs the history. A history file that cannot be read never stops the price update: the run still writes `prices.json` and says "Price history not updated" with the reason in its summary. The price pull request carries both files. Git keeps every earlier version of the file, so the full history stays recoverable even though the file holds only 30 days.
 
 ## Check
 
