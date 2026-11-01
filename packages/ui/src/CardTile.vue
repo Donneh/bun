@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount } from "vue";
 import CardImage from "./CardImage.vue";
 import type { CardOrientation } from "./card-summary.ts";
+import { copies } from "./collection.ts";
 import { isPlainLeftClick } from "./link-click.ts";
 
 const props = defineProps<{
@@ -12,6 +13,7 @@ const props = defineProps<{
   href: string;
   srcset?: string | undefined;
   sizes?: string | undefined;
+  count?: number | undefined;
 }>();
 
 const emit = defineEmits<{ navigate: [href: string]; intent: [] }>();
@@ -30,7 +32,11 @@ function cancelHoverIntent() {
 
 onBeforeUnmount(cancelHoverIntent);
 
-const linkName = computed(() => (props.subtitle ? `${props.name}, ${props.subtitle}` : props.name));
+const linkName = computed(() =>
+  [props.name, props.subtitle, props.count === undefined ? null : copies(props.count)]
+    .filter((part): part is string => Boolean(part))
+    .join(", "),
+);
 
 function followLink(event: MouseEvent) {
   if (!isPlainLeftClick(event)) return;
@@ -51,14 +57,17 @@ function followLink(event: MouseEvent) {
     @touchstart.passive="emit('intent')"
   >
     <figure class="figure">
-      <CardImage
-        class="frame"
-        :name="name"
-        :image-url="imageUrl"
-        :orientation="orientation"
-        :srcset="srcset"
-        :sizes="sizes"
-      />
+      <div class="art">
+        <CardImage
+          class="frame"
+          :name="name"
+          :image-url="imageUrl"
+          :orientation="orientation"
+          :srcset="srcset"
+          :sizes="sizes"
+        />
+        <span v-if="count !== undefined" class="count" aria-hidden="true">×{{ count }}</span>
+      </div>
       <figcaption class="caption">
         <span class="name">{{ name }}</span>
         <span v-if="subtitle" class="subtitle">{{ subtitle }}</span>
@@ -84,12 +93,29 @@ function followLink(event: MouseEvent) {
   margin: 0;
 }
 
-.frame {
+.art {
+  position: relative;
   transition: transform var(--rk-duration-fast) ease-out;
 }
 
+.count {
+  position: absolute;
+  right: var(--rk-space-2);
+  bottom: var(--rk-space-2);
+  min-width: 2rem;
+  padding: var(--rk-space-1) var(--rk-space-2);
+  border: var(--rk-border-width) solid var(--rk-glass-edge);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rk-color-background) 85%, transparent);
+  color: var(--rk-color-text);
+  font: var(--rk-font-weight-bold) var(--rk-font-size-sm) / 1 var(--rk-font-family-mono);
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 @media (hover: hover) {
-  .tile:hover .frame {
+  .tile:hover .art {
     transform: translateY(calc(-1 * var(--rk-space-1)));
   }
 
@@ -108,11 +134,11 @@ function followLink(event: MouseEvent) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .frame {
+  .art {
     transition: none;
   }
 
-  .tile:hover .frame {
+  .tile:hover .art {
     transform: none;
   }
 }

@@ -131,4 +131,11 @@ describe("CardTile", () => {
       expect(emitted("intent")).toHaveLength(2);
     });
   });
+
+  test("shows an owned count on the art and in the link name", () => {
+    render(CardTile, { props: { ...jinx, count: 3 } });
+
+    expect(screen.getByRole("link", { name: "Jinx, Loose Cannon, 3 copies" })).toBeTruthy();
+    expect(screen.getByText("×3")).toBeTruthy();
+  });
 });
