@@ -128,7 +128,6 @@ function priceTrend(history: PriceHistory, printingId: PrintingId, finish: Histo
   const span = Math.max(...byDaysBefore.keys());
   const first = byDaysBefore.get(span) as number;
   const last = byDaysBefore.get(0) as number;
-  if (first <= 0) return undefined;
   const period = `${span} days`;
   return {
     ...describeChange((last - first) / first, period),

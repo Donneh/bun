@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { type PrintingId, PrintingIdSchema } from "./card.ts";
-import { PRICE_CURRENCY, PRICE_SOURCE, type PriceSnapshot } from "./price.ts";
+import { PRICE_CURRENCY, PRICE_SOURCE, type PriceSnapshot, SMALLEST_PRICE } from "./price.ts";
 
 export const PRICE_HISTORY_DAYS = 30;
 const DAY_MS = 86_400_000;
 
-const MarketSeriesSchema = z.array(z.number().nonnegative().nullable());
+const MarketSeriesSchema = z.array(z.number().min(SMALLEST_PRICE).nullable());
 
 const PrintingHistorySchema = z.object({
   normal: MarketSeriesSchema.optional(),

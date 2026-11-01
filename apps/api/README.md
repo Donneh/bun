@@ -18,13 +18,14 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 
 ## Endpoints
 
-| Method | Path              | Response                                                                 |
-| ------ | ----------------- | ------------------------------------------------------------------------ |
-| GET    | `/health`         | `200 { data: { status: "ok", cards: number, version: string \| null } }` |
-| GET    | `/cards`          | `200 { data: Card[] }`                                                   |
-| GET    | `/cards/:id`      | `200 { data: Card }`, `400` bad id, `404` no card                        |
-| GET    | `/search`         | `200 { data: Card[], meta, warnings, parsed }`, `400` bad parameters     |
-| GET    | `/search/options` | `200 { data: { domains, types, supertypes, rarities, variants, sets } }` |
+| Method | Path                       | Response                                                                 |
+| ------ | -------------------------- | ------------------------------------------------------------------------ |
+| GET    | `/health`                  | `200 { data: { status: "ok", cards: number, version: string \| null } }` |
+| GET    | `/cards`                   | `200 { data: Card[] }`                                                   |
+| GET    | `/cards/:id`               | `200 { data: Card }`, `400` bad id, `404` no card                        |
+| GET    | `/cards/:id/price-history` | `200 { data: PriceHistory }`, `400` bad id, `404` no card                |
+| GET    | `/search`                  | `200 { data: Card[], meta, warnings, parsed }`, `400` bad parameters     |
+| GET    | `/search/options`          | `200 { data: { domains, types, supertypes, rarities, variants, sets } }` |
 
 Errors use the shape `{ error: { code, message } }`.
 
@@ -47,6 +48,19 @@ Every card response (`/cards`, `/cards/:id` and `/search`) also gives each print
 ```
 
 `normal` and `foil` are present only for the finishes TCGplayer sells; at least one is. Any of `market`, `low`, `mid` and `high` can be `null`. `updatedAt` is when TCGCSV built the prices, not when we fetched them. The schema lives in `packages/cards/src/price.ts`.
+
+`GET /cards/:id/price-history` gives the daily TCGplayer market price of each printing of the card over the last 30 days:
+
+```json
+{
+  "currency": "USD",
+  "source": "TCGplayer via TCGCSV",
+  "dates": ["2026-10-30", "2026-10-31"],
+  "printings": { "ogn-001-298": { "normal": [0.11, 0.1], "foil": [null, 0.19] } }
+}
+```
+
+`dates` are the UTC days on which TCGCSV built prices, ascending, and each series has one value per date. A day without a price for a finish is `null`, and a day on which no prices were recorded at all is missing from `dates`, so a gap is never filled with another day's price. A printing without any price in the window is left out. The schema lives in `packages/cards/src/price-history.ts`.
 
 ## Search
 
@@ -103,7 +117,7 @@ On a lightly used API almost every request lands on a new Worker instance, so st
 
 `src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker does not validate the snapshot when it starts. `bun run build` runs `scripts/validate-snapshot.ts` first, which fails the build when the snapshot does not match the card schema or has fields the schema does not know, with one message instead of a list of Zod issues. The unit tests check the same.
 
-`src/cards/price-snapshot.ts` bundles `data/prices.json` the same way, and `scripts/validate-snapshot.ts` checks it against the price schema. Prices are keyed by printing id and joined to the cards once, when the Worker starts. A printing missing from the price snapshot gets `prices: null`, and a price for a printing that no longer exists is ignored, so the two snapshots can be updated independently.
+`src/cards/price-snapshot.ts` bundles `data/prices.json` and `data/price-history.json` the same way, and `scripts/validate-snapshot.ts` checks them against their schemas. Prices are keyed by printing id and joined to the cards once, when the Worker starts. A printing missing from the price snapshot gets `prices: null`, and a price for a printing that no longer exists is ignored, so the two snapshots can be updated independently.
 
 ## Black-box tests
 
