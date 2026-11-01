@@ -49,6 +49,12 @@ export function pullRequestComment(source: CommentSource): string {
   return comment.length <= MAX_COMMENT_LENGTH ? comment : commentWith(source, 0);
 }
 
+export function shownImages({ reports, requested }: Pick<CommentSource, "reports" | "requested">): string[] {
+  return reports.flatMap((report) =>
+    requested.paths.includes(report.path) ? [report.firstScreen, report.fullPage] : [report.firstScreen],
+  );
+}
+
 function commentWith(
   { reports, imageBaseUrl, commit, runUrl, e2eResult, requested }: CommentSource,
   problemsPerPage: number,
@@ -110,8 +116,7 @@ function pathSection(
   const label = (report: SavedReport) => `${VIEWPORT_LABELS[report.viewport]} ${report.colorScheme}`;
   const image = (file: (report: SavedReport) => string) => (report: SavedReport) => {
     const url = `${imageBaseUrl.replace(/\/$/, "")}/${encodeURIComponent(file(report))}`;
-    const alt = escapeHtml(`${decodeURIComponent(path)} ${label(report)}`);
-    return `<a href="${url}"><img src="${url}" width="${IMAGE_WIDTH}" alt="${alt}"></a>`;
+    return `<a href="${url}"><img src="${url}" width="${IMAGE_WIDTH}" alt="${label(report)}"></a>`;
   };
   const row = (cells: readonly string[]) => `| ${cells.join(" | ")} |`;
   const table = showsFullPage
@@ -155,8 +160,4 @@ function codeSpan(text: string): string {
   const fence = "`".repeat(longestBacktickRun + 1);
   const padding = text.startsWith("`") || text.endsWith("`") ? " " : "";
   return `${fence}${padding}${text}${padding}${fence}`;
-}
-
-function escapeHtml(text: string): string {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }

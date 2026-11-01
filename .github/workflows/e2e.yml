@@ -17,7 +17,7 @@ defaults:
 
 env:
   MARKER: "<!-- riftkeeper-screenshots -->"
-  IMAGES_PLACEHOLDER: https://screenshots.invalid
+  IMAGES_PLACEHOLDER: https://raw.githubusercontent.com/${{ github.repository }}/0000000000000000000000000000000000000000
   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
   HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
@@ -66,13 +66,12 @@ jobs:
             {
               echo "$MARKER"
               bun verify-live/pull-request-comment-cli.ts --reports test-results/verify-live/reports.json \
-                --requested test-results/verify-live/requested-paths.json \
+                --requested test-results/verify-live/requested-paths.json --image-list "$RUNNER_TEMP/shown-images.txt" \
                 --images "$IMAGES_PLACEHOLDER" --commit "$HEAD_SHA" --run "$RUN_URL" --e2e "$E2E_RESULT"
             } > test-results/pull-request-screenshots/pull-request-comment.md
-            grep -o "$IMAGES_PLACEHOLDER/[a-z0-9-]*\.jpg" test-results/pull-request-screenshots/pull-request-comment.md \
-              | sort -u | while read -r image; do
-                cp "test-results/verify-live/${image##*/}" test-results/pull-request-screenshots/
-              done
+            while read -r image; do
+              cp "test-results/verify-live/$image" test-results/pull-request-screenshots/
+            done < "$RUNNER_TEMP/shown-images.txt"
             echo "saved=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Upload the screenshots for the pull request

@@ -1,14 +1,15 @@
 import { describe, expect, test } from "bun:test";
-import { type E2eResult, pullRequestComment } from "../verify-live/pull-request-comment.ts";
+import { type E2eResult, pullRequestComment, shownImages } from "../verify-live/pull-request-comment.ts";
 import {
   MAX_REQUESTED_PAGES,
   NO_REQUESTED_PATHS,
+  parseScreenshotRequest,
   type RejectedLine,
   type RequestedPaths,
 } from "../verify-live/screenshot-request.ts";
 import type { SavedReport } from "../verify-live/verify-live.ts";
 
-const IMAGES = "https://raw.githubusercontent.com/owner/repo/abc123";
+const IMAGES = `https://raw.githubusercontent.com/${"o".repeat(39)}/${"r".repeat(100)}/${"0".repeat(40)}`;
 const RUN = "https://github.com/owner/repo/actions/runs/1";
 
 function reportsFor(path: string, slug: string, problems: Partial<Record<string, string[]>> = {}): SavedReport[] {
@@ -50,6 +51,27 @@ describe("pullRequestComment", () => {
     expect(text).toContain("### `/cards/x`\n\n|  | Desktop light | Desktop dark | Pixel 7 light | Pixel 7 dark |\n");
     expect(text).toContain(`| First screen | <a href="${IMAGES}/cards-x-desktop-light-first-screen.jpg">`);
     expect(text).toContain(`| Full page | <a href="${IMAGES}/cards-x-desktop-light-full-page.jpg">`);
+  });
+
+  test("keeps a requested path with markdown, a pipe or a mention out of the image table", () => {
+    const { pages } = parseScreenshotRequest(
+      '```screenshots\n/?q=a|@owner [click](https://evil.example) <b>x</b> & "y"\n```',
+    );
+    const path = pages[0] && "path" in pages[0] ? pages[0].path : "";
+    const text = comment(reportsFor(path, "q"), "success", { paths: [path], rejected: [] });
+    const rows = text.split("\n").filter((line) => line.startsWith("|"));
+    expect(rows).toHaveLength(4);
+    for (const row of rows) expect(row.split("|")).toHaveLength(7);
+    expect(text).toContain('### `/?q=a|@owner [click](https://evil.example) <b>x</b> & "y"`\n');
+  });
+
+  test("lists exactly the images the comment shows", () => {
+    const reports = [...reportsFor("/", "home"), ...reportsFor("/cards/x", "cards-x")];
+    const requested = { paths: ["/cards/x"], rejected: [] };
+    const text = comment(reports, "success", requested);
+    const linked = [...new Set([...text.matchAll(/src="[^"]*\/([^"/]+)"/g)].map((match) => match[1] ?? ""))];
+    expect(shownImages({ reports, requested }).sort()).toEqual(linked.sort());
+    expect(linked).toHaveLength(12);
   });
 
   test("names the lines of the screenshots block that show no page and why, as code", () => {
@@ -155,5 +177,22 @@ describe("pullRequestComment", () => {
     expect(text.length).toBeLessThan(65_536);
     expect(text).toContain("- Pixel 7 dark: 200 problems in the run log");
     expect(text).toContain(`${"s".repeat(60)}-0123abcd-pixel-7-dark-full-page.jpg`);
+  });
+
+  test("stays under GitHub's comment limit with the longest paths a block allows and three long problems on every page", () => {
+    const body = ["```screenshots", ..."abcdef".split("").map((last) => `/?q=${"&".repeat(195)}${last}`), "```"];
+    const { pages } = parseScreenshotRequest(body.join("\n"));
+    const requestedPaths = pages.flatMap((page) => ("path" in page ? [page.path] : []));
+    expect(requestedPaths).toHaveLength(MAX_REQUESTED_PAGES);
+    const problems = Array.from({ length: 3 }, (_, index) => `failed request: ${"x".repeat(300)} ${index}`);
+    const reports = ["/", "/a", "/b", "/c", ...requestedPaths].flatMap((path) =>
+      reportsFor(path, `${"s".repeat(60)}-0123abcd`, {
+        "desktop-light": problems,
+        "desktop-dark": problems,
+        "pixel-7-light": problems,
+        "pixel-7-dark": problems,
+      }),
+    );
+    expect(comment(reports, "failure", { paths: requestedPaths, rejected: [] }).length).toBeLessThan(65_536);
   });
 });
