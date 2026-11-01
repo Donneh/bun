@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { PricedCard, PrintingPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
+import { makeCard, makePriceHistory, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
 import { createApp } from "./app.ts";
 
 describe("GET /health", () => {
@@ -8,6 +8,7 @@ describe("GET /health", () => {
     const app = createApp({
       cards: [makeCard({ id: "abandon" }), makeCard({ id: "jinx-loose-cannon" })],
       prices: makePriceSnapshot(),
+      priceHistory: makePriceHistory(),
     });
 
     const response = await app.request("/health");
@@ -17,7 +18,7 @@ describe("GET /health", () => {
   });
 
   test("reports the deployed Worker version", async () => {
-    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot() });
+    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
 
     const response = await app.request("/health", {}, { CF_VERSION_METADATA: { id: "version-1" } });
 
@@ -26,7 +27,7 @@ describe("GET /health", () => {
 });
 
 describe("CORS", () => {
-  const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot() });
+  const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
   const origin = { Origin: "https://riftkeeper.example" };
 
   test("allows any origin on GET responses without credentials", async () => {
@@ -58,7 +59,7 @@ describe("CORS", () => {
 
 describe("routing", () => {
   test.each(["/health/", "/cards/", "/search/"])("does not serve %s with a trailing slash", async (path) => {
-    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot() });
+    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
 
     const response = await app.request(path);
 
@@ -71,7 +72,11 @@ describe("prices", () => {
   const priced = makePrinting({ id: "ogn-001-298", publicCode: "OGN-001/298" });
   const unpriced = makePrinting({ id: "unl-t01", publicCode: "UNL-T01" });
   const prices = makePriceSnapshot({ printings: { [priced.id]: { normal: quote, foil: { ...quote, market: 1 } } } });
-  const app = createApp({ cards: [makeCard({ id: "jinx", name: "Jinx", printings: [priced, unpriced] })], prices });
+  const app = createApp({
+    cards: [makeCard({ id: "jinx", name: "Jinx", printings: [priced, unpriced] })],
+    prices,
+    priceHistory: makePriceHistory(),
+  });
   const expectedPrices: (PrintingPrices | null)[] = [
     {
       normal: quote,

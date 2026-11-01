@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { type Card, CardIdSchema, PrintingIdSchema } from "@riftkeeper/cards";
 import { withPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
+import { makeCard, makePriceHistory, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
 import { createApp } from "../app.ts";
 import { MAX_QUERY_LENGTH, MAX_WARNINGS } from "./search.routes.ts";
 
@@ -30,7 +30,7 @@ const ashe = makeCard({
   ],
 });
 const prices = makePriceSnapshot();
-const app = createApp({ cards: [annie, ashe], prices });
+const app = createApp({ cards: [annie, ashe], prices, priceHistory: makePriceHistory() });
 
 interface SearchBody {
   readonly data: readonly Card[];

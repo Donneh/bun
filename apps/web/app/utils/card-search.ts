@@ -1,3 +1,4 @@
+import type { PriceHistory } from "@riftkeeper/cards/price-history";
 import type { PricedCard } from "@riftkeeper/cards/prices";
 import type { Decomposition, SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
@@ -51,6 +52,15 @@ export async function fetchCard(apiBase: string, id: string): Promise<CardOutcom
   } catch (error) {
     if (isUnknownCard(error)) return { kind: "not-found" };
     return { kind: "error", message: apiErrorMessage(error) ?? UNREACHABLE_MESSAGE };
+  }
+}
+
+export async function fetchPriceHistory(apiBase: string, cardId: string): Promise<PriceHistory | null> {
+  try {
+    const path = `/cards/${encodeURIComponent(cardId)}/price-history`;
+    return (await $fetch<{ data: PriceHistory }>(path, { baseURL: apiBase })).data;
+  } catch {
+    return null;
   }
 }
 

@@ -18,7 +18,7 @@ import { useTheme } from "~/composables/theme";
 import { rememberedCard } from "~/utils/card-cache";
 import { cardInfo, printingSummaries, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
-import { type CardView, fetchCard } from "~/utils/card-search";
+import { type CardView, fetchCard, fetchPriceHistory } from "~/utils/card-search";
 import { cardOwnership } from "~/utils/collection-view";
 import { RIOT_NOTICE } from "~/utils/riot-notice";
 
@@ -51,7 +51,14 @@ const view = computed<CardView>(() => {
 const card = computed(() => (view.value.kind === "card" ? view.value.card : null));
 const domains = computed(() => card.value?.domains ?? []);
 const printing = computed(() => (card.value ? selectedPrinting(card.value, route.query.printing) : null));
-const info = computed(() => (card.value && printing.value ? cardInfo(card.value, printing.value) : null));
+const loadedCardId = computed(() => card.value?.id ?? null);
+const { data: priceHistory } = useLazyAsyncData(
+  () => `price-history:${loadedCardId.value}`,
+  () => (loadedCardId.value === null ? Promise.resolve(null) : fetchPriceHistory(apiBase, loadedCardId.value)),
+);
+const info = computed(() =>
+  card.value && printing.value ? cardInfo(card.value, printing.value, priceHistory.value ?? null) : null,
+);
 const printings = computed(() => (card.value ? printingSummaries(card.value) : []));
 const collection = useCollection();
 const ownership = computed(() =>

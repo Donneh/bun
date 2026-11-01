@@ -19,6 +19,7 @@ export type {
   CardTag,
   FinishPricing,
   PriceFigure,
+  PriceTrend,
   PricingContent,
   PrintingSummary,
 } from "./card-detail.ts";
@@ -45,6 +46,7 @@ export { default as Hero } from "./Hero.vue";
 export { default as InfiniteScrollSentinel } from "./InfiniteScrollSentinel.vue";
 export type { NavLink } from "./nav-link.ts";
 export { default as PageSection } from "./PageSection.vue";
+export { default as PriceSparkline } from "./PriceSparkline.vue";
 export { default as PrintingList } from "./PrintingList.vue";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as RiftboundGlyph } from "./RiftboundGlyph.vue";

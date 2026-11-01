@@ -1,9 +1,18 @@
 import { describe, expect, test } from "bun:test";
 import { PrintingIdSchema } from "@riftkeeper/cards";
+import { parsePriceHistory, recordPriceDay } from "@riftkeeper/cards/price-history";
 import { parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { makePriceSnapshot } from "@riftkeeper/cards/testing";
 import type { PriceMatch } from "./match-prices.ts";
-import { decidePriceUpdate, renderPriceSummary, serializePriceSnapshot } from "./price-update.ts";
+import {
+  decideHistoryUpdate,
+  decidePriceUpdate,
+  describeHistoryUpdate,
+  type HistoryUpdate,
+  renderPriceSummary,
+  serializePriceHistory,
+  serializePriceSnapshot,
+} from "./price-update.ts";
 
 const quote = { market: 0.25, low: 0.1, mid: 0.3, high: 2 };
 const updatedAt = "2026-10-31T20:05:59.000Z";
@@ -123,5 +132,77 @@ describe("serializePriceSnapshot", () => {
       `    "ogn-002": ${JSON.stringify({ normal: quote, foil: quote })}`,
     ]);
     expect(parsePriceSnapshot({ json: JSON.parse(text), path: "prices.json" })).toEqual(snapshot);
+  });
+});
+
+describe("serializePriceHistory", () => {
+  test("writes one printing per line with its series and parses back to the same history", () => {
+    const history = recordPriceDay(
+      null,
+      makePriceSnapshot({ printings: Object.fromEntries(priced({ ogn: 2, ogs: 0 })) }),
+    );
+
+    const text = serializePriceHistory(history);
+
+    expect(text).toContain(`  "dates": ["2026-10-31"],`);
+    expect(text.split("\n").filter((line) => line.startsWith('    "'))).toEqual([
+      `    "ogn-001": ${JSON.stringify({ normal: [quote.market], foil: [quote.market] })},`,
+      `    "ogn-002": ${JSON.stringify({ normal: [quote.market], foil: [quote.market] })}`,
+    ]);
+    expect(parsePriceHistory({ json: JSON.parse(text), path: "price-history.json" })).toEqual(history);
+  });
+});
+
+describe("decideHistoryUpdate", () => {
+  const historyUntil = (date: string) =>
+    recordPriceDay(null, makePriceSnapshot({ updatedAt: `${date}T20:00:00.000Z`, printings: {} }));
+
+  test("records the day of updated prices", () => {
+    const update = decidePriceUpdate({ previous: snapshotOf(), match: makeMatch({ ogn: 99 }), updatedAt });
+
+    const history = decideHistoryUpdate({ update, readPrevious: () => historyUntil("2026-10-30") });
+
+    expect(history).toMatchObject({ kind: "recorded", history: { dates: ["2026-10-30", "2026-10-31"] } });
+    expect(describeHistoryUpdate(history as HistoryUpdate)).toBe("Price history recorded 2026-10-31 (2 days).");
+  });
+
+  test("repairs a history that lags behind unchanged prices", () => {
+    const previous = snapshotOf();
+    const update = decidePriceUpdate({ previous, match: makeMatch(), updatedAt: previous.updatedAt });
+
+    const history = decideHistoryUpdate({ update, readPrevious: () => historyUntil("2026-10-29") });
+
+    expect(update.kind).toBe("unchanged");
+    expect(history).toMatchObject({ kind: "recorded", history: { dates: ["2026-10-29", "2026-10-30"] } });
+  });
+
+  test("changes nothing when unchanged prices are already in the history", () => {
+    const previous = snapshotOf();
+    const update = decidePriceUpdate({ previous, match: makeMatch(), updatedAt: previous.updatedAt });
+
+    expect(decideHistoryUpdate({ update, readPrevious: () => historyUntil("2026-10-30") })).toEqual({
+      kind: "current",
+      day: "2026-10-30",
+    });
+  });
+
+  test("reports a history it cannot read without stopping the price update", () => {
+    const update = decidePriceUpdate({ previous: snapshotOf(), match: makeMatch({ ogn: 99 }), updatedAt });
+
+    const history = decideHistoryUpdate({
+      update,
+      readPrevious: () => parsePriceHistory({ json: JSON.parse("{}"), path: "price-history.json" }),
+    });
+
+    expect(history?.kind).toBe("failed");
+    expect(describeHistoryUpdate(history as HistoryUpdate)).toStartWith(
+      "Price history not updated: Price history price-history.json does not match the price history schema",
+    );
+  });
+
+  test("records nothing when the prices were rejected", () => {
+    const update = decidePriceUpdate({ previous: snapshotOf(), match: makeMatch({ ogn: 90 }), updatedAt });
+
+    expect(decideHistoryUpdate({ update, readPrevious: () => historyUntil("2026-10-30") })).toBeNull();
   });
 });
