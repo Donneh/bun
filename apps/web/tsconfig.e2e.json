@@ -20,6 +20,6 @@
     "playwright.config.ts",
     "playwright.dev.config.ts",
     "playwright.production.config.ts",
-    "copy-app-for-e2e.ts"
+    "e2e-build"
   ]
 }

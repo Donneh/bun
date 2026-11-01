@@ -39,7 +39,7 @@ export default defineConfig({
     apiServer,
     {
       command: [
-        `node copy-app-for-e2e.ts ${e2eCopyDir}`,
+        `node e2e-build/cli.ts ${e2eCopyDir}`,
         `node node_modules/nuxt/bin/nuxt.mjs generate ${e2eCopyDir}`,
         `node node_modules/wrangler/bin/wrangler.js dev --assets ${e2eCopyDir}/.output/public --ip 127.0.0.1 --port ${webPort} --show-interactive-dev-session=false`,
       ].join(" && "),
