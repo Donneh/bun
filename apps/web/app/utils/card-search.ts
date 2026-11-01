@@ -1,4 +1,4 @@
-import type { Card } from "@riftkeeper/cards";
+import type { PricedCard } from "@riftkeeper/cards/prices";
 import type { Decomposition, SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
 import { rememberCards } from "./card-cache";
@@ -8,14 +8,14 @@ import type { SearchState } from "./search-state";
 import type { SearchOutcome, SearchResults } from "./search-view";
 
 interface SearchResponse {
-  readonly data: readonly Card[];
+  readonly data: readonly PricedCard[];
   readonly meta: { readonly page: number; readonly pageSize: number; readonly total: number };
   readonly warnings: readonly SearchWarning[];
   readonly parsed: Decomposition;
 }
 
 export type CardOutcome =
-  | { readonly kind: "card"; readonly card: Card }
+  | { readonly kind: "card"; readonly card: PricedCard }
   | { readonly kind: "not-found" }
   | { readonly kind: "error"; readonly message: string };
 
@@ -46,7 +46,7 @@ export async function searchCards(apiBase: string, state: SearchState, page = 1)
 
 export async function fetchCard(apiBase: string, id: string): Promise<CardOutcome> {
   try {
-    const response = await $fetch<{ data: Card }>(`/cards/${encodeURIComponent(id)}`, { baseURL: apiBase });
+    const response = await $fetch<{ data: PricedCard }>(`/cards/${encodeURIComponent(id)}`, { baseURL: apiBase });
     return { kind: "card", card: response.data };
   } catch (error) {
     if (isUnknownCard(error)) return { kind: "not-found" };
@@ -74,7 +74,7 @@ export function appendPage(results: SearchResults, next: SearchResults): SearchR
   };
 }
 
-function toCardSummaries(card: Card): CardSummary[] {
+function toCardSummaries(card: PricedCard): CardSummary[] {
   return card.printings.slice(0, 1).map((printing) => ({
     id: card.id,
     name: card.name,
