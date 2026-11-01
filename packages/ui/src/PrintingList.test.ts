@@ -11,6 +11,10 @@ const printings = [
     details: ["Standard", "Epic", "Six More Vodka"],
     imageUrl: "https://example.com/ogn-119.png",
     orientation: "portrait" as const,
+    prices: [
+      { label: "Normal", amount: "$0.25" },
+      { label: "Foil", amount: "$1.10" },
+    ],
   },
   {
     id: "ogn-119a-298",
@@ -19,6 +23,7 @@ const printings = [
     details: ["Alt art", "Showcase"],
     imageUrl: "https://example.com/ogn-119a.png",
     orientation: "landscape" as const,
+    prices: [],
   },
 ];
 
@@ -32,6 +37,15 @@ describe("PrintingList", () => {
     expect(buttons[0]?.textContent).toContain("OGN-119/298");
     expect(buttons[0]?.textContent).toContain("Standard · Epic · Six More Vodka");
     expect(screen.getByRole("heading", { level: 2, name: "Printings" })).toBeTruthy();
+  });
+
+  test("shows the market price of each finish a printing has, and no price for one without", () => {
+    render(PrintingList, { props: { printings, selected: "ogn-119-298" } });
+
+    const [priced, unpriced] = screen.getAllByRole("button");
+    expect(priced?.textContent).toContain("Normal $0.25");
+    expect(priced?.textContent).toContain("Foil $1.10");
+    expect(unpriced?.textContent).not.toContain("$");
   });
 
   test("shows a decorative thumbnail of each printing", () => {
