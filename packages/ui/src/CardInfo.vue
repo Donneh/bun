@@ -49,6 +49,10 @@ function follow(event: MouseEvent, href: string) {
       @select="(id: string) => emit('select', id)"
     />
 
+    <div v-if="$slots.collection" class="section">
+      <slot name="collection" />
+    </div>
+
     <footer v-if="card.tags.length > 0 || card.artist" class="section foot">
       <ul v-if="card.tags.length > 0" class="tags" aria-label="Tags">
         <li v-for="tag in card.tags" :key="tag.href">

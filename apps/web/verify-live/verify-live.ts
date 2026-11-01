@@ -5,6 +5,7 @@ import type { VerifyOptions } from "./arguments.ts";
 
 export const SEARCH_QUERY = "c:fury cost:<=2";
 export const UNKNOWN_PATH = "/no-such-page";
+export const COLLECTION_PATH = "/collection";
 export const REPORTS_FILE = "reports.json";
 const SCROLL_PAUSE_MS = 150;
 const FIRST_SCREEN_JPEG_QUALITY = 80;
@@ -99,7 +100,7 @@ export async function defaultPaths(browser: Browser, baseUrl: string, headers: R
     const { data } = (await (await searchResponse).json()) as { data: { id: string }[] };
     const [card] = data;
     if (!card) throw new Error(`The search ${SEARCH_QUERY} on ${baseUrl} found no card to check`);
-    return ["/", searchPath, `/cards/${card.id}`, UNKNOWN_PATH];
+    return ["/", searchPath, `/cards/${card.id}`, COLLECTION_PATH, UNKNOWN_PATH];
   } finally {
     await context.close();
   }

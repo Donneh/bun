@@ -9,7 +9,7 @@ export const USAGE = `Usage: bun run verify:live [base-url] [path...] [--out <di
 
   base-url  the deployed site, default ${DEFAULT_BASE_URL}
   path      pages to check, each starting with "/"; default the home page, a search,
-            a card page picked from that search and an unknown path
+            a card page picked from that search, the collection and an unknown path
   --out     directory for the screenshots, default ${DEFAULT_OUT_DIR}
   --timeout how long a page may take to finish loading, in milliseconds, default ${DEFAULT_LOAD_TIMEOUT_MS}
   --header  an HTTP header for every request, such as

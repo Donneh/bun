@@ -83,7 +83,7 @@ test.describe("verify:live", () => {
       },
       () => undefined,
     );
-    expect(reports).toHaveLength(16);
+    expect(reports).toHaveLength(20);
     expect(reports.flatMap((report) => problems(report).map((problem) => `${report.path}: ${problem}`))).toEqual([]);
     expect(new Set(reports.map((report) => report.heading)).size).toBeGreaterThan(2);
   });

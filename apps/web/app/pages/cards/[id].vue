@@ -6,17 +6,20 @@ import {
   CardDetailSkeleton,
   CardImage,
   CardInfo,
+  CollectionControls,
   DomainBackdrop,
   domainScope,
   SiteFooter,
   SiteNavbar,
   StatusMessage,
 } from "@riftkeeper/ui";
+import { useCollection } from "~/composables/collection";
 import { useTheme } from "~/composables/theme";
 import { rememberedCard } from "~/utils/card-cache";
 import { cardInfo, printingSummaries, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
 import { type CardView, fetchCard } from "~/utils/card-search";
+import { cardOwnership } from "~/utils/collection-view";
 import { RIOT_NOTICE } from "~/utils/riot-notice";
 
 const route = useRoute();
@@ -50,6 +53,10 @@ const domains = computed(() => card.value?.domains ?? []);
 const printing = computed(() => (card.value ? selectedPrinting(card.value, route.query.printing) : null));
 const info = computed(() => (card.value && printing.value ? cardInfo(card.value, printing.value) : null));
 const printings = computed(() => (card.value ? printingSummaries(card.value) : []));
+const collection = useCollection();
+const ownership = computed(() =>
+  card.value && printing.value ? cardOwnership(collection.collection.value, card.value, printing.value) : null,
+);
 const image = computed(() =>
   printing.value ? responsiveImage(printing.value.imageUrl, printing.value.orientation, "detail") : null,
 );
@@ -79,6 +86,14 @@ useHead(() => ({
 async function goBack(href: string) {
   if (resultsPath.value) router.back();
   else await navigateTo(href);
+}
+
+function setOwned(owned: number) {
+  if (printing.value) collection.setOwned(printing.value.publicCode, owned);
+}
+
+function setWishlisted(wishlist: boolean) {
+  if (printing.value) collection.setWishlisted(printing.value.publicCode, wishlist);
 }
 
 function choosePrinting(id: string) {
@@ -138,7 +153,16 @@ function choosePrinting(id: string) {
         :selected="printing.id"
         @select="choosePrinting"
         @navigate="navigate"
-      />
+      >
+        <template v-if="ownership" #collection>
+          <CollectionControls
+            v-bind="ownership"
+            :saved="collection.saved.value"
+            @update:owned="setOwned"
+            @update:wishlisted="setWishlisted"
+          />
+        </template>
+      </CardInfo>
     </CardDetail>
     <template #footer>
       <SiteFooter :notice="RIOT_NOTICE" />

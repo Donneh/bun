@@ -90,4 +90,15 @@ describe("CardInfo", () => {
     await userEvent.click(tag);
     expect(emitted("navigate")).toEqual([["/?q=t%3AIonia"]]);
   });
+
+  test("shows the collection slot as its own section after the printings", () => {
+    render(CardInfo, {
+      props: { card: ahri, printings, selected: "ogn-119" },
+      slots: { collection: "<p>2 copies</p>" },
+    });
+
+    const printingsHeading = screen.getByRole("heading", { name: "Printings" });
+    const collection = screen.getByText("2 copies");
+    expect(printingsHeading.compareDocumentPosition(collection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
 });
