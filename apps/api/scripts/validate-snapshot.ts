@@ -1,7 +1,9 @@
 import { isDeepStrictEqual } from "node:util";
+import { parsePriceHistory } from "@riftkeeper/cards/price-history";
 import { parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { parseCardSnapshot, REBUILD_COMMAND } from "@riftkeeper/cards/snapshot";
 import snapshot from "../data/cards.json";
+import priceHistorySnapshot from "../data/price-history.json";
 import priceSnapshot from "../data/prices.json";
 
 const path = "apps/api/data/cards.json";
@@ -17,3 +19,10 @@ if (!isDeepStrictEqual(prices, priceSnapshot)) {
   throw new Error(`Price snapshot ${pricesPath} has fields the price schema does not know.`);
 }
 console.log(`Price snapshot ${pricesPath} matches the price schema: ${Object.keys(prices.printings).length} printings`);
+
+const historyPath = "apps/api/data/price-history.json";
+const history = parsePriceHistory({ json: priceHistorySnapshot, path: historyPath });
+if (!isDeepStrictEqual(history, priceHistorySnapshot)) {
+  throw new Error(`Price history ${historyPath} has fields the price history schema does not know.`);
+}
+console.log(`Price history ${historyPath} matches the price history schema: ${history.dates.length} days`);

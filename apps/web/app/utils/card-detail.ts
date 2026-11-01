@@ -1,4 +1,5 @@
-import type { Card, Domain, Variant } from "@riftkeeper/cards";
+import type { Card, Domain, PrintingId, Variant } from "@riftkeeper/cards";
+import type { HistoryFinish, PriceHistory } from "@riftkeeper/cards/price-history";
 import type { PricedCard, PricedPrinting, PriceQuote, PrintingPrices } from "@riftkeeper/cards/prices";
 import type {
   CardInfoContent,
@@ -6,6 +7,7 @@ import type {
   GlyphName,
   GlyphTextPart,
   PriceFigure,
+  PriceTrend,
   PricingContent,
   PrintingSummary,
 } from "@riftkeeper/ui";
@@ -89,12 +91,49 @@ const FINISHES = [
 ] as const;
 
 const PRICE_DATE = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
+const TREND_DAYS = 30;
+const MIN_TREND_DAYS = 7;
+const DAY_MS = 86_400_000;
+const PERCENT = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 });
 
-function finishQuotes(prices: PrintingPrices): { finish: string; quote: PriceQuote }[] {
+function finishQuotes(prices: PrintingPrices): { key: HistoryFinish; finish: string; quote: PriceQuote }[] {
   return FINISHES.flatMap(({ key, label }) => {
     const quote = prices[key];
-    return quote === undefined ? [] : [{ finish: label, quote }];
+    return quote === undefined ? [] : [{ key, finish: label, quote }];
   });
+}
+
+const daysBefore = (date: string, latest: string) => Math.round((Date.parse(latest) - Date.parse(date)) / DAY_MS);
+
+function describeChange(change: number, period: string): Pick<PriceTrend, "change" | "description"> {
+  const percent = PERCENT.format(Math.abs(change));
+  if (percent === PERCENT.format(0)) return { change: percent, description: `Unchanged in ${period}` };
+  return change > 0
+    ? { change: `▲ ${percent}`, description: `Up ${percent} in ${period}` }
+    : { change: `▼ ${percent}`, description: `Down ${percent} in ${period}` };
+}
+
+function priceTrend(history: PriceHistory, printingId: PrintingId, finish: HistoryFinish): PriceTrend | undefined {
+  const series = history.printings[printingId]?.[finish];
+  const latest = history.dates.at(-1);
+  if (series === undefined || latest === undefined || series.at(-1) == null) return undefined;
+  const byDaysBefore = new Map(
+    history.dates.flatMap((date, index) => {
+      const amount = series[index];
+      const age = daysBefore(date, latest);
+      return amount == null || age > TREND_DAYS ? [] : [[age, amount] as const];
+    }),
+  );
+  if (byDaysBefore.size < MIN_TREND_DAYS) return undefined;
+  const span = Math.max(...byDaysBefore.keys());
+  const first = byDaysBefore.get(span) as number;
+  const last = byDaysBefore.get(0) as number;
+  const period = `${span} days`;
+  return {
+    ...describeChange((last - first) / first, period),
+    period,
+    values: Array.from({ length: span + 1 }, (_, day) => byDaysBefore.get(span - day) ?? null),
+  };
 }
 
 type Money = (amount: number) => string;
@@ -108,15 +147,20 @@ function figure(label: string, amount: number | null, money: Money): PriceFigure
   return amount === null ? [] : [{ label, amount: money(amount) }];
 }
 
-function pricing(prices: PrintingPrices | null): PricingContent | null {
+function pricing(printing: PricedPrinting, history: PriceHistory | null): PricingContent | null {
+  const { prices } = printing;
   if (prices === null) return null;
   const money = moneyFormat(prices.currency);
   const finishes = finishQuotes(prices)
-    .map(({ finish, quote }) => ({
-      finish,
-      market: quote.market === null ? null : money(quote.market),
-      range: [...figure("Low", quote.low, money), ...figure("High", quote.high, money)],
-    }))
+    .map(({ key, finish, quote }) => {
+      const trend = quote.market === null || history === null ? undefined : priceTrend(history, printing.id, key);
+      return {
+        finish,
+        market: quote.market === null ? null : money(quote.market),
+        range: [...figure("Low", quote.low, money), ...figure("High", quote.high, money)],
+        ...(trend === undefined ? {} : { trend }),
+      };
+    })
     .filter((finish) => finish.market !== null || finish.range.length > 0);
   if (finishes.length === 0) return null;
   return {
@@ -131,7 +175,7 @@ function marketPrices(prices: PrintingPrices | null): PriceFigure[] {
   return finishQuotes(prices).flatMap(({ finish, quote }) => figure(finish, quote.market, money));
 }
 
-export function cardInfo(card: Card, printing: PricedPrinting): CardInfoContent {
+export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHistory | null = null): CardInfoContent {
   return {
     name: card.name,
     subtitle: card.subtitle,
@@ -140,7 +184,7 @@ export function cardInfo(card: Card, printing: PricedPrinting): CardInfoContent 
     rules: [card.ability, card.effect].filter((text): text is string => Boolean(text)),
     tags: card.tags.map((tag) => ({ label: tag, href: searchHref(`t:${quotedValue(tag)}`) })),
     artist: printing.artist,
-    pricing: pricing(printing.prices),
+    pricing: pricing(printing, history),
   };
 }
 

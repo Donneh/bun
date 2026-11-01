@@ -1,11 +1,15 @@
 import { parseArgs } from "node:util";
+import { parsePriceHistory } from "@riftkeeper/cards/price-history";
 import { type PriceSnapshot, parsePriceSnapshot } from "@riftkeeper/cards/prices";
 import { matchPrices } from "./match-prices.ts";
 import {
+  decideHistoryUpdate,
   decidePriceUpdate,
+  describeHistoryUpdate,
   describePriceUpdate,
   type PriceUpdate,
   renderPriceSummary,
+  serializePriceHistory,
   serializePriceSnapshot,
 } from "./price-update.ts";
 import { readCardSnapshot } from "./snapshot-file.ts";
@@ -18,6 +22,7 @@ const { values: options } = parseArgs({
   options: {
     cards: { type: "string", default: Bun.fileURLToPath(new URL("cards.json", DATA_DIRECTORY)) },
     prices: { type: "string", default: Bun.fileURLToPath(new URL("prices.json", DATA_DIRECTORY)) },
+    history: { type: "string", default: Bun.fileURLToPath(new URL("price-history.json", DATA_DIRECTORY)) },
     summary: { type: "string" },
     "pr-body": { type: "string" },
   },
@@ -46,9 +51,21 @@ async function update(): Promise<PriceUpdate> {
 
 const result = await update();
 if (result.kind === "updated") await Bun.write(options.prices, serializePriceSnapshot(result.snapshot));
-const summary = renderPriceSummary(result);
+
+const historyFile = Bun.file(options.history);
+const historyText = (await historyFile.exists()) ? await historyFile.text() : null;
+const history = decideHistoryUpdate({
+  update: result,
+  readPrevious: () =>
+    historyText === null ? null : parsePriceHistory({ json: JSON.parse(historyText), path: options.history }),
+});
+if (history?.kind === "recorded") await Bun.write(options.history, serializePriceHistory(history.history));
+
+const historyLine = history === null ? [] : [describeHistoryUpdate(history), ""];
+const summary = [renderPriceSummary(result), ...historyLine].join("\n");
 if (options.summary !== undefined) await Bun.write(options.summary, summary);
-if (options["pr-body"] !== undefined && result.kind === "updated") await Bun.write(options["pr-body"], summary);
+const changed = result.kind === "updated" || history?.kind === "recorded";
+if (options["pr-body"] !== undefined && changed) await Bun.write(options["pr-body"], summary);
 
 const description = describePriceUpdate(result);
 if (result.kind === "failed" || result.kind === "rejected") {
@@ -57,3 +74,5 @@ if (result.kind === "failed" || result.kind === "rejected") {
 } else {
   console.log(description);
 }
+if (history?.kind === "failed") console.error(describeHistoryUpdate(history));
+else if (history !== null) console.log(describeHistoryUpdate(history));

@@ -8,7 +8,7 @@ const tiles = (page: Page) => results(page).getByRole("link");
 const themeButton = (page: Page) => page.getByRole("button", { name: /^Theme: / });
 const isSearchRequest = (url: URL) => url.origin === apiBase && url.pathname === "/search";
 const isNextPageRequest = (url: URL) => isSearchRequest(url) && Number(url.searchParams.get("page") ?? 1) > 1;
-const isCardRequest = (url: URL) => url.origin === apiBase && url.pathname.startsWith("/cards/");
+const isCardRequest = (url: URL) => url.origin === apiBase && /^\/cards\/[^/]+$/.test(url.pathname);
 
 async function search(page: Page, query: string) {
   await searchBox(page).fill(query);
