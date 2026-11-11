@@ -2,13 +2,22 @@ import { describe, expect, test } from "bun:test";
 import { parseSearchState, SORT_OPTIONS, searchStateKey, toRouteQuery } from "../app/utils/search-state.ts";
 
 describe("parseSearchState", () => {
+  test("round-trips both views and uses unique printings by default", () => {
+    for (const view of ["cards", "printings"] as const) {
+      const state = parseSearchState({ view });
+      expect(parseSearchState(toRouteQuery(state))).toEqual(state);
+    }
+    expect(parseSearchState({ view: "unknown" }).view).toBe("printings");
+    expect(searchStateKey(parseSearchState({ view: "cards" }))).not.toBe(searchStateKey(parseSearchState({})));
+  });
   test("defaults to the set order, ascending", () => {
-    expect(parseSearchState({})).toEqual({ query: "", sort: "set", direction: "asc" });
+    expect(parseSearchState({})).toEqual({ query: "", sort: "set", direction: "asc", view: "printings" });
   });
 
   test("reads the query, sort and direction", () => {
     expect(parseSearchState({ q: " c:fury ", sort: "might", direction: "desc" })).toEqual({
       query: "c:fury",
+      view: "printings",
       sort: "might",
       direction: "desc",
     });
@@ -17,6 +26,7 @@ describe("parseSearchState", () => {
   test("falls back to the defaults for unknown or repeated values", () => {
     expect(parseSearchState({ q: ["a", "b"], sort: "price", direction: ["desc"] })).toEqual({
       query: "",
+      view: "printings",
       sort: "set",
       direction: "asc",
     });

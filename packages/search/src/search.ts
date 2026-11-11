@@ -9,11 +9,15 @@ export type SortDirection = (typeof SORT_DIRECTIONS)[number];
 
 export const PAGE_SIZE = 40;
 
+export const SEARCH_VIEWS = ["cards", "printings"] as const;
+export type SearchView = (typeof SEARCH_VIEWS)[number];
+
 export interface SearchRequest {
   readonly root: SearchNode | null;
   readonly sort: SortKey;
   readonly direction: SortDirection;
   readonly page: number;
+  readonly view?: SearchView;
 }
 
 export interface SearchPage {

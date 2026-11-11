@@ -79,6 +79,40 @@ function cardWithPrintings(name: string, printings: Omit<PrintingInput, "id">[])
 }
 
 describe("printing-level matching", () => {
+  test("printing view sorts and counts individual printings", () => {
+    const card = cardWithPrintings("multi", [{ rarity: "epic" }, { rarity: "common" }]);
+    const result = searchCards([card], request(null, { view: "printings", sort: "rarity" }));
+    expect(result.total).toBe(2);
+    expect(result.cards.map((entry) => entry.printings.map((printing) => printing.rarity))).toEqual([
+      ["common"],
+      ["epic"],
+    ]);
+    expect(searchCards([card], request(null)).total).toBe(1);
+    expect(card.printings).toHaveLength(2);
+  });
+
+  test("printing pages do not drop or repeat printings of the same card", () => {
+    const card = cardWithPrintings(
+      "multi",
+      Array.from({ length: 43 }, (_, collectorNumber) => ({ collectorNumber })),
+    );
+    const first = searchCards([card], request(null, { view: "printings", sort: "collector_number" }));
+    const second = searchCards([card], request(null, { view: "printings", sort: "collector_number", page: 2 }));
+    expect(first.total).toBe(43);
+    expect(first.cards).toHaveLength(40);
+    expect(second.cards).toHaveLength(3);
+    expect(
+      new Set([...first.cards, ...second.cards].flatMap((entry) => entry.printings.map((printing) => printing.id)))
+        .size,
+    ).toBe(43);
+  });
+
+  test("printing view keeps only matching printings", () => {
+    const card = cardWithPrintings("multi", [{ rarity: "epic" }, { rarity: "common" }]);
+    const result = searchCards([card], request(filterNode({ field: "rarity", value: "epic" }), { view: "printings" }));
+    expect(result.total).toBe(1);
+    expect(result.cards[0]?.printings[0]?.rarity).toBe("epic");
+  });
   test("keeps only the matching printings in their original order", () => {
     const card = cardWithPrintings("multi", [
       { rarity: "rare", collectorNumber: 3 },

@@ -27,12 +27,12 @@ export async function searchCards(apiBase: string, state: SearchState, page = 1)
   try {
     const response = await $fetch<SearchResponse>("/search", {
       baseURL: apiBase,
-      query: { q: state.query, sort: state.sort, direction: state.direction, page },
+      query: { q: state.query, sort: state.sort, direction: state.direction, page, view: state.view ?? "printings" },
     });
-    rememberCards(response.data);
+    if (state.view === "cards") rememberCards(response.data);
     return {
       kind: "results",
-      cards: response.data.flatMap(toCardSummaries),
+      cards: response.data.flatMap((card) => toCardSummaries(card, state.view !== "cards")),
       page: response.meta.page,
       total: response.meta.total,
       hasMore: response.meta.page * response.meta.pageSize < response.meta.total,
@@ -74,14 +74,14 @@ export function appendPage(results: SearchResults, next: SearchResults): SearchR
   };
 }
 
-function toCardSummaries(card: Card): CardSummary[] {
+function toCardSummaries(card: Card, printings: boolean): CardSummary[] {
   return card.printings.slice(0, 1).map((printing) => ({
-    id: card.id,
+    id: printings ? printing.id : card.id,
     name: card.name,
     subtitle: card.subtitle,
     imageUrl: printing.imageUrl,
     orientation: printing.orientation,
-    href: cardHref(card.id),
+    href: printings ? `${cardHref(card.id)}?printing=${encodeURIComponent(printing.id)}` : cardHref(card.id),
     ...responsiveImage(printing.imageUrl, printing.orientation),
   }));
 }

@@ -35,14 +35,14 @@ const {
 } = useLazyAsyncData(
   () => `card:${cardId.value}`,
   () => {
-    const card = rememberedCard(cardId.value);
+    const card = route.query.printing ? undefined : rememberedCard(cardId.value);
     return card ? Promise.resolve({ kind: "card", card } as const) : fetchCard(apiBase, cardId.value);
   },
 );
 
 const view = computed<CardView>(() => {
   if (outcome.value && status.value !== "pending") return outcome.value;
-  const remembered = rememberedCard(cardId.value);
+  const remembered = route.query.printing ? undefined : rememberedCard(cardId.value);
   return remembered ? { kind: "card", card: remembered } : { kind: "loading" };
 });
 const card = computed(() => (view.value.kind === "card" ? view.value.card : null));

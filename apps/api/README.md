@@ -63,6 +63,11 @@ A result is a card whose `printings` holds only the printings that matched. A ca
 
 ### Query syntax
 
+`view=printings` returns one entry per matching printing, using the same card shape
+with exactly one printing. Sorting, pagination, and `meta.total` then operate on
+printings. With `view=cards` (the API default), entries remain grouped by card.
+The website defaults to unique printings and explicitly sends that view.
+
 Bare words search the card name with its subtitle (`Annie, Fiery`) and match tags exactly. Words next to each other form one phrase.
 
 | Filter      | Keywords                    | Example                                           |

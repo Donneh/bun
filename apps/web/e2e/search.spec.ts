@@ -22,7 +22,7 @@ interface ApiSearch {
 }
 
 async function apiSearch(request: APIRequestContext, params: Record<string, string>): Promise<ApiSearch> {
-  const response = await request.get(`${apiBase}/search`, { params });
+  const response = await request.get(`${apiBase}/search`, { params: { view: "printings", ...params } });
   expect(response.ok()).toBe(true);
   return (await response.json()) as ApiSearch;
 }
@@ -52,7 +52,7 @@ test("an empty query shows every card in the current sort", async ({ page, reque
   const health = await request.get(`${apiBase}/health`);
   const { data } = (await health.json()) as { data: { cards: number } };
   const { meta } = await apiSearch(request, { q: "" });
-  expect(meta.total).toBe(data.cards);
+  expect(meta.total).toBeGreaterThanOrEqual(data.cards);
 
   await page.goto("/");
 
@@ -63,7 +63,7 @@ test("an empty query shows every card in the current sort", async ({ page, reque
   await expect(page.getByRole("search")).toHaveCount(1);
   await expect(searchBox(page)).toHaveValue("");
   await expect(exampleQueries(page).getByRole("button")).toHaveCount(3);
-  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} printings`)).toBeVisible();
   await expect(results(page).getByRole("listitem")).toHaveCount(meta.pageSize);
   await expect(sortBy(page)).toHaveValue("set");
 
@@ -120,7 +120,7 @@ test("clearing the query returns to every card", async ({ page, request }) => {
   await expect.poll(() => new URL(page.url()).searchParams.has("q")).toBe(false);
   expect(new URL(page.url()).searchParams.get("sort")).toBe("name");
   await expect(page).toHaveTitle("Riftkeeper");
-  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} printings`)).toBeVisible();
   await expect(exampleQueries(page)).toBeVisible();
 });
 
@@ -274,8 +274,7 @@ test("the page works when the browser blocks storage", async ({ page }) => {
 
 test("a query shows its matching cards and survives a reload", async ({ page, request }) => {
   const query = "c:fury cost:<=2";
-  const apiResponse = await request.get(`${apiBase}/search`, { params: { q: query } });
-  const { meta } = (await apiResponse.json()) as { meta: { total: number; pageSize: number } };
+  const { meta } = await apiSearch(request, { q: query });
   expect(meta.total).toBeGreaterThan(0);
   const shown = Math.min(meta.total, meta.pageSize);
 
@@ -283,7 +282,7 @@ test("a query shows its matching cards and survives a reload", async ({ page, re
   await search(page, query);
 
   await expect(results(page).getByRole("listitem")).toHaveCount(shown);
-  await expect(page.getByText(new RegExp(`${count(meta.total)} cards$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`${count(meta.total)} printings$`))).toBeVisible();
   await expectFirstImageLoaded(page);
 
   await page.reload();
@@ -297,7 +296,7 @@ test("a query without matches says so", async ({ page }) => {
   await page.goto("/");
   await search(page, "zzqxv");
 
-  await expect(page.getByRole("status").getByText("No cards found")).toBeVisible();
+  await expect(page.getByRole("status").getByText("No printings found")).toBeVisible();
   await expect(results(page)).toHaveCount(0);
 });
 
@@ -343,7 +342,7 @@ async function expectSteadyWhileLoading(page: Page, top: number, act: () => Prom
     const sample = () => {
       const grid = document.querySelector("ul[aria-label='Search results']");
       const summary = [...document.querySelectorAll("[role='status']")].find((element) =>
-        /Searching…| cards?$/.test(element.textContent ?? ""),
+        /Searching…| printings?$/.test(element.textContent ?? ""),
       );
       frames.push({
         gridTop: grid ? grid.getBoundingClientRect().top + window.scrollY : null,
@@ -360,7 +359,7 @@ async function expectSteadyWhileLoading(page: Page, top: number, act: () => Prom
   await expect(page.getByRole("status").getByText("Searching…")).toBeVisible();
   await expect(sortBy(page)).toBeEnabled();
   await expect(results(page)).toHaveAttribute("aria-busy", "false", { timeout: 10_000 });
-  await expect(page.getByRole("status").getByText(/ cards?$/)).toBeVisible();
+  await expect(page.getByRole("status").getByText(/ printings?$/)).toBeVisible();
 
   const frames = await page.evaluate(() => {
     Object.assign(window, { stopSampling: true });
@@ -538,7 +537,7 @@ test("scrolling loads every result page by page and keeps the URL shareable", as
   await page.goto("/");
   await search(page, query);
   await expect(results(page).getByRole("listitem")).toHaveCount(meta.pageSize);
-  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} cards`)).toBeVisible();
+  await expect(page.getByText(`Showing ${meta.pageSize} of ${count(meta.total)} printings`)).toBeVisible();
   const firstPage = await shownNames(page);
 
   await expect
@@ -548,7 +547,10 @@ test("scrolling loads every result page by page and keeps the URL shareable", as
     })
     .toBe(meta.total);
 
-  await expect(page.getByText(`${count(meta.total)} cards`, { exact: true })).toHaveAttribute("aria-live", "polite");
+  await expect(page.getByText(`${count(meta.total)} printings`, { exact: true })).toHaveAttribute(
+    "aria-live",
+    "polite",
+  );
   expect((await shownNames(page)).slice(0, meta.pageSize)).toEqual(firstPage);
   expect(new URL(page.url()).searchParams.has("page")).toBe(false);
   expect(pageRequests).toHaveLength(Math.ceil(meta.total / meta.pageSize) - 1);
@@ -588,7 +590,7 @@ test("a failed page shows the error and can be retried", async ({ page, browserC
 
   await scrollToEnd(page);
 
-  await expect(page.getByRole("alert")).toContainText("Could not load more cards");
+  await expect(page.getByRole("alert")).toContainText("Could not load more printings");
   await expect(page.getByRole("alert")).toContainText("Internal server error");
   await expect(results(page).getByRole("listitem")).toHaveCount(firstPage);
 
@@ -636,7 +638,7 @@ test("removing a filter chip edits the query and searches again", async ({ page,
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("c:fury");
   await expect(searchBox(page)).toHaveValue("c:fury");
   await expect(filters(page).getByRole("listitem")).toHaveText([/Domain\s*Fury/]);
-  await expect(page.getByText(new RegExp(`${count(meta.total)} cards$`))).toBeVisible();
+  await expect(page.getByText(new RegExp(`${count(meta.total)} printings$`))).toBeVisible();
 });
 
 test("a repeated filter is shown as a chip that cannot be removed", async ({ page }) => {
