@@ -14,6 +14,7 @@ export type {
   CardStat,
   CardTag,
   FinishPricing,
+  PriceDay,
   PriceFigure,
   PriceTrend,
   PricingContent,

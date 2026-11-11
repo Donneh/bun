@@ -18,7 +18,7 @@ const headingId = useId();
         <div v-if="finish.trend" class="trend">
           <span class="change" aria-hidden="true">{{ finish.trend.change }}</span>
           <span class="period" aria-hidden="true">{{ finish.trend.period }}</span>
-          <PriceSparkline :values="finish.trend.values" :label="finish.trend.description" />
+          <PriceSparkline :days="finish.trend.days" :label="finish.trend.description" />
         </div>
         <dl v-if="finish.range.length > 0" class="range">
           <div v-for="figure in finish.range" :key="figure.label" class="figure">

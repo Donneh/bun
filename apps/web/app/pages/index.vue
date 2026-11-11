@@ -197,7 +197,7 @@ async function loadNextPage() {
       flush
       :decorated="false"
     />
-    <SearchBar ref="searchBar" v-model="draft" placeholder="c:fury cost:<=2" @submit="submit" />
+    <SearchBar ref="searchBar" v-model="draft" placeholder="Search cards…" @submit="submit" />
     <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
     <StatusMessage v-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
     <template v-else-if="view.kind === 'loading'">

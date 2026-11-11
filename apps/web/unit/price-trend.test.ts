@@ -31,9 +31,10 @@ describe("price trend", () => {
     const [normalTrend, foilTrend] = trends(dates, normal, foil) ?? [];
 
     expect(normalTrend).toMatchObject({ change: "▲ 25%", period: "30 days", description: "Up 25% in 30 days" });
-    expect(normalTrend?.values).toHaveLength(31);
-    expect(normalTrend?.values[10]).toBeNull();
-    expect(normalTrend?.values.at(-1)).toBe(1.5);
+    expect(normalTrend?.days).toHaveLength(31);
+    expect(normalTrend?.days[10]).toEqual({ date: "Nov 10", amount: null, price: null });
+    expect(normalTrend?.days[0]).toEqual({ date: "Oct 31", amount: 1.2, price: "$1.20" });
+    expect(normalTrend?.days.at(-1)).toEqual({ date: "Nov 30", amount: 1.5, price: "$1.50" });
     expect(foilTrend).toMatchObject({ change: "▼ 20%", description: "Down 20% in 30 days" });
   });
 
