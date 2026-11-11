@@ -106,8 +106,14 @@ jobs:
           BASE_URL: ${{ steps.stage.outputs.api_url }}
           EXPECTED_VERSION: ${{ steps.stage.outputs.version }}
           VERSION_OVERRIDES: ${{ steps.stage.outputs.version_overrides }}
-      - run: bunx playwright install --with-deps chromium
+      - run: bunx playwright install chromium
         working-directory: apps/web
+      - name: Install Chromium's system packages when the apt mirror answers
+        working-directory: apps/web
+        run: |
+          if ! timeout 180 bunx playwright install-deps chromium; then
+            echo "::warning title=Chromium system packages::The apt mirror did not answer, so Chromium runs with the libraries already on the runner."
+          fi
       - name: Smoke test the deployed web app at the staged version
         run: bun run test:production
         working-directory: apps/web

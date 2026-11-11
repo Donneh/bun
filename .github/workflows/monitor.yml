@@ -65,8 +65,14 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
-      - run: bunx playwright install --with-deps chromium
+      - run: bunx playwright install chromium
         working-directory: apps/web
+      - name: Install Chromium's system packages when the apt mirror answers
+        working-directory: apps/web
+        run: |
+          if ! timeout 180 bunx playwright install-deps chromium; then
+            echo "::warning title=Chromium system packages::The apt mirror did not answer, so Chromium runs with the libraries already on the runner."
+          fi
       - name: Run the website smoke test against production
         run: bun run test:production
         working-directory: apps/web
