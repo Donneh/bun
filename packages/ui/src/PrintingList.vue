@@ -36,7 +36,12 @@ const headingId = useId();
             <span class="set">{{ printing.setName }}</span>
             <span class="details">{{ printing.details.join(" · ") }}</span>
           </span>
-          <span class="code">{{ printing.code }}</span>
+          <span class="end">
+            <span v-for="price in printing.prices" :key="price.label" class="price">
+              <span class="finish">{{ price.label }}</span> {{ price.amount }}
+            </span>
+            <span class="code">{{ printing.code }}</span>
+          </span>
         </button>
       </li>
     </ul>
@@ -129,6 +134,28 @@ const headingId = useId();
   font-size: var(--rk-font-size-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.end {
+  display: grid;
+  justify-items: end;
+}
+
+.price {
+  font-size: var(--rk-font-size-sm);
+  font-weight: var(--rk-font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.finish {
+  color: var(--rk-color-text-muted);
+  font-size: var(--rk-font-size-xs);
+  font-weight: var(--rk-font-weight-regular);
+}
+
+.printing[aria-pressed="true"] .finish {
+  color: var(--rk-color-text);
 }
 
 .code {

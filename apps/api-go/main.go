@@ -33,7 +33,11 @@ func run(ctx context.Context, address, dataDir string) error {
 	if err != nil {
 		return err
 	}
-	cardService := cards.NewService(catalog)
+	priceHistory, err := cards.LoadPriceHistory(dataDir)
+	if err != nil {
+		return err
+	}
+	cardService := cards.NewService(catalog, priceHistory)
 	searchService := search.NewService(catalog)
 	server := &http.Server{
 		Addr:              address,

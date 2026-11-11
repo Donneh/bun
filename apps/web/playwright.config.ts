@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 const apiPort = Number(process.env.E2E_API_PORT ?? 8787);
 const webPort = Number(process.env.E2E_WEB_PORT ?? 3100);
 const isCi = Boolean(process.env.CI);
+const e2eCopyDir = ".e2e-copy";
 
 export const apiBase = `http://127.0.0.1:${apiPort}`;
 export const webBase = `http://127.0.0.1:${webPort}`;
@@ -37,7 +38,11 @@ export default defineConfig({
   webServer: [
     apiServer,
     {
-      command: `node node_modules/nuxt/bin/nuxt.mjs generate && node node_modules/wrangler/bin/wrangler.js dev --ip 127.0.0.1 --port ${webPort} --show-interactive-dev-session=false`,
+      command: [
+        `node e2e-build/cli.ts ${e2eCopyDir}`,
+        `node node_modules/nuxt/bin/nuxt.mjs generate ${e2eCopyDir}`,
+        `node node_modules/wrangler/bin/wrangler.js dev --assets ${e2eCopyDir}/.output/public --ip 127.0.0.1 --port ${webPort} --show-interactive-dev-session=false`,
+      ].join(" && "),
       url: webBase,
       env: { NUXT_PUBLIC_API_BASE: apiBase, WRANGLER_SEND_METRICS: "false" },
       reuseExistingServer: false,

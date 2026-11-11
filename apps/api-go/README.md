@@ -12,13 +12,15 @@ With Go 1.22 or newer, from this directory:
 go run . -addr :3000 -data ../api/data
 ```
 
-The data directory must contain `cards.json` and `prices.json`. Snapshots are
-loaded once at startup; restart the server to pick up updates. For deployment,
-build with `go build -o riftkeeper-api .` and supply the snapshots using `-data`.
-The standalone server reports `null` for the Cloudflare-specific health version.
+The data directory must contain `cards.json`, `prices.json` and
+`price-history.json`. Snapshots are loaded once at startup; restart the server to
+pick up updates. For deployment, build with `go build -o riftkeeper-api .` and
+supply the snapshots using `-data`. The standalone server reports `null` for the
+Cloudflare-specific health version.
 
-The API exposes `/health`, `/cards`, `/cards/:id`, `/search`, and
-`/search/options`. The search syntax is documented in `../api/README.md`.
+The API exposes `/health`, `/cards`, `/cards/:id`, `/cards/:id/price-history`,
+`/search` (including `view=cards|printings`), and `/search/options`. The
+endpoints and search syntax are documented in `../api/README.md`.
 
 ## Reading the code
 
@@ -28,32 +30,33 @@ Start with these files, in order:
 2. `internal/api/routes.go`: find every endpoint in one list of `HandleFunc` registrations.
 3. `internal/cards/card.go`: the typed card, printing, set, and price models.
 4. `internal/api/card_handler.go`: HTTP validation and responses for card endpoints.
-5. `internal/cards/service.go`: list cards, find a card by ID, and count the catalog.
+5. `internal/cards/service.go`: list cards, find a card or its price history by ID, and count the catalog.
 6. `internal/api/search_handler.go`: validate HTTP input and call the search service.
 7. `internal/search/service.go`: search the loaded catalog and expose its search options.
 8. `internal/search/search.go`: the service's parsing, matching, sorting, and pagination engine.
 
 The other files handle specific parts of that flow:
 
-| File under `internal`   | Responsibility                                                   |
-| ----------------------- | ---------------------------------------------------------------- |
-| `cards/snapshot.go`     | Read JSON snapshots and join prices to printings                 |
-| `cards/decode.go`       | Decode required fields without silently accepting unknown fields |
-| `cards/validate.go`     | Validate snapshot values and reject duplicate IDs                |
-| `api/response.go`       | Write JSON data and error responses                              |
-| `api/server.go`         | Initialize the router and apply CORS and method handling         |
-| `search/options.go`     | Build the available search choices and sets                      |
-| `api/search_request.go` | Validate HTTP query parameters and defaults                      |
-| `search/match.go`       | Decide whether a printing satisfies a search expression          |
-| `search/sort.go`        | Order matching cards with deterministic tie-breakers             |
-| `search/decompose.go`   | Describe filters as editable controls for the frontend           |
-| `search/syntax.go`      | Search tokens, expression nodes, and UTF-16 source locations     |
-| `search/lexer.go`       | Split a query into tokens, handling quotes and escapes           |
-| `search/parser.go`      | Build the expression tree with AND, OR, NOT, and groups          |
-| `search/filter.go`      | Validate filter values and resolve aliases                       |
-| `search/request.go`     | Named sort keys and directions                                   |
-| `api/server_test.go`    | Exercise HTTP endpoints and search responses                     |
-| `search/search_test.go` | Verify that searches preserve the shared snapshot                |
+| File under `internal`    | Responsibility                                                   |
+| ------------------------ | ---------------------------------------------------------------- |
+| `cards/snapshot.go`      | Read JSON snapshots and join prices to printings                 |
+| `cards/decode.go`        | Decode required fields without silently accepting unknown fields |
+| `cards/validate.go`      | Validate snapshot values and reject duplicate IDs                |
+| `cards/price_history.go` | Load, validate and select a card's daily market prices           |
+| `api/response.go`        | Write JSON data and error responses                              |
+| `api/server.go`          | Initialize the router and apply CORS and method handling         |
+| `search/options.go`      | Build the available search choices and sets                      |
+| `api/search_request.go`  | Validate HTTP query parameters and defaults                      |
+| `search/match.go`        | Decide whether a printing satisfies a search expression          |
+| `search/sort.go`         | Order matching cards with deterministic tie-breakers             |
+| `search/decompose.go`    | Describe filters as editable controls for the frontend           |
+| `search/syntax.go`       | Search tokens, expression nodes, and UTF-16 source locations     |
+| `search/lexer.go`        | Split a query into tokens, handling quotes and escapes           |
+| `search/parser.go`       | Build the expression tree with AND, OR, NOT, and groups          |
+| `search/filter.go`       | Validate filter values and resolve aliases                       |
+| `search/request.go`      | Named sort keys and directions                                   |
+| `api/server_test.go`     | Exercise HTTP endpoints and search responses                     |
+| `search/search_test.go`  | Verify that searches preserve the shared snapshot                |
 
 The request flow is:
 

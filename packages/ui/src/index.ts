@@ -5,10 +5,20 @@ export { default as CardDetailSkeleton } from "./CardDetailSkeleton.vue";
 export { default as CardGrid } from "./CardGrid.vue";
 export { default as CardImage } from "./CardImage.vue";
 export { default as CardInfo } from "./CardInfo.vue";
+export { default as CardPricing } from "./CardPricing.vue";
 export { default as CardText } from "./CardText.vue";
 export { default as CardTile } from "./CardTile.vue";
 export { default as CardTileSkeleton } from "./CardTileSkeleton.vue";
-export type { CardInfoContent, CardStat, CardTag, PrintingSummary } from "./card-detail.ts";
+export type {
+  CardInfoContent,
+  CardStat,
+  CardTag,
+  FinishPricing,
+  PriceFigure,
+  PriceTrend,
+  PricingContent,
+  PrintingSummary,
+} from "./card-detail.ts";
 export type { CardOrientation, CardSummary } from "./card-summary.ts";
 export { default as Dither } from "./Dither.vue";
 export { default as DomainBackdrop } from "./DomainBackdrop.vue";
@@ -23,6 +33,7 @@ export type { GlyphName, GlyphTextPart } from "./glyph.ts";
 export { default as Hero } from "./Hero.vue";
 export { default as InfiniteScrollSentinel } from "./InfiniteScrollSentinel.vue";
 export type { NavLink } from "./nav-link.ts";
+export { default as PriceSparkline } from "./PriceSparkline.vue";
 export { default as PrintingList } from "./PrintingList.vue";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as RiftboundGlyph } from "./RiftboundGlyph.vue";

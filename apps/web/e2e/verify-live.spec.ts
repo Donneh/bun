@@ -1,10 +1,23 @@
+import { writeFile } from "node:fs/promises";
 import { createServer, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
+import { join } from "node:path";
 import { DEFAULT_LOAD_TIMEOUT_MS, DEFAULT_OUT_DIR } from "../verify-live/arguments.ts";
-import { checkPage, checkSite, type PageCheck, problems } from "../verify-live/verify-live.ts";
+import { parseScreenshotRequest } from "../verify-live/screenshot-request.ts";
+import {
+  checkPage,
+  checkSite,
+  defaultPaths,
+  type PageCheck,
+  problems,
+  REQUESTED_PATHS_FILE,
+  resolveRequestedPaths,
+} from "../verify-live/verify-live.ts";
 import { expect, test } from "./browser-console.ts";
 
 const FIXTURE_LOAD_TIMEOUT_MS = 2_000;
+const DEFAULT_PAGES_TIMEOUT_MS = 180_000;
+const REQUESTED_PAGE_TIMEOUT_MS = 60_000;
 
 const FIXTURE_PAGES: Record<string, string> = {
   "/clean": "<h1>Clean</h1>",
@@ -67,24 +80,32 @@ test.describe("verify:live", () => {
       expect(problems(report).join("\n")).toContain(problem);
     });
 
-  test("passes every default page of the app at every viewport and color scheme, and saves the screenshots for the pull request", async ({
+  test("passes every default page of the app at every viewport and color scheme, and saves the screenshots of those and of the pages the pull request names", async ({
     browser,
     baseURL,
   }) => {
-    test.setTimeout(180_000);
+    const baseUrl = baseURL ?? "";
+    const request = parseScreenshotRequest(process.env.PULL_REQUEST_BODY ?? "");
+    test.setTimeout(DEFAULT_PAGES_TIMEOUT_MS + request.pages.length * REQUESTED_PAGE_TIMEOUT_MS);
+    const defaults = await defaultPaths(browser, baseUrl, {});
+    const requested = await resolveRequestedPaths(browser, baseUrl, request, defaults);
     const reports = await checkSite(
       browser,
       {
-        baseUrl: baseURL ?? "",
-        paths: [],
+        baseUrl,
+        paths: [...defaults, ...requested.paths],
         outDir: DEFAULT_OUT_DIR,
         headers: {},
         loadTimeoutMs: DEFAULT_LOAD_TIMEOUT_MS,
       },
       () => undefined,
     );
-    expect(reports).toHaveLength(16);
-    expect(reports.flatMap((report) => problems(report).map((problem) => `${report.path}: ${problem}`))).toEqual([]);
-    expect(new Set(reports.map((report) => report.heading)).size).toBeGreaterThan(2);
+    await writeFile(join(DEFAULT_OUT_DIR, REQUESTED_PATHS_FILE), JSON.stringify(requested, null, 2));
+    const defaultReports = reports.filter((report) => defaults.includes(report.path));
+    expect(defaultReports).toHaveLength(16);
+    expect(defaultReports.flatMap((report) => problems(report).map((problem) => `${report.path}: ${problem}`))).toEqual(
+      [],
+    );
+    expect(new Set(defaultReports.map((report) => report.heading)).size).toBeGreaterThan(2);
   });
 });

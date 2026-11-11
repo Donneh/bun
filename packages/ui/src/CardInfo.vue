@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardPricing from "./CardPricing.vue";
 import CardText from "./CardText.vue";
 import type { CardInfoContent, PrintingSummary } from "./card-detail.ts";
 import GlassPanel from "./GlassPanel.vue";
@@ -41,6 +42,8 @@ function follow(event: MouseEvent, href: string) {
     <div v-if="card.rules.length > 0" class="section rules">
       <CardText v-for="(text, index) in card.rules" :key="index" :text="text" />
     </div>
+
+    <CardPricing v-if="card.pricing" class="section" :pricing="card.pricing" />
 
     <PrintingList
       class="section"

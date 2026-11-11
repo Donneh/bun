@@ -6,6 +6,7 @@
     ".": "./src/card.ts",
     "./snapshot": "./src/card-snapshot.ts",
     "./prices": "./src/price.ts",
+    "./price-history": "./src/price-history.ts",
     "./testing": "./test-support/fixtures.ts"
   },
   "scripts": {

@@ -11,7 +11,8 @@ import (
 
 func TestRoutes(t *testing.T) {
 	catalog := []cards.Card{{ID: "test-card", Name: "Test", Printings: []cards.Printing{{ID: "test-printing"}}}}
-	handler := NewHandler(cards.NewService(catalog), search.NewService(catalog))
+	history := cards.PriceHistory{Currency: "USD", Source: "TCGplayer via TCGCSV", Dates: []string{}, Printings: map[string]cards.PrintingHistory{}}
+	handler := NewHandler(cards.NewService(catalog, history), search.NewService(catalog))
 	for _, test := range []struct {
 		method string
 		path   string
@@ -24,6 +25,9 @@ func TestRoutes(t *testing.T) {
 		{"GET", "/cards/%74est-card", 200, ""},
 		{"GET", "/cards/a%2Fb", 400, "invalid_request"},
 		{"GET", "/cards/missing", 404, "card_not_found"},
+		{"GET", "/cards/test-card/price-history", 200, ""},
+		{"GET", "/cards/missing/price-history", 404, "card_not_found"},
+		{"GET", "/cards/Not_A_Slug/price-history", 400, "invalid_request"},
 		{"GET", "/search", 200, ""},
 		{"GET", "/search/options", 200, ""},
 		{"HEAD", "/cards/test-card", 200, ""},

@@ -14,6 +14,16 @@ describe("price snapshot", () => {
     expect(failure).toThrow("A priced printing needs a normal or a foil quote");
   });
 
+  test("rejects a zero or sub-cent amount, which must be null instead", () => {
+    for (const market of [0, 0.004]) {
+      const printings = { "ogn-001-298": { normal: { ...quote, market } } };
+
+      expect(() => parsePriceSnapshot({ json: { ...makePriceSnapshot(), printings }, path: "prices.json" })).toThrow(
+        "does not match the price schema",
+      );
+    }
+  });
+
   test("rejects another currency", () => {
     expect(() =>
       parsePriceSnapshot({ json: { ...makePriceSnapshot(), currency: "EUR" }, path: "prices.json" }),

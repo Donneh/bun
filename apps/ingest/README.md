@@ -48,13 +48,13 @@ One-time repository setup: store a fine-grained personal access token, limited t
 
 ## Prices
 
-`bun run prices` fetches TCGplayer prices in USD from [TCGCSV](https://tcgcsv.com/), a free daily mirror of TCGplayer's catalogue, and writes `apps/api/data/prices.json`.
+`bun run prices` fetches TCGplayer prices in USD from [TCGCSV](https://tcgcsv.com/), a free daily mirror of TCGplayer's catalogue, and writes `apps/api/data/prices.json`. It also records the day's market prices in `apps/api/data/price-history.json` when that day is not there yet.
 
 ```sh
 bun run prices                          # refresh apps/api/data/prices.json
 bun run prices --summary summary.md     # also write a markdown summary of the run
-bun run prices --pr-body body.md        # also write the summary as a PR body, only when the prices changed
-bun run prices --cards other/cards.json --prices other/prices.json
+bun run prices --pr-body body.md        # also write the summary as a PR body, only when the prices or the history changed
+bun run prices --cards other/cards.json --prices other/prices.json --history other/price-history.json
 ```
 
 TCGCSV lists Riftbound as TCGplayer category `89`. The command reads the set codes from the card snapshot and makes one request at a time, with a User-Agent that names riftkeeper.app: `last-updated.txt` (when TCGCSV built the files, about 20:00 UTC each day, which becomes `updatedAt`), `/tcgplayer/89/groups`, then `products` and `prices` for each group whose abbreviation is one of our set codes. A product matches a printing when `<set code>-<Number>` equals the printing's `publicCode`, for example `OGN-030a/298`. Each match gets a `normal` and a `foil` quote (`market`, `low`, `mid`, `high`) for the finishes TCGplayer sells. Products without a `Number` are sealed products and are skipped.
@@ -62,6 +62,10 @@ TCGCSV lists Riftbound as TCGplayer category `89`. The command reads the set cod
 The summary lists the printings without a price (tokens, which TCGplayer sells as double-sided pairs) and the TCGplayer products without a printing (runes, token pairs, and printings the card gallery does not have yet). Two products with the same number price neither printing, and the summary says so.
 
 The command never writes a partial snapshot. When a request fails, TCGCSV returns something unexpected, or any set would lose the price of more than 5% of its printings priced in the snapshot it replaces (for example because TCGCSV dropped or renamed its group), it keeps the existing `prices.json`, says so in the summary and exits `1`. The file stores one printing per line, sorted by id, so the nightly diff shows only the prices that changed.
+
+### Price history
+
+`price-history.json` keeps the market price of each printing per finish for the last 30 days, which the card page needs for its 30-day change and sparkline, because TCGCSV only gives today's prices. Each run that writes new prices records them under the UTC day of `updatedAt`, the day TCGCSV built them, and drops days more than 30 days before the newest one. Recording the same build again replaces that day, so a rerun changes nothing. A run that fails or is rejected writes neither file, and a night without a run records nothing, so a missed day stays a gap instead of repeating the day before. When the prices are unchanged but the history does not have their day yet, for example because an earlier price pull request merged without it, the run records that day, so the next run repairs the history. A history file that cannot be read never stops the price update: the run still writes `prices.json` and says "Price history not updated" with the reason in its summary. The price pull request carries both files. Git keeps every earlier version of the file, so the full history stays recoverable even though the file holds only 30 days.
 
 ## Check
 

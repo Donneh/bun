@@ -101,7 +101,9 @@ jobs:
           token: ${{ secrets.SNAPSHOT_PR_TOKEN }}
           branch: automation/price-snapshot
           delete-branch: true
-          add-paths: apps/api/data/prices.json
+          add-paths: |
+            apps/api/data/prices.json
+            apps/api/data/price-history.json
           commit-message: Update TCGplayer prices from TCGCSV
           title: Update TCGplayer prices from TCGCSV
           body-path: ${{ steps.prices.outputs.pr-body }}

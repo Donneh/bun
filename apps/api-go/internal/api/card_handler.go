@@ -15,19 +15,33 @@ type CardHandler struct {
 }
 
 func (h *CardHandler) Show(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("id")
-	if !cardID.MatchString(id) {
-		writeError(w, http.StatusBadRequest, "invalid_request", "✖ Card id must be a lowercase slug\n  → at id")
+	id, valid := validCardID(w, r)
+	if !valid {
 		return
 	}
 
 	card, found := h.service.Find(id)
 	if !found {
-		writeError(w, http.StatusNotFound, "card_not_found", fmt.Sprintf("Card %s does not exist", id))
+		writeCardNotFound(w, id)
 		return
 	}
 
 	writeData(w, card)
+}
+
+func (h *CardHandler) PriceHistory(w http.ResponseWriter, r *http.Request) {
+	id, valid := validCardID(w, r)
+	if !valid {
+		return
+	}
+
+	history, found := h.service.PriceHistory(id)
+	if !found {
+		writeCardNotFound(w, id)
+		return
+	}
+
+	writeData(w, history)
 }
 
 func (h *CardHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -40,4 +54,17 @@ func (h *CardHandler) Health(w http.ResponseWriter, r *http.Request) {
 		Cards   int     `json:"cards"`
 		Version *string `json:"version"`
 	}{Status: "ok", Cards: h.service.Count()})
+}
+
+func validCardID(w http.ResponseWriter, r *http.Request) (string, bool) {
+	id := r.PathValue("id")
+	if !cardID.MatchString(id) {
+		writeError(w, http.StatusBadRequest, "invalid_request", "✖ Card id must be a lowercase slug\n  → at id")
+		return "", false
+	}
+	return id, true
+}
+
+func writeCardNotFound(w http.ResponseWriter, id string) {
+	writeError(w, http.StatusNotFound, "card_not_found", fmt.Sprintf("Card %s does not exist", id))
 }

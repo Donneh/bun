@@ -4,7 +4,9 @@ import { type Card, CardSchema, type PrintingId, PrintingIdSchema, PrintingSchem
 export const PRICE_CURRENCY = "USD";
 export const PRICE_SOURCE = "TCGplayer via TCGCSV";
 
-const AmountSchema = z.number().nonnegative().nullable();
+export const SMALLEST_PRICE = 0.01;
+
+const AmountSchema = z.number().min(SMALLEST_PRICE).nullable();
 
 export const PriceQuoteSchema = z.object({
   market: AmountSchema,

@@ -20,7 +20,11 @@ func snapshotServer(t *testing.T) (http.Handler, []cards.Card) {
 	if len(catalog) == 0 {
 		t.Fatal("snapshot contains no cards")
 	}
-	return NewHandler(cards.NewService(catalog), search.NewService(catalog)), catalog
+	priceHistory, err := cards.LoadPriceHistory("../../../api/data")
+	if err != nil {
+		t.Fatal(err)
+	}
+	return NewHandler(cards.NewService(catalog, priceHistory), search.NewService(catalog)), catalog
 }
 
 func TestCardEndpoints(t *testing.T) {

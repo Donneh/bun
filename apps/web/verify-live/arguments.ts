@@ -1,6 +1,7 @@
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 
+export const SEARCH_QUERY = "c:fury cost:<=2";
 export const DEFAULT_BASE_URL = "https://riftkeeper.app";
 export const DEFAULT_LOAD_TIMEOUT_MS = 30_000;
 export const DEFAULT_OUT_DIR = resolve(import.meta.dirname, "../test-results/verify-live");

@@ -124,8 +124,8 @@ func (snapshot priceSnapshot) validate() error {
 				continue
 			}
 			for _, amount := range []*float64{quote.Market, quote.Low, quote.Mid, quote.High} {
-				if amount != nil && *amount < 0 {
-					return fmt.Errorf("printing %s: price must be nonnegative", id)
+				if amount != nil && *amount < smallestPrice {
+					return fmt.Errorf("printing %s: price must be at least %.2f", id, smallestPrice)
 				}
 			}
 		}

@@ -68,6 +68,30 @@ describe("fetchTcgcsvCatalog", () => {
     await expect(fetchTcgcsvCatalog({ setCodes: ["OGN"], baseUrl: baseUrl() })).rejects.toThrow("HTTP 503");
   });
 
+  test("reads a zero or sub-cent amount as a missing price", async () => {
+    failingPath = undefined;
+    const original = responses["/tcgplayer/89/10/prices"];
+    responses["/tcgplayer/89/10/prices"] = {
+      success: true,
+      results: [
+        { productId: 1, lowPrice: 0, midPrice: 0.004, highPrice: 0.01, marketPrice: null, subTypeName: "Normal" },
+      ],
+    };
+
+    try {
+      const catalog = await fetchTcgcsvCatalog({ setCodes: ["OGN"], baseUrl: baseUrl() });
+
+      expect(catalog.sets[0]?.prices[0]).toMatchObject({
+        lowPrice: null,
+        midPrice: null,
+        highPrice: 0.01,
+        marketPrice: null,
+      });
+    } finally {
+      responses["/tcgplayer/89/10/prices"] = original;
+    }
+  });
+
   test("fails on a response that is not the TCGCSV envelope", async () => {
     failingPath = undefined;
     const original = responses["/tcgplayer/89/groups"];
