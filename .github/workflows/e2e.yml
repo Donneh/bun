@@ -49,7 +49,12 @@ jobs:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
         working-directory: .
-      - run: bunx playwright install --with-deps chromium
+      - run: bunx playwright install chromium
+      - name: Install Chromium's system packages when the apt mirror answers
+        run: |
+          if ! timeout 180 bunx playwright install-deps chromium; then
+            echo "::warning title=Chromium system packages::The apt mirror did not answer, so Chromium runs with the libraries already on the runner."
+          fi
       - run: bun run test:e2e
         env:
           PULL_REQUEST_BODY: ${{ github.event.pull_request.body }}
