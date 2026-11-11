@@ -45,16 +45,21 @@ describe("CardPricing", () => {
       change: "▲ 12.5%",
       period: "30 days",
       description: "Up 12.5% in 30 days",
-      values: [1, 1.1, null, 1.125],
+      days: [
+        { date: "Oct 28", amount: 1, price: "$1.00" },
+        { date: "Oct 29", amount: 1.1, price: "$1.10" },
+        { date: "Oct 30", amount: null, price: null },
+        { date: "Oct 31", amount: 1.125, price: "$1.13" },
+      ],
     };
     const [normal, foil] = pricing.finishes as [FinishPricing, FinishPricing];
     render(CardPricing, { props: { pricing: { ...pricing, finishes: [{ ...normal, trend }, foil] } } });
 
     const [withTrend, withoutTrend] = screen.getAllByRole("listitem") as [HTMLElement, HTMLElement];
-    expect(within(withTrend).getByRole("img", { name: "Up 12.5% in 30 days" })).toBeTruthy();
+    expect(within(withTrend).getByRole("slider", { name: "Up 12.5% in 30 days" })).toBeTruthy();
     expect(withTrend.textContent).toContain("▲ 12.5%");
     expect(withTrend.textContent).toContain("30 days");
-    expect(within(withoutTrend).queryByRole("img")).toBeNull();
+    expect(within(withoutTrend).queryByRole("slider")).toBeNull();
   });
 
   test("credits the source and the date of the prices", () => {

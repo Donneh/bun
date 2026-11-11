@@ -6,6 +6,7 @@ import type {
   CardStat,
   GlyphName,
   GlyphTextPart,
+  PriceDay,
   PriceFigure,
   PriceTrend,
   PricingContent,
@@ -91,6 +92,7 @@ const FINISHES = [
 ] as const;
 
 const PRICE_DATE = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
+const DAY_DATE = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 const TREND_DAYS = 30;
 const MIN_TREND_DAYS = 7;
 const DAY_MS = 86_400_000;
@@ -113,7 +115,23 @@ function describeChange(change: number, period: string): Pick<PriceTrend, "chang
     : { change: `▼ ${percent}`, description: `Down ${percent} in ${period}` };
 }
 
-function priceTrend(history: PriceHistory, printingId: PrintingId, finish: HistoryFinish): PriceTrend | undefined {
+function priceDays(byDaysBefore: ReadonlyMap<number, number>, span: number, latest: string, money: Money): PriceDay[] {
+  return Array.from({ length: span + 1 }, (_, day) => {
+    const amount = byDaysBefore.get(span - day) ?? null;
+    return {
+      date: DAY_DATE.format(Date.parse(latest) - (span - day) * DAY_MS),
+      amount,
+      price: amount === null ? null : money(amount),
+    };
+  });
+}
+
+function priceTrend(
+  history: PriceHistory,
+  printingId: PrintingId,
+  finish: HistoryFinish,
+  money: Money,
+): PriceTrend | undefined {
   const series = history.printings[printingId]?.[finish];
   const latest = history.dates.at(-1);
   if (series === undefined || latest === undefined || series.at(-1) == null) return undefined;
@@ -132,7 +150,7 @@ function priceTrend(history: PriceHistory, printingId: PrintingId, finish: Histo
   return {
     ...describeChange((last - first) / first, period),
     period,
-    values: Array.from({ length: span + 1 }, (_, day) => byDaysBefore.get(span - day) ?? null),
+    days: priceDays(byDaysBefore, span, latest, money),
   };
 }
 
@@ -153,7 +171,8 @@ function pricing(printing: PricedPrinting, history: PriceHistory | null): Pricin
   const money = moneyFormat(prices.currency);
   const finishes = finishQuotes(prices)
     .map(({ key, finish, quote }) => {
-      const trend = quote.market === null || history === null ? undefined : priceTrend(history, printing.id, key);
+      const trend =
+        quote.market === null || history === null ? undefined : priceTrend(history, printing.id, key, money);
       return {
         finish,
         market: quote.market === null ? null : money(quote.market),

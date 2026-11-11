@@ -306,7 +306,11 @@ function daysUntil(latest: string, count: number) {
   );
 }
 
-test("a printing with a month of price history shows the 30-day change and a sparkline", async ({ page, request }) => {
+test("a printing with a month of price history shows the 30-day change and each day's price on the sparkline", async ({
+  page,
+  request,
+  isMobile,
+}) => {
   const { card, printing, finish, market } = await cardWithPricedFinish(request);
   await routePriceHistory(page, (history) => {
     const dates = daysUntil(history.dates.at(-1) as string, 31);
@@ -317,8 +321,25 @@ test("a printing with a month of price history shows the 30-day change and a spa
   await page.goto(`/cards/${card.id}`);
 
   const pricing = page.getByRole("region", { name: "Market price" });
-  await expect(pricing.getByRole("img", { name: "Up 100% in 30 days" })).toBeVisible();
+  const chart = pricing.getByRole("slider", { name: "Up 100% in 30 days" });
+  await expect(chart).toBeVisible();
   await expect(pricing).toContainText(/▲ 100%\s*30 days/);
+
+  const box = await chart.boundingBox();
+  if (box === null) throw new Error("The sparkline has no size");
+  const price = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  const pointAt = (x: number) => {
+    const position = { x, y: box.height / 2 };
+    return isMobile ? chart.tap({ position }) : chart.hover({ position });
+  };
+
+  await pointAt(box.width - 1);
+  await expect(chart).toContainText(`· ${price.format(market)}`);
+  await pointAt(1);
+  await expect(chart).toContainText(`· ${price.format(market / 2)}`);
+  if (isMobile) await pricing.getByRole("heading", { name: "Market price" }).tap();
+  else await page.mouse.move(0, 0);
+  await expect(chart).not.toContainText("·");
 });
 
 test("a printing with less than a week of price history shows no trend", async ({ page, request }) => {
@@ -340,7 +361,7 @@ test("a printing with less than a week of price history shows no trend", async (
 
   const pricing = page.getByRole("region", { name: "Market price" });
   await expect(pricing).toBeVisible();
-  await expect(pricing.getByRole("img")).toHaveCount(0);
+  await expect(pricing.getByRole("slider")).toHaveCount(0);
   await expect(pricing).not.toContainText(/[▲▼]/);
 });
 

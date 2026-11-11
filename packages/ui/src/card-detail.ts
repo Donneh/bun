@@ -18,11 +18,17 @@ export interface PriceFigure {
   readonly amount: string;
 }
 
+export interface PriceDay {
+  readonly date: string;
+  readonly amount: number | null;
+  readonly price: string | null;
+}
+
 export interface PriceTrend {
   readonly change: string;
   readonly period: string;
   readonly description: string;
-  readonly values: readonly (number | null)[];
+  readonly days: readonly PriceDay[];
 }
 
 export interface FinishPricing {
