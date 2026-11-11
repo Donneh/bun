@@ -101,12 +101,14 @@ function buildPrinting(raw: RawPrinting): Printing {
 function groupByCard(rawPrintings: readonly RawPrinting[]): Map<string, RawPrinting[]> {
   const groups = new Map<string, RawPrinting[]>();
   const identities = new Map<string, string>();
-  const seenPrintingIds = new Set<string>();
+  const seenPrintings = new Map<string, RawPrinting>();
   for (const raw of rawPrintings) {
-    if (seenPrintingIds.has(raw.id)) {
-      throw new Error(`Duplicate printing id: ${raw.id}`);
+    const seen = seenPrintings.get(raw.id);
+    if (seen !== undefined) {
+      if (isDeepStrictEqual(seen, raw)) continue;
+      throw new Error(`Duplicate printing id with different contents: ${raw.id}`);
     }
-    seenPrintingIds.add(raw.id);
+    seenPrintings.set(raw.id, raw);
     const identity = { name: raw.name, subtitle: raw.subtitle };
     const cardId = cardIdFor(identity);
     const identityLabel = JSON.stringify(identity);
