@@ -42,7 +42,7 @@ test("the search page stays quiet through every state", async ({ page }) => {
   await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("c:fury");
 
   await search(page, "zzzzzzzz");
-  await expect(page.getByText("No cards found")).toBeVisible();
+  await expect(page.getByText("No printings found")).toBeVisible();
   await search(page, "foo:bar c:calm");
   await expect(tiles(page).first()).toBeVisible();
 
@@ -96,7 +96,7 @@ test("loading and failed states stay quiet apart from the failed requests", asyn
   await search(page, "type:unit");
   await expect(tiles(page).first()).toBeVisible();
   await scrollToEnd(page);
-  await expect(page.getByRole("alert")).toContainText("Could not load more cards");
+  await expect(page.getByRole("alert")).toContainText("Could not load more printings");
   await page.unrouteAll();
 
   const cardHref = await tiles(page).first().getAttribute("href");

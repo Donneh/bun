@@ -37,6 +37,20 @@ async function allCards(): Promise<PricedCard[]> {
 }
 
 describe("GET /search", () => {
+  test("printing view counts and pages distinct matching printings", async () => {
+    const [result, cards] = await Promise.all([search({ view: "printings", sort: "rarity" }), allCards()]);
+    expect(result.meta.total).toBe(cards.reduce((count, card) => count + card.printings.length, 0));
+    expect(result.data.every((card) => card.printings.length === 1)).toBe(true);
+    const second = await search({ view: "printings", sort: "rarity", page: "2" });
+    const ids = [...result.data, ...second.data].flatMap((card) => card.printings.map((printing) => printing.id));
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  test("rejects an unknown view", async () => {
+    const { status, body } = await get("/search", { view: "unknown" });
+    expect(status).toBe(400);
+    expect(body).toMatchObject({ error: { code: "invalid_request" } });
+  });
   test("an empty query matches every card", async () => {
     const [result, cards] = await Promise.all([search({}), allCards()]);
 

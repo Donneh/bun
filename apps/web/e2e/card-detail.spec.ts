@@ -66,7 +66,7 @@ for (const [way, goBack] of Object.entries(goingBack))
     const { meta } = await apiSearch(request, query);
     expect(meta.total).toBeGreaterThan(meta.pageSize);
 
-    await page.goto(`/?q=${encodeURIComponent(query)}`);
+    await page.goto(`/?q=${encodeURIComponent(query)}&view=cards`);
     await expect(tiles(page)).toHaveCount(meta.pageSize);
     await expect
       .poll(async () => {
@@ -121,7 +121,7 @@ test("a card opened from the results shows at once, its image fetched while the 
     if (isCardRequest(new URL(sent.url()))) cardRequests.push(sent.url());
   });
 
-  await page.goto(`/?q=${encodeURIComponent(query)}`);
+  await page.goto(`/?q=${encodeURIComponent(query)}&view=cards`);
   const tile = results(page).locator(`a[href="/cards/${id}"]`);
   await expect(tile).toBeVisible();
   const preloaded = page.waitForResponse((response) => isDetailImage(response.url()));

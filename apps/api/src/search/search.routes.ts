@@ -7,7 +7,15 @@ import {
   SupertypeSchema,
   VariantSchema,
 } from "@riftkeeper/cards";
-import { decompose, parseQuery, SORT_DIRECTIONS, SORT_KEYS, searchCards, setReleaseRank } from "@riftkeeper/search";
+import {
+  decompose,
+  parseQuery,
+  SEARCH_VIEWS,
+  SORT_DIRECTIONS,
+  SORT_KEYS,
+  searchCards,
+  setReleaseRank,
+} from "@riftkeeper/search";
 import { Hono } from "hono";
 import { z } from "zod";
 import { errorBody } from "../http/errors.ts";
@@ -20,6 +28,7 @@ const SearchParamsSchema = z.object({
   sort: z.enum(SORT_KEYS).default("set"),
   direction: z.enum(SORT_DIRECTIONS).default("asc"),
   page: z.coerce.number().int().min(1).default(1),
+  view: z.enum(SEARCH_VIEWS).default("cards"),
 });
 
 function searchOptions(cards: readonly Card[]) {
@@ -48,9 +57,9 @@ export function createSearchRoutes({ cards }: { cards: readonly Card[] }) {
         }
       }),
       (c) => {
-        const { q, sort, direction, page } = c.req.valid("query");
+        const { q, sort, direction, page, view } = c.req.valid("query");
         const { root, warnings } = parseQuery(q);
-        const result = searchCards(cards, { root, sort, direction, page });
+        const result = searchCards(cards, { root, sort, direction, page, view });
 
         return c.json(
           {

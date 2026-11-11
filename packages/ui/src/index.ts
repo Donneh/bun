@@ -38,6 +38,7 @@ export { default as PrintingList } from "./PrintingList.vue";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as RiftboundGlyph } from "./RiftboundGlyph.vue";
 export { default as SearchBar } from "./SearchBar.vue";
+export { default as SearchViewControl } from "./SearchViewControl.vue";
 export { default as SiteFooter } from "./SiteFooter.vue";
 export { default as SiteNavbar } from "./SiteNavbar.vue";
 export { default as SortControl } from "./SortControl.vue";

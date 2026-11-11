@@ -9,6 +9,7 @@ import {
   InfiniteScrollSentinel,
   ResultSummary,
   SearchBar,
+  SearchViewControl,
   SiteFooter,
   SiteNavbar,
   SortControl,
@@ -131,6 +132,7 @@ async function search(next: SearchState) {
 }
 
 function preloadCardDetail(id: string) {
+  if (state.value.view === "printings") return;
   const card = rememberedCard(id);
   if (!card) return;
   const { imageUrl, orientation } = selectedPrinting(card, undefined);
@@ -202,7 +204,10 @@ async function loadNextPage() {
       <FilterChips :chips="[]" :placeholder="Boolean(state.query)" />
       <Toolbar>
         <ResultSummary searching />
-        <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
+        <template #actions>
+          <SearchViewControl :view="state.view ?? 'printings'" @change="search({ ...state, view: $event })" />
+          <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
+        </template>
       </Toolbar>
       <CardGrid :cards="[]" :placeholders="LOADING_PLACEHOLDERS" label="Loading results" />
     </template>
@@ -210,13 +215,16 @@ async function loadNextPage() {
       <FilterChips :chips="chips" :more-conditions="view.parsed.hasAdvancedConditions" @remove="removeFilter" />
       <WarningList :warnings="view.warnings" />
       <Toolbar>
-        <ResultSummary :shown="view.cards.length" :total="view.total" :searching="view.stale" />
-        <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
+        <ResultSummary :shown="view.cards.length" :total="view.total" :searching="view.stale" :view="state.view ?? 'printings'" />
+        <template #actions>
+          <SearchViewControl :view="state.view ?? 'printings'" @change="search({ ...state, view: $event })" />
+          <SortControl :sort="state.sort" :direction="state.direction" :options="SORT_OPTIONS" @change="changeSort" />
+        </template>
       </Toolbar>
       <StatusMessage
         v-if="view.cards.length === 0 && !view.stale"
         kind="empty"
-        title="No cards found"
+        :title="state.view === 'printings' ? 'No printings found' : 'No cards found'"
         detail="Check the query for typos or remove a filter."
       />
       <CardGrid
@@ -232,7 +240,7 @@ async function loadNextPage() {
         <StatusMessage
           v-if="nextPage.kind === 'error'"
           kind="error"
-          title="Could not load more cards"
+          :title="state.view === 'printings' ? 'Could not load more printings' : 'Could not load more cards'"
           :detail="nextPage.message"
           action="Try again"
           @action="loadNextPage"

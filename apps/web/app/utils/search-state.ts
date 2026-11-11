@@ -1,10 +1,17 @@
-import { SORT_DIRECTIONS, SORT_KEYS, type SortDirection, type SortKey } from "@riftkeeper/search/request";
+import {
+  type SearchView,
+  SORT_DIRECTIONS,
+  SORT_KEYS,
+  type SortDirection,
+  type SortKey,
+} from "@riftkeeper/search/request";
 import type { SortOption } from "@riftkeeper/ui";
 
 export interface SearchState {
   readonly query: string;
   readonly sort: SortKey;
   readonly direction: SortDirection;
+  readonly view?: SearchView;
 }
 
 export type RouteQuery = Readonly<Record<string, unknown>>;
@@ -41,17 +48,19 @@ export function parseSearchState(routeQuery: RouteQuery): SearchState {
     query: typeof routeQuery.q === "string" ? routeQuery.q.trim() : "",
     sort: parseSortKey(routeQuery.sort),
     direction: parseSortDirection(routeQuery.direction),
+    view: routeQuery.view === "cards" ? "cards" : "printings",
   };
 }
 
-export function toRouteQuery({ query, sort, direction }: SearchState): Record<string, string> {
+export function toRouteQuery({ query, sort, direction, view }: SearchState): Record<string, string> {
   return {
     ...(query ? { q: query } : {}),
     ...(sort === DEFAULT_SORT ? {} : { sort }),
     ...(direction === DEFAULT_DIRECTION ? {} : { direction }),
+    ...(view === "cards" ? { view } : {}),
   };
 }
 
-export function searchStateKey({ query, sort, direction }: SearchState): string {
-  return JSON.stringify([query, sort, direction]);
+export function searchStateKey({ query, sort, direction, view }: SearchState): string {
+  return JSON.stringify([query, sort, direction, view ?? "printings"]);
 }

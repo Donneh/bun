@@ -5,8 +5,10 @@ export type { ComparisonOperator, Filter, FilterField, NumberComparison, Numeric
 export { parseQuery } from "./parser.ts";
 export {
   PAGE_SIZE,
+  SEARCH_VIEWS,
   type SearchPage,
   type SearchRequest,
+  type SearchView,
   SORT_DIRECTIONS,
   SORT_KEYS,
   type SortDirection,

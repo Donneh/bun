@@ -71,9 +71,12 @@ Every card response (`/cards`, `/cards/:id` and `/search`) also gives each print
 | `q`         | A query in the syntax below, at most 512 characters                   | empty   |
 | `sort`      | `set`, `collector_number`, `name`, `rarity`, `cost`, `might`, `power` | `set`   |
 | `direction` | `asc`, `desc`                                                         | `asc`   |
-| `page`      | 1 or higher, 40 cards per page                                        | `1`     |
+| `page`      | 1 or higher, 40 results per page                                      | `1`     |
+| `view`      | `cards`, `printings`                                                  | `cards` |
 
 A result is a card whose `printings` holds only the printings that matched. A card matches when one of its printings satisfies the whole query. `meta` holds `page`, `pageSize` and `total`. A malformed query never fails: the parts that could not be used come back in `warnings` (at most 20), each with a `message` and the `span` of the query it refers to. `parsed` lists the top-level filters a client can show as editable controls. The default sort is by set in release order: OGS, OGN, SFD, UNL, VEN, RAD.
+
+With `view=printings`, each result is one matching printing instead: the same card shape with exactly one entry in `printings`. Sorting, pages and `meta.total` then count printings, so a card with three matching printings appears three times, each sorted by its own set, collector number and rarity. The web app asks for this view by default.
 
 ### Query syntax
 
