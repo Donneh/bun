@@ -185,10 +185,17 @@ describe("buildCards on curated fixtures", () => {
     expect(() => buildCards([base, withSubtitle])).toThrow("abandoned-hall");
   });
 
-  test("throws on duplicate printing ids", async () => {
+  test("ignores a printing the gallery lists twice with the same contents", async () => {
     const printings = await loadFixturePrintings();
     const base = printingById({ printings, id: "unl-205-219" });
-    expect(() => buildCards([base, base])).toThrow("unl-205-219");
+    expect(buildCards([base, structuredClone(base)])).toEqual(buildCards([base]));
+  });
+
+  test("throws when two printings share an id but differ", async () => {
+    const printings = await loadFixturePrintings();
+    const base = printingById({ printings, id: "unl-205-219" });
+    const turned: RawPrinting = { ...base, orientation: base.orientation === "portrait" ? "landscape" : "portrait" };
+    expect(() => buildCards([base, turned])).toThrow("Duplicate printing id with different contents: unl-205-219");
   });
 
   test("throws naming the printing when its id matches no variant pattern", async () => {
