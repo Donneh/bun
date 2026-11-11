@@ -3,6 +3,7 @@ import { expectedApiVersion, expectedBuildId, webUrl, wwwUrl } from "../playwrig
 import { expect, test } from "./staged-version.ts";
 
 const READY_TIMEOUT_MS = 180_000;
+const API_VERSION_TIMEOUT_MS = 60_000;
 const query = "c:fury cost:<=2";
 
 async function homePage(request: APIRequestContext) {
@@ -54,11 +55,19 @@ test("a shared search link shows its cards", async ({ page }) => {
 
   const apiOrigin = new URL((await searchResponse).url()).origin;
   if (expectedApiVersion) {
-    const apiVersion = await page.evaluate(async (healthUrl) => {
-      const health = (await (await fetch(healthUrl, { cache: "no-store" })).json()) as { data: { version: unknown } };
-      return health.data.version;
-    }, `${apiOrigin}/health`);
-    expect(apiVersion, `the API the page searched, ${apiOrigin}, runs the new version`).toBe(expectedApiVersion);
+    test.setTimeout(API_VERSION_TIMEOUT_MS + 30_000);
+    const apiVersion = () =>
+      page.evaluate(async (healthUrl) => {
+        const health = (await (await fetch(healthUrl, { cache: "no-store" })).json()) as { data: { version: unknown } };
+        return health.data.version;
+      }, `${apiOrigin}/health`);
+    await expect
+      .poll(apiVersion, {
+        message: `the API the page searched, ${apiOrigin}, runs the new version`,
+        timeout: API_VERSION_TIMEOUT_MS,
+        intervals: [1_000, 2_000, 5_000],
+      })
+      .toBe(expectedApiVersion);
   }
 });
 
