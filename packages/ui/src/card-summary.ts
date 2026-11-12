@@ -9,4 +9,5 @@ export interface CardSummary {
   readonly sizes?: string;
   readonly href: string;
   readonly orientation: CardOrientation;
+  readonly count?: number;
 }

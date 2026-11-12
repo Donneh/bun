@@ -1,7 +1,12 @@
 import type { NavLink } from "@riftkeeper/ui";
 
+const SECTIONS = [
+  { label: "Cards", href: "/" },
+  { label: "Collection", href: "/collection" },
+] as const;
+
 export function useSiteNavigation(currentHref: string | null = "/") {
-  const links: NavLink[] = [{ label: "Cards", href: "/", current: currentHref === "/" }];
+  const links: NavLink[] = SECTIONS.map((section) => ({ ...section, current: section.href === currentHref }));
   const query = ref("");
 
   function navigate(href: string) {

@@ -1,8 +1,7 @@
 import { isThemePreference, type ThemePreference } from "@riftkeeper/ui/theme";
+import type { StorageAccess } from "./browser-storage.ts";
 
 export const THEME_STORAGE_KEY = "riftkeeper-theme";
-
-type StorageAccess = () => Pick<Storage, "getItem" | "setItem">;
 
 export function loadThemePreference(storage: StorageAccess): ThemePreference {
   try {
