@@ -18211,6 +18211,20 @@
     ],
     "printings": [
       {
+        "id": "sfd-119-221",
+        "publicCode": "SFD-119/221",
+        "set": {
+          "code": "SFD",
+          "name": "Spiritforged"
+        },
+        "collectorNumber": 119,
+        "variant": "standard",
+        "rarity": "epic",
+        "artist": "Envar Studio",
+        "imageUrl": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/game_data_live/e63ab3370a6e4ce4baddfba12ab92468f6cc9541-744x1039.png",
+        "orientation": "portrait"
+      },
+      {
         "id": "sfd-119a-221",
         "publicCode": "SFD-119a/221",
         "set": {
