@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { suggest } from "@riftkeeper/search/suggest";
 import {
   AppShell,
   CardGrid,
@@ -66,6 +67,8 @@ const { links: navLinks, navigate } = useSiteNavigation();
 const state = computed(() => parseSearchState(route.query));
 const stateKey = computed(() => searchStateKey(state.value));
 const draft = ref(state.value.query);
+const caret = ref(draft.value.length);
+const suggestions = computed(() => suggest(draft.value, caret.value));
 const searchBar = useTemplateRef<ComponentPublicInstance>("searchBar");
 const ditherAvoids = computed(() => [searchBar.value?.$el as Element | undefined]);
 watch(
@@ -197,7 +200,15 @@ async function loadNextPage() {
       flush
       :decorated="false"
     />
-    <SearchBar ref="searchBar" v-model="draft" placeholder="Search cards…" @submit="submit" />
+    <SearchBar
+      ref="searchBar"
+      v-model="draft"
+      placeholder="Search cards…"
+      :suggestions="suggestions.suggestions"
+      :hint="suggestions.hint"
+      @caret="caret = $event"
+      @submit="submit"
+    />
     <ExampleQueries v-if="!state.query" :queries="EXAMPLE_QUERIES" @select="submit" />
     <StatusMessage v-if="view.kind === 'error'" kind="error" title="Search failed" :detail="view.message" />
     <template v-else-if="view.kind === 'loading'">

@@ -36,6 +36,7 @@ export { default as InfiniteScrollSentinel } from "./InfiniteScrollSentinel.vue"
 export type { NavLink } from "./nav-link.ts";
 export { default as PriceSparkline } from "./PriceSparkline.vue";
 export { default as PrintingList } from "./PrintingList.vue";
+export type { QuerySuggestion } from "./query-suggestion.ts";
 export { default as ResultSummary } from "./ResultSummary.vue";
 export { default as RiftboundGlyph } from "./RiftboundGlyph.vue";
 export { default as SearchBar } from "./SearchBar.vue";

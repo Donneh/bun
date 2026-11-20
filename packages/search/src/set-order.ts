@@ -1,4 +1,4 @@
-const SET_RELEASE_ORDER: readonly string[] = ["OGS", "OGN", "SFD", "UNL", "VEN", "RAD"];
+export const SET_RELEASE_ORDER: readonly string[] = ["OGS", "OGN", "SFD", "UNL", "VEN", "RAD"];
 
 export function setReleaseRank(setCode: string): number {
   const rank = SET_RELEASE_ORDER.indexOf(setCode);

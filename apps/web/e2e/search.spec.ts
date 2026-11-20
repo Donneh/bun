@@ -110,6 +110,27 @@ test("an example query starts that search", async ({ page, isMobile }) => {
   await expect(exampleQueries(page)).toHaveCount(0);
 });
 
+test("typing suggests filters and turns t: with a card type into type:", async ({ page, request }) => {
+  const { meta } = await apiSearch(request, { q: "type:spell" });
+  await page.goto("/");
+  const suggestions = page.getByRole("listbox", { name: "Search cards suggestions" });
+
+  await searchBox(page).click();
+  await expect(suggestions.getByRole("option", { name: /^type:/ })).toBeVisible();
+
+  await searchBox(page).pressSequentially("t:spell");
+  await expect(page.getByText('t: searches tags, and "spell" is a card type. Use type:spell instead.')).toBeVisible();
+  await searchBox(page).press("Tab");
+  await expect(searchBox(page)).toHaveValue("type:spell ");
+  await expect(searchBox(page)).toBeFocused();
+
+  await searchBox(page).press("Enter");
+  await expect(suggestions).toBeHidden();
+  await expect(
+    page.getByText(`Showing ${Math.min(meta.pageSize, meta.total)} of ${count(meta.total)} printings`),
+  ).toBeVisible();
+});
+
 test("clearing the query returns to every card", async ({ page, request }) => {
   const { meta } = await apiSearch(request, { q: "" });
   await page.goto(`/?q=${encodeURIComponent("c:fury cost:<=2")}&sort=name`);

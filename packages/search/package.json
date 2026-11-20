@@ -4,7 +4,8 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./request": "./src/search.ts"
+    "./request": "./src/search.ts",
+    "./suggest": "./src/suggest.ts"
   },
   "scripts": {
     "test": "bun test",
