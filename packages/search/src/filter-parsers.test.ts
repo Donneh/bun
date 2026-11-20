@@ -173,6 +173,10 @@ describe("text filters", () => {
     ["artist", "artist"],
     ["a", "artist"],
     ["ability", "ability"],
+    ["effect", "effect"],
+    ["keyword", "keyword"],
+    ["k", "keyword"],
+    ["name", "name"],
   ])("%s:legendary filters %s as typed", (keyword, field) => {
     expect(filterOf(`${keyword}:Legendary`)).toEqual({ field, text: "Legendary" });
   });
@@ -186,6 +190,10 @@ describe("text filters", () => {
     ["set", "Set"],
     ["artist", "Artist"],
     ["ability", "Ability"],
+    ["effect", "Effect"],
+    ["keyword", "Keyword"],
+    ["k", "Keyword"],
+    ["name", "Name"],
   ])("rejects an empty or blank %s", (keyword, label) => {
     const message = `Invalid value for "${keyword}": ${label} value cannot be empty.`;
 
@@ -195,6 +203,14 @@ describe("text filters", () => {
 });
 
 describe("keywords", () => {
+  test("exact-name shorthand uses normal quoting and rejects empty names", () => {
+    expect(filterOf('!"Ready: go (now)"')).toEqual({ field: "name", text: "Ready: go (now)" });
+    expect(filterOf('!"Say \\"Hi\\""')).toEqual({ field: "name", text: 'Say "Hi"' });
+    expect(parseQuery('"!Jinx"').root).toEqual({ kind: "text", value: "!Jinx" });
+    expect(parseQuery("\\!Jinx").root).toEqual({ kind: "text", value: "!Jinx" });
+    expect(rejection('!"  "')).toEqual(['Invalid value for "name": Name value cannot be empty.']);
+  });
+
   test("matches keywords case-insensitively and trimmed", () => {
     const { root } = parseQuery('" COST ":5');
 
@@ -205,12 +221,12 @@ describe("keywords", () => {
     expect(parseQuery("C:fury").root).toMatchObject({ kind: "filter", keyword: "c" });
   });
 
-  test.each(["promo", "owned", "flavor", "legal", "keyword", "k"])("%s is not supported yet", (keyword) => {
+  test.each(["promo", "owned", "flavor", "legal"])("%s is not supported yet", (keyword) => {
     expect(rejection(`${keyword.toUpperCase()}:true`)).toEqual([`"${keyword}" is not supported yet and was ignored.`]);
   });
 
   test("warns about an unknown keyword", () => {
-    expect(rejection("name:annie")).toEqual(['Unknown keyword "name" was ignored.']);
+    expect(rejection("names:annie")).toEqual(['Unknown keyword "names" was ignored.']);
   });
 
   test("warns about a missing keyword", () => {

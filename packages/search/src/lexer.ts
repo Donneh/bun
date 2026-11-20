@@ -64,6 +64,10 @@ export function tokenize(query: string): LexResult {
       return { type: operator, lexeme, span };
     }
 
+    if (lexeme.startsWith("!")) {
+      return { type: "keywordValue", lexeme, span, keyword: "name", value: lexeme.slice(1) };
+    }
+
     if (colon === null) {
       return { type: "word", lexeme, span };
     }
