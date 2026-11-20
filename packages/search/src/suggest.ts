@@ -36,6 +36,9 @@ const FIELD_HELP: { readonly [F in FilterField]: { readonly label: string; reado
     label: "Card text",
     hint: 'Card text: words from the rules text. Quote phrases, such as ability:"draw 1".',
   },
+  effect: { label: "Effect", hint: 'Effect: words from the effect only, such as effect:"draw 1".' },
+  keyword: { label: "Keyword", hint: 'Keyword: a bracketed rules keyword, such as k:shield or k:"shield 2".' },
+  name: { label: "Exact name", hint: 'Exact name, ignoring case: name:Jinx or !"Jinx, Loose Cannon".' },
 };
 
 const VALUES: { readonly [F in FilterField]?: readonly string[] } = {

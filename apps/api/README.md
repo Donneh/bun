@@ -97,12 +97,17 @@ Bare words search the card name with its subtitle (`Annie, Fiery`) and match tag
 | Set         | `set`, `s`                  | `s:ogn`, `s:origins`                              |
 | Artist      | `artist`, `a`               | `a:kudos`                                         |
 | Card text   | `ability`                   | `ability:"draw 1"`                                |
+| Effect only | `effect`                    | `effect:"draw 1"`                                 |
+| Keyword     | `keyword`, `k`              | `k:shield`, `k:"shield 2"`, `k:"show off"`        |
+| Exact name  | `name`, `!` prefix          | `name:Jinx`, `!"Jinx"`, `!"Jinx, Loose Cannon"`   |
 
 Numbers take `=`, `!=`, `<`, `<=`, `>` and `>=`. In a domain value, `,` means any of, `+` means all of and `-` means none of. Quote values with spaces. Combine with `and` (or just a space), `or`, `not` (or `-`) and parentheses, for example `(c:fury or c:chaos) -type:spell cost:<=3`.
 
+Text filters ignore case. `ability:` searches both ability and effect text; `effect:` searches only effect text. `keyword:` matches a whole bracketed keyword in either field, not mentions in prose or card tags. A base keyword such as `k:shield` also matches numbered forms such as `[Shield 2]`; specify `k:"shield 2"` to require that number. Exact-name search matches the whole name across subtitles, or the whole `Name, Subtitle` when supplied, and never matches card tags.
+
 Price accepts non-negative decimal USD amounts. It uses the cheapest available normal or foil TCGplayer market price of each printing, not its low, mid or high quote. Only price filters allow omitting the colon before a comparison. Printings without a market price never match a price comparison (including `!=`); negating a price filter includes them. `sort=price` orders by the cheapest matching printing in cards view, or each printing's price in printings view. Missing prices sort last in both directions; ties use name and card id.
 
-`promo`, `owned`, `flavor`, `legal` and `keyword` existed in the old API; they are not supported yet and come back as warnings.
+`promo`, `owned`, `flavor` and `legal` existed in the old API; they are not supported yet and come back as warnings.
 
 ## Benchmark
 

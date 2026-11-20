@@ -27,6 +27,9 @@ describe("keywords", () => {
       "set:",
       "artist:",
       "ability:",
+      "effect:",
+      "keyword:",
+      "name:",
     ]);
   });
 
@@ -44,7 +47,17 @@ describe("keywords", () => {
 
   test("an unknown keyword is explained", () => {
     expect(atEnd("foo:1").hint).toBe('"foo" is not a filter. Remove it or pick one of the filters below.');
-    expect(atEnd("k:shield").hint).toBe('"k" is not supported yet.');
+    expect(atEnd("legal:true").hint).toBe('"legal" is not supported yet.');
+  });
+
+  test("completes keyword, effect and exact-name filters and explains their values", () => {
+    expect(apply("keyw")).toBe("keyword:");
+    expect(apply("k")).toBe("k:");
+    expect(apply("eff")).toBe("effect:");
+    expect(apply("nam")).toBe("name:");
+    expect(atEnd("k:shield").hint).toContain('k:"shield 2"');
+    expect(atEnd("effect:draw").hint).toContain("effect only");
+    expect(atEnd("name:Jinx").hint).toContain('!"Jinx, Loose Cannon"');
   });
 });
 

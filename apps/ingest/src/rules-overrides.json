@@ -1,0 +1,72 @@
+{
+  "aliases": {},
+  "domainRunes": {
+    "the-boss": {
+      "rune": ":rb_rune_rainbow:",
+      "reason": "Origins errata uses [C] for this two-domain legend; the gallery's original cost is rainbow power."
+    }
+  },
+  "excludedSources": {
+    "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-faq": "Riot replaced this FAQ with an obsolete-document notice."
+  },
+  "faqCards": {
+    "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq": {
+      "Q: Should the reflexive trigger system introduced in the Origins FAQ apply to any cards in Spiritforged?": {
+        "cards": ["arise", "guards"],
+        "reason": "The two Spiritforged reflexive-trigger errata are Arise! and Guards!, in the accompanying errata article."
+      },
+      "Q: Can Janna’s play effect be used to heal my units without an enemy unit present?": {
+        "cards": ["janna-savior"],
+        "reason": "Janna, Savior has the heal-and-move play effect discussed in this answer."
+      },
+      "Q: Does Kato give keywords he’s gained during play? What about Might bonuses from various sources like Equipment?": {
+        "cards": ["kato-the-arm"],
+        "reason": "Follow-up to the preceding Kato the Arm question."
+      },
+      "Q: When and how does Yone trigger? If you conquer a battlefield, is it still open?": {
+        "cards": ["yone-blademaster"],
+        "reason": "Yone, Blademaster has the conquer-an-open-battlefield trigger."
+      },
+      "Q: What does it mean to win or lose a combat?": {
+        "cards": ["draven-audacious"],
+        "reason": "The answer discusses Draven's score-on-winning ability, which belongs to Draven, Audacious."
+      },
+      "Q: If I win on the attack and conquer, does this happen before or after I score? Before or after conquer effects?": {
+        "cards": ["draven-audacious"],
+        "reason": "Follow-up about Draven, Audacious scoring before the conquer point."
+      },
+      "Q: Can I still conquer and hold battlefields while my opponent has Tianna? Do I get conquer and hold triggers? What about drawing a card instead of getting the 8th point from conquering?": {
+        "cards": ["tianna-crownguard", "tryndamere-barbarian"],
+        "reason": "Tianna Crownguard prevents scoring points; the answer also names Tryndamere, Barbarian."
+      },
+      "Q: Does Forgotten Monument work the same as Tianna? Will it receive similar errata?": {
+        "cards": ["forgotten-monument", "tianna-crownguard", "renata-glasc-mastermind"],
+        "reason": "The question compares Tianna Crownguard with Forgotten Monument; the answer names Renata Glasc, Mastermind."
+      },
+      "Q: Does a unit with negative Might contribute negative damage to my Might total in combat?": {
+        "cards": [],
+        "reason": "General combat rule, with no particular card referenced."
+      },
+      "Q: What about Deflect costs? Aren’t those optional now?": {
+        "cards": ["ezreal-prodigy"],
+        "reason": "Follow-up to the preceding Ezreal, Prodigy cost-reduction question."
+      },
+      "Q: The reminder text of Weaponmaster says “You may”, but the Core Rules reads like it is mandatory. Which is it?": {
+        "cards": [],
+        "reason": "General keyword clarification; retained without guessing which Weaponmaster cards to attach it to."
+      }
+    },
+    "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications": {
+      "Can a cleanup happen while I’m finalizing a card or ability?": {
+        "cards": [],
+        "reason": "General timing rule, with no particular card referenced."
+      }
+    },
+    "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications": {
+      "But can I activate Kayle’s empower ability even if she’s already empowered?": {
+        "cards": ["kayle-justified"],
+        "reason": "Follow-up to the preceding Kayle, Justified question."
+      }
+    }
+  }
+}

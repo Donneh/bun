@@ -114,3 +114,60 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SNAPSHOT_PR_TOKEN }}
         run: gh pr merge "${{ steps.pr.outputs.pull-request-number }}" --auto --squash --repo "$GITHUB_REPOSITORY"
+
+  rules:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Fetch Riot rules, errata and FAQs
+        id: rules
+        working-directory: apps/ingest
+        env:
+          PR_BODY_PATH: ${{ runner.temp }}/rules-pull-request-body.md
+          RESULT_PATH: ${{ runner.temp }}/rules-result.json
+          PAGES_PATH: ${{ runner.temp }}/rules-pages
+        run: |
+          bun run rules --summary "$GITHUB_STEP_SUMMARY" --pr-body "$PR_BODY_PATH" \
+            --result "$RESULT_PATH" --save-pages "$PAGES_PATH"
+          if [ "$(jq -r .changed "$RESULT_PATH")" = true ]; then
+            echo "pr-body=$PR_BODY_PATH" >> "$GITHUB_OUTPUT"
+            echo "auto-merge=$(jq -r .autoMerge "$RESULT_PATH")" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Upload fetched rules pages for debugging
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-pages
+          path: ${{ runner.temp }}/rules-pages
+          retention-days: 3
+          if-no-files-found: ignore
+      - name: Open or update the rules pull request
+        id: pr
+        if: steps.rules.outputs.pr-body != ''
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.SNAPSHOT_PR_TOKEN }}
+          branch: automation/rules-snapshot
+          delete-branch: true
+          add-paths: apps/api/data/rules.json
+          commit-message: Update rules from Riot announcements
+          title: Update rules from Riot announcements
+          body-path: ${{ steps.rules.outputs.pr-body }}
+      - name: Set the rules pull request merge policy
+        if: steps.pr.outputs.pull-request-number != ''
+        env:
+          GH_TOKEN: ${{ secrets.SNAPSHOT_PR_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+          AUTO_MERGE: ${{ steps.rules.outputs.auto-merge }}
+        run: |
+          if [ "$AUTO_MERGE" = true ]; then
+            gh pr merge "$PR_NUMBER" --auto --squash --repo "$GITHUB_REPOSITORY"
+          else
+            gh pr merge "$PR_NUMBER" --disable-auto --repo "$GITHUB_REPOSITORY"
+          fi

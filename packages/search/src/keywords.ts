@@ -15,9 +15,12 @@ export const FILTER_KEYWORDS: { readonly [F in FilterField]: readonly [F, ...str
   set: ["set", "s"],
   artist: ["artist", "a"],
   ability: ["ability"],
+  effect: ["effect"],
+  keyword: ["keyword", "k"],
+  name: ["name"],
 };
 
-export const UNSUPPORTED_KEYWORDS: ReadonlySet<string> = new Set(["promo", "owned", "flavor", "legal", "keyword", "k"]);
+export const UNSUPPORTED_KEYWORDS: ReadonlySet<string> = new Set(["promo", "owned", "flavor", "legal"]);
 
 export const COLOR_ALIASES: ReadonlyMap<string, Domain> = new Map<string, Domain>([
   ["red", "fury"],

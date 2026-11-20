@@ -67,6 +67,32 @@ The command never writes a partial snapshot. When a request fails, TCGCSV return
 
 `price-history.json` keeps the market price of each printing per finish for the last 30 days, which the card page needs for its 30-day change and sparkline, because TCGCSV only gives today's prices. Each run that writes new prices records them under the UTC day of `updatedAt`, the day TCGCSV built them, and drops days more than 30 days before the newest one. Recording the same build again replaces that day, so a rerun changes nothing. A run that fails or is rejected writes neither file, and a night without a run records nothing, so a missed day stays a gap instead of repeating the day before. When the prices are unchanged but the history does not have their day yet, for example because an earlier price pull request merged without it, the run records that day, so the next run repairs the history. A history file that cannot be read never stops the price update: the run still writes `prices.json` and says "Price history not updated" with the reason in its summary. The price pull request carries both files. Git keeps every earlier version of the file, so the full history stays recoverable even though the file holds only 30 days.
 
+## Rules, errata and FAQ answers
+
+`bun run rules` reads Riot's English announcements and rules-and-releases indexes, then the Rules Hub and the discovered ban, errata and set FAQ articles. It writes `apps/api/data/rules.json`; it does not change the gallery snapshot or the card page. Each entry links to a source with its title and publication date. Previously imported sources are fetched even after they leave the indexes.
+
+```sh
+bun run rules
+bun run rules --summary summary.md --pr-body rules-pr-body.md --result rules-result.json
+bun run rules --save-pages saved-rules-pages
+bun run rules --pages saved-rules-pages --snapshot other/rules.json
+```
+
+`--cards`, `--snapshot` and `--overrides` select alternate inputs/output. `--pages` replays a saved fetch offline and cannot be combined with `--save-pages`. A missing snapshot bootstraps a new one. Identical input writes no snapshot or PR body. `--result` always writes `{changed, autoMerge}` after a successful run. A fetch, parse, unknown-card, ambiguous-symbol or disappearing-entry failure exits nonzero and preserves the previous snapshot.
+
+The snapshot contains:
+
+- `sources`: URL, title and publication date for each official source.
+- `bans`: a card id, format (`standard` or `2v2`), effective date and source. Future bans retain their date rather than becoming active immediately. The July announcement creates 2v2 by copying the then-current Standard list, effective on July 24, not on the earlier Standard ban dates.
+- `errata`: the previous and current text for each change, in publication order, using the gallery's symbol notation. `previous` is the wording replaced by that change, not necessarily the first printed wording. Later consumers should select the latest entry for the current text.
+- `rulings`: complete FAQ questions and answers, source, and all matched card ids. General answers have an empty `cards` array. FAQ text retains Riot's `[C]` and other symbols because a question may discuss multiple cards with different domains. Notes are dated historical rulings; newer Core Rules may supersede them.
+
+`src/rules-overrides.json` records reviewed aliases, per-card `[C]` rune corrections, excluded sources with reasons, and per-source/per-question FAQ card associations with reasons. A follow-up is not automatically attached to the previous question: doing so could attach an unrelated general rule to the wrong card. Obsolete sources must be excluded explicitly; an exclusion also permits removing that source's old entries. To correct a renamed/deleted question within an otherwise active source, review and edit the old snapshot entry explicitly before rerunning.
+
+The parser compares announcements with the Rules Hub **as of each list's "Last updated" date**, so an announced future ban does not falsely conflict with the current list. Mismatches and unmatched FAQ questions appear as warnings. Unknown ban/errata card names and unsupported unban/restriction announcements stop the update instead of guessing.
+
+A third, independent `rules` job in `scrape-cards.yml` runs on its existing daily scheduler dispatch. It opens `automation/rules-snapshot` using the existing `SNAPSHOT_PR_TOKEN`. Only additive ban/errata updates without warnings or FAQ changes are eligible for auto-merge after checks. Bootstrap, edited existing entries, all new/edited FAQ mappings, and warnings require review; the job disables an older auto-merge request when necessary. Failed jobs upload fetched pages for three days so the same run can be replayed with `--pages`.
+
 ## Check
 
 From `apps/ingest`, `bun run test` and `bun run typecheck` check only this package. Biome and the full `bun run check` run from the workspace root.
