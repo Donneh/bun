@@ -105,11 +105,23 @@ function domain(value: string): Parsed<Filter> {
   return ok({ field: "domain", anyOf, allOf, noneOf });
 }
 
+function identity(value: string): Parsed<Filter> {
+  if (value === "") return invalid("Identity value cannot be empty. Use a domain list, such as id:fury,chaos.");
+  const domains: Domain[] = [];
+  for (const name of value.split(",")) {
+    const parsed = oneOf("domain", DomainSchema.options, name, COLOR_ALIASES);
+    if (!parsed.ok) return parsed;
+    domains.push(parsed.value);
+  }
+  return ok({ field: "identity", domains });
+}
+
 const FILTERS: { readonly [F in FilterField]: FilterParser } = {
   cost: numeric("cost"),
   might: numeric("might"),
   power: numeric("power"),
   domain,
+  identity,
   tag: text("tag"),
   type: enumeration("type", CardTypeSchema.options),
   supertype: enumeration("supertype", SupertypeSchema.options),

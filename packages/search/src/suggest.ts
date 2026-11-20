@@ -21,6 +21,10 @@ const FIELD_HELP: { readonly [F in FilterField]: { readonly label: string; reado
   might: { label: "Might", hint: "Might: a whole number, such as m:<4. Numbers take = != < <= > >=." },
   power: { label: "Power cost", hint: "Power cost: a whole number, such as p:2. Numbers take = != < <= > >=." },
   domain: { label: "Domain", hint: "Use , for any of, + for all of and - for none of, such as c:fury+calm." },
+  identity: {
+    label: "Legend identity",
+    hint: "Cards within these domains, including colorless. Use a legend's domains, such as id:fury,chaos.",
+  },
   tag: { label: "Tag", hint: "Tag: an exact region or creature tag, such as t:ionia." },
   type: { label: "Card type", hint: null },
   supertype: { label: "Supertype", hint: null },
@@ -39,6 +43,7 @@ const FIELD_HELP: { readonly [F in FilterField]: { readonly label: string; reado
 
 const VALUES: { readonly [F in FilterField]?: readonly string[] } = {
   domain: DOMAINS,
+  identity: DOMAINS,
   type: CARD_TYPES,
   supertype: SUPERTYPES,
   rarity: RARITIES,
@@ -135,18 +140,22 @@ function valueSuggestions(
     if (query.charAt(start) === "-") start++;
     const next = query.slice(caret, end).search(/[,+]/);
     if (next !== -1) segmentEnd = caret + next;
+  } else if (field === "identity") {
+    start = valueStart + query.slice(valueStart, caret).lastIndexOf(",") + 1;
+    const next = query.slice(caret, end).indexOf(",");
+    if (next !== -1) segmentEnd = caret + next;
   }
 
   const prefix = query.slice(start, caret).trim().toLowerCase();
   const complete = values.includes(query.slice(start, segmentEnd).trim().toLowerCase());
-  const space = field !== "domain" && segmentEnd === query.length ? " " : "";
+  const space = field !== "domain" && field !== "identity" && segmentEnd === query.length ? " " : "";
   const suggestions = complete
     ? []
     : values
         .filter((value) => value.startsWith(prefix))
         .map((value) => ({
           label: value,
-          detail: field === "domain" ? (COLOR_OF.get(value) ?? null) : null,
+          detail: field === "domain" || field === "identity" ? (COLOR_OF.get(value) ?? null) : null,
           text: value + space,
           span: { start, end: segmentEnd },
         }));

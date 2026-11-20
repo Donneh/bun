@@ -32,6 +32,7 @@ const FIELD_MAPPINGS: FieldMappings = {
       noneOf: filter.noneOf,
     }),
   },
+  identity: { label: "Legend identity", toValue: (filter) => text({ text: filter.domains.join(", ") }) },
   type: { label: "Type", toValue: select },
   supertype: { label: "Supertype", toValue: select },
   rarity: { label: "Rarity", toValue: select },
