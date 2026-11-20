@@ -51,6 +51,7 @@ const FILTER_MATCHERS: FilterMatchers = {
     (filter.anyOf.length === 0 || filter.anyOf.some((domain) => card.domains.includes(domain))) &&
     filter.allOf.every((domain) => card.domains.includes(domain)) &&
     !filter.noneOf.some((domain) => card.domains.includes(domain)),
+  identity: (filter, card) => card.domains.every((domain) => domain === "colorless" || filter.domains.includes(domain)),
   type: (filter, card) => card.type === filter.value,
   supertype: (filter, card) => card.supertype === filter.value,
   rarity: (filter, _card, printing) => printing.rarity === filter.value,

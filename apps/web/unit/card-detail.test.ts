@@ -80,6 +80,15 @@ describe("searchHref", () => {
 });
 
 describe("cardInfo", () => {
+  test("only legends link to cards within all their domains", () => {
+    const legend = priced(makeCard({ type: "legend", domains: ["mind", "calm"] }));
+    expect(cardInfo(legend, firstPrinting(legend)).legendSearch).toEqual({
+      label: "Cards for this legend",
+      href: searchHref("id:mind,calm"),
+    });
+    expect(cardInfo(ahri, firstPrinting(ahri)).legendSearch).toBeUndefined();
+  });
+
   test("names the domains and the type with their glyphs above the name", () => {
     const info = cardInfo(ahri, firstPrinting(ahri));
 

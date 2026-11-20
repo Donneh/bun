@@ -264,6 +264,28 @@ describe("domain filter", () => {
   });
 });
 
+test("legend identity admits subsets and colorless, not cards with any outside domain", () => {
+  const cards = [
+    buildCard({ id: "a", name: "Fury", domains: ["fury"], type: "unit" }),
+    buildCard({ id: "b", name: "Chaos", domains: ["chaos"], type: "spell" }),
+    buildCard({ id: "c", name: "Both", domains: ["fury", "chaos"], type: "unit" }),
+    buildCard({ id: "d", name: "Outside", domains: ["fury", "mind"], type: "unit" }),
+    buildCard({ id: "e", name: "Colorless", domains: ["colorless"], type: "gear" }),
+    buildCard({ id: "f", name: "Empty", domains: [], type: "battlefield" }),
+    buildCard({ id: "g", name: "Mind", domains: ["mind"], type: "unit" }),
+  ];
+  for (const [query, expected] of [
+    ["id:fury,chaos", ["Both", "Chaos", "Colorless", "Empty", "Fury"]],
+    ["identity:RED,purple type:unit", ["Both", "Fury"]],
+    ["id:colorless", ["Colorless", "Empty"]],
+    ["-id:fury,chaos", ["Mind", "Outside"]],
+  ] as const) {
+    const { root, warnings } = parseQuery(query);
+    expect(warnings).toEqual([]);
+    expect(names(cards, root)).toEqual([...expected]);
+  }
+});
+
 describe("enumerated filters", () => {
   test("type and supertype compare the card field", () => {
     const cards = [
