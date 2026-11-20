@@ -2,11 +2,13 @@ import type { z } from "zod";
 import { type Card, CardSchema, type Printing, PrintingSchema } from "../src/card.ts";
 import { type PriceSnapshot, PriceSnapshotSchema } from "../src/price.ts";
 import { type PriceHistory, PriceHistorySchema } from "../src/price-history.ts";
+import { type RulesSnapshot, RulesSnapshotSchema } from "../src/rules.ts";
 
 type PrintingOverrides = Partial<z.input<typeof PrintingSchema>>;
 type CardOverrides = Partial<z.input<typeof CardSchema>>;
 type PriceSnapshotOverrides = Partial<z.input<typeof PriceSnapshotSchema>>;
 type PriceHistoryOverrides = Partial<z.input<typeof PriceHistorySchema>>;
+type RulesSnapshotOverrides = Partial<z.input<typeof RulesSnapshotSchema>>;
 
 export function makePrinting(overrides: PrintingOverrides = {}): Printing {
   return PrintingSchema.parse({
@@ -62,4 +64,8 @@ export function makePriceHistory(overrides: PriceHistoryOverrides = {}): PriceHi
     printings: {},
     ...overrides,
   });
+}
+
+export function makeRulesSnapshot(overrides: RulesSnapshotOverrides = {}): RulesSnapshot {
+  return RulesSnapshotSchema.parse({ sources: [], bans: [], errata: [], rulings: [], ...overrides });
 }

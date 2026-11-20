@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, spyOn, test } from "bun:test";
 import { withPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceHistory, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
+import {
+  makeCard,
+  makePriceHistory,
+  makePriceSnapshot,
+  makePrinting,
+  makeRulesSnapshot,
+} from "@riftkeeper/cards/testing";
 import { createApp } from "../app.ts";
 import { MAX_QUERY_LENGTH, MAX_WARNINGS } from "../search/search.routes.ts";
 
@@ -8,7 +14,7 @@ const cards = Array.from({ length: 81 }, (_, index) =>
   makeCard({ id: `card-${index}`, name: `Card ${index}`, domains: index === 80 ? ["calm"] : ["fury"] }),
 );
 const prices = makePriceSnapshot();
-const app = createApp({ cards, prices, priceHistory: makePriceHistory() });
+const app = createApp({ cards, prices, priceHistory: makePriceHistory(), rules: makeRulesSnapshot() });
 let random: ReturnType<typeof spyOn<typeof Math, "random">> | undefined;
 afterEach(() => random?.mockRestore());
 
@@ -38,12 +44,22 @@ describe("GET /cards/random", () => {
   test("weights cards equally, not their printings, and returns the full card", async () => {
     const many = makeCard({ id: "many", printings: Array.from({ length: 5 }, () => makePrinting()) });
     const one = makeCard({ id: "one" });
-    const weighted = createApp({ cards: [many, one], prices, priceHistory: makePriceHistory() });
+    const weighted = createApp({
+      cards: [many, one],
+      prices,
+      priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
+    });
     random = spyOn(Math, "random").mockReturnValue(0.5);
     expect(await (await weighted.request("/cards/random")).json()).toMatchObject({ data: { id: "one" } });
 
     const printings = [makePrinting({ rarity: "common" }), makePrinting({ rarity: "epic" })];
-    const full = createApp({ cards: [makeCard({ printings })], prices, priceHistory: makePriceHistory() });
+    const full = createApp({
+      cards: [makeCard({ printings })],
+      prices,
+      priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
+    });
     const response = await full.request("/cards/random?q=r:epic");
     expect(await response.json()).toMatchObject({
       data: { printings: printings.map((p) => ({ ...p, prices: null })) },
@@ -55,7 +71,7 @@ describe("GET /cards/random", () => {
   });
 
   test.each([{ snapshot: cards }, { snapshot: [] }])("answers no card when nothing matches", async ({ snapshot }) => {
-    const empty = createApp({ cards: snapshot, prices, priceHistory: makePriceHistory() });
+    const empty = createApp({ cards: snapshot, prices, priceHistory: makePriceHistory(), rules: makeRulesSnapshot() });
     const response = await empty.request("/cards/random?q=cost:>999");
 
     expect(response.status).toBe(200);

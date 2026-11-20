@@ -2,6 +2,7 @@ import { decompose, parseQuery, type SortDirection, type SortKey, searchCards } 
 import { createApp } from "../src/app.ts";
 import { cards } from "../src/cards/card-snapshot.ts";
 import { priceHistory, prices } from "../src/cards/price-snapshot.ts";
+import { rules } from "../src/cards/rules-snapshot.ts";
 
 interface BenchmarkCase {
   readonly name: string;
@@ -50,7 +51,7 @@ function ms(value: number) {
   return value.toFixed(3);
 }
 
-const app = createApp({ cards, prices, priceHistory });
+const app = createApp({ cards, prices, priceHistory, rules });
 const failures: string[] = [];
 let checksum = 0;
 

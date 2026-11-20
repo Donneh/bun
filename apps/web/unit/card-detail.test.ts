@@ -1,8 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import type { Card } from "@riftkeeper/cards";
 import { type PricedCard, type PricedPrinting, withPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
-import { cardHref, cardInfo, printingSummaries, searchHref, selectedPrinting } from "../app/utils/card-detail.ts";
+import { makeCard, makePriceSnapshot, makePrinting, makeRulesSnapshot } from "@riftkeeper/cards/testing";
+import {
+  cardHref,
+  cardInfo,
+  legality,
+  localDate,
+  printingSummaries,
+  searchHref,
+  selectedPrinting,
+} from "../app/utils/card-detail.ts";
 
 const snapshot = makePriceSnapshot({
   updatedAt: "2026-10-31T20:05:59.000Z",
@@ -217,6 +225,57 @@ describe("cardInfo", () => {
   test("leaves out the pricing of a printing without a market, low or high price", () => {
     expect(cardInfo(battlefield, firstPrinting(battlefield)).pricing).toBeNull();
     expect(cardInfo(unpriced, firstPrinting(unpriced)).pricing).toBeNull();
+  });
+});
+
+describe("legality", () => {
+  const radiance =
+    "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026";
+  const july = "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates";
+  const rules = makeRulesSnapshot({
+    sources: [
+      { url: radiance, title: "Radiance Ban List Updates (Effective November 23, 2026)", publishedAt: "2026-11-13" },
+      { url: july, title: "July Ban List Updates", publishedAt: "2026-07-17" },
+    ],
+    bans: [
+      { card: "riven-broken-blade", format: "2v2", effective: "2026-07-24", source: july },
+      { card: "riven-broken-blade", format: "standard", effective: "2026-11-23", source: radiance },
+    ],
+  });
+
+  test("dates a ban that is announced but not in force yet, and links each ban to Riot's announcement", () => {
+    expect(legality(rules, "2026-11-22")).toEqual([
+      {
+        format: "Standard",
+        status: "upcoming",
+        label: "Banned Nov 23",
+        source: { label: "Radiance Ban List Updates", href: radiance },
+      },
+      {
+        format: "2v2 Constructed",
+        status: "banned",
+        label: "Banned",
+        source: { label: "July Ban List Updates", href: july },
+      },
+      { format: "Sealed", status: "legal", label: "Legal", note: "No ban list" },
+    ]);
+  });
+
+  test("counts a ban as in force from its effective day", () => {
+    expect(legality(rules, "2026-11-23")[0]).toMatchObject({ status: "banned", label: "Banned" });
+  });
+
+  test("lists every format as legal for a card without bans", () => {
+    expect(legality(makeRulesSnapshot(), "2026-11-22").map((row) => [row.format, row.label])).toEqual([
+      ["Standard", "Legal"],
+      ["2v2 Constructed", "Legal"],
+      ["Sealed", "Legal"],
+    ]);
+  });
+
+  test("takes today from the reader's own calendar day", () => {
+    expect(localDate(new Date(2026, 10, 22, 23, 30))).toBe("2026-11-22");
+    expect(localDate(new Date(2026, 0, 5, 0, 15))).toBe("2026-01-05");
   });
 });
 

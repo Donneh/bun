@@ -34,6 +34,10 @@ const ahri: CardInfoContent = {
     finishes: [{ finish: "Foil", market: "$12.34", range: [{ label: "Low", amount: "$10.00" }] }],
     attribution: "Prices: TCGplayer market price via TCGCSV, updated Oct 31, 2026",
   },
+  legality: [
+    { format: "Standard", status: "upcoming", label: "Banned Nov 23" },
+    { format: "Sealed", status: "legal", label: "Legal", note: "No ban list" },
+  ],
 };
 
 const printing = { setName: "Origins", orientation: "portrait" as const, prices: [] };
@@ -67,11 +71,23 @@ describe("CardInfo", () => {
   });
 
   test("leaves out the stat row, pricing, tags and credit when the card has none", () => {
-    const { container } = renderInfo({ ...ahri, stats: [], tags: [], artist: null, pricing: null });
+    const { container } = renderInfo({ ...ahri, stats: [], tags: [], artist: null, pricing: null, legality: null });
 
     expect(container.querySelector("dl")).toBeNull();
     expect(container.querySelector("footer")).toBeNull();
     expect(screen.queryByRole("region", { name: "Market price" })).toBeNull();
+    expect(screen.queryByRole("region", { name: "Legality" })).toBeNull();
+  });
+
+  test("shows the legality right after the rules text", () => {
+    renderInfo();
+
+    const legality = screen.getByRole("region", { name: "Legality" });
+    expect(legality.textContent).toContain("Banned Nov 23");
+    const rules = screen.getByText(/When I attack/);
+    expect(rules.compareDocumentPosition(legality) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    const pricing = screen.getByRole("region", { name: "Market price" });
+    expect(legality.compareDocumentPosition(pricing) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   test("shows the pricing of the chosen printing between the rules text and the printings", () => {

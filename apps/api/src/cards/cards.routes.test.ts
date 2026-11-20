@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { withPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceHistory, makePriceSnapshot } from "@riftkeeper/cards/testing";
+import { makeCard, makePriceHistory, makePriceSnapshot, makeRulesSnapshot } from "@riftkeeper/cards/testing";
 import { createApp } from "../app.ts";
 
 const unpricedCards = [
@@ -16,7 +16,26 @@ const priceHistory = makePriceHistory({
     "gone-p1": { normal: [5, 5] },
   },
 });
-const app = createApp({ cards: unpricedCards, prices, priceHistory });
+const bansUrl = "https://playriftbound.com/en-us/news/announcements/bans";
+const errataUrl = "https://playriftbound.com/en-us/news/rules-and-releases/errata";
+const faqUrl = "https://playriftbound.com/en-us/news/rules-and-releases/faq";
+const rules = makeRulesSnapshot({
+  sources: [
+    { url: bansUrl, title: "Bans", publishedAt: "2026-11-13" },
+    { url: errataUrl, title: "Errata", publishedAt: "2026-10-09" },
+    { url: faqUrl, title: "FAQ", publishedAt: "2026-08-14" },
+  ],
+  bans: [
+    { card: "abandon", format: "2v2", effective: "2026-11-23", source: bansUrl },
+    { card: "jinx-loose-cannon", format: "standard", effective: "2026-11-23", source: bansUrl },
+  ],
+  errata: [{ card: "jinx-loose-cannon", previous: "Old.", current: "New.", source: errataUrl }],
+  rulings: [
+    { cards: ["abandon", "jinx-loose-cannon"], question: "Both?", answer: "Yes.", source: faqUrl },
+    { cards: ["jinx-loose-cannon"], question: "Jinx?", answer: "No.", source: faqUrl },
+  ],
+});
+const app = createApp({ cards: unpricedCards, prices, priceHistory, rules });
 const cards = withPrices(unpricedCards, prices);
 
 describe("GET /cards", () => {
@@ -78,6 +97,29 @@ describe("GET /cards/:id/price-history", () => {
 
     expect(response.status).toBe(400);
     expect(await response.json()).toMatchObject({ error: { code: "invalid_request" } });
+  });
+});
+
+describe("GET /cards/:id/rules", () => {
+  test("returns the card's bans, errata and rulings with only the sources they cite", async () => {
+    const response = await app.request("/cards/abandon/rules");
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      data: {
+        sources: [rules.sources[0], rules.sources[2]],
+        bans: [rules.bans[0]],
+        errata: [],
+        rulings: [rules.rulings[0]],
+      },
+    });
+  });
+
+  test("responds 404 when no card has that id", async () => {
+    const response = await app.request("/cards/gone/rules");
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toMatchObject({ error: { code: "card_not_found" } });
   });
 });
 

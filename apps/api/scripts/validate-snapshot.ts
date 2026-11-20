@@ -1,10 +1,12 @@
 import { isDeepStrictEqual } from "node:util";
 import { parsePriceHistory } from "@riftkeeper/cards/price-history";
 import { parsePriceSnapshot } from "@riftkeeper/cards/prices";
+import { parseRulesSnapshot } from "@riftkeeper/cards/rules";
 import { parseCardSnapshot, REBUILD_COMMAND } from "@riftkeeper/cards/snapshot";
 import snapshot from "../data/cards.json";
 import priceHistorySnapshot from "../data/price-history.json";
 import priceSnapshot from "../data/prices.json";
+import rulesSnapshot from "../data/rules.json";
 
 const path = "apps/api/data/cards.json";
 const cards = parseCardSnapshot({ json: snapshot, path });
@@ -26,3 +28,10 @@ if (!isDeepStrictEqual(history, priceHistorySnapshot)) {
   throw new Error(`Price history ${historyPath} has fields the price history schema does not know.`);
 }
 console.log(`Price history ${historyPath} matches the price history schema: ${history.dates.length} days`);
+
+const rulesPath = "apps/api/data/rules.json";
+const rules = parseRulesSnapshot({ json: rulesSnapshot, path: rulesPath });
+if (!isDeepStrictEqual(rules, rulesSnapshot)) {
+  throw new Error(`Rules snapshot ${rulesPath} has fields the rules schema does not know.`);
+}
+console.log(`Rules snapshot ${rulesPath} matches the rules schema: ${rules.bans.length} bans`);

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CardLegality from "./CardLegality.vue";
 import CardPricing from "./CardPricing.vue";
 import CardText from "./CardText.vue";
 import type { CardInfoContent, PrintingSummary } from "./card-detail.ts";
@@ -50,6 +51,8 @@ function follow(event: MouseEvent, href: string) {
     <div v-if="card.rules.length > 0" class="section rules">
       <CardText v-for="(text, index) in card.rules" :key="index" :text="text" />
     </div>
+
+    <CardLegality v-if="card.legality" class="section" :rows="card.legality" />
 
     <div v-if="card.legendSearch" class="section">
       <a class="credit-link" :href="card.legendSearch.href" @click="follow($event, card.legendSearch.href)">{{

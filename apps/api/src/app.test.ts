@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import type { PricedCard, PrintingPrices } from "@riftkeeper/cards/prices";
-import { makeCard, makePriceHistory, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
+import {
+  makeCard,
+  makePriceHistory,
+  makePriceSnapshot,
+  makePrinting,
+  makeRulesSnapshot,
+} from "@riftkeeper/cards/testing";
 import { createApp } from "./app.ts";
 
 describe("GET /health", () => {
@@ -9,6 +15,7 @@ describe("GET /health", () => {
       cards: [makeCard({ id: "abandon" }), makeCard({ id: "jinx-loose-cannon" })],
       prices: makePriceSnapshot(),
       priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
     });
 
     const response = await app.request("/health");
@@ -18,7 +25,12 @@ describe("GET /health", () => {
   });
 
   test("reports the deployed Worker version", async () => {
-    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
+    const app = createApp({
+      cards: [makeCard()],
+      prices: makePriceSnapshot(),
+      priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
+    });
 
     const response = await app.request("/health", {}, { CF_VERSION_METADATA: { id: "version-1" } });
 
@@ -27,7 +39,12 @@ describe("GET /health", () => {
 });
 
 describe("CORS", () => {
-  const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
+  const app = createApp({
+    cards: [makeCard()],
+    prices: makePriceSnapshot(),
+    priceHistory: makePriceHistory(),
+    rules: makeRulesSnapshot(),
+  });
   const origin = { Origin: "https://riftkeeper.example" };
 
   test("allows any origin on GET responses without credentials", async () => {
@@ -59,7 +76,12 @@ describe("CORS", () => {
 
 describe("routing", () => {
   test.each(["/health/", "/cards/", "/search/"])("does not serve %s with a trailing slash", async (path) => {
-    const app = createApp({ cards: [makeCard()], prices: makePriceSnapshot(), priceHistory: makePriceHistory() });
+    const app = createApp({
+      cards: [makeCard()],
+      prices: makePriceSnapshot(),
+      priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
+    });
 
     const response = await app.request(path);
 
@@ -76,6 +98,7 @@ describe("prices", () => {
     cards: [makeCard({ id: "jinx", name: "Jinx", printings: [priced, unpriced] })],
     prices,
     priceHistory: makePriceHistory(),
+    rules: makeRulesSnapshot(),
   });
   const expectedPrices: (PrintingPrices | null)[] = [
     {
