@@ -1,0 +1,1416 @@
+{
+  "sources": [
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans",
+      "title": "Announcing Riftbound's First Bans",
+      "publishedAt": "2026-03-30"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates",
+      "title": "July Ban List Updates",
+      "publishedAt": "2026-07-17"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026",
+      "title": "Radiance Ban List Updates (Effective November 23, 2026)",
+      "publishedAt": "2026-11-13"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates",
+      "title": "Radiance Errata Updates",
+      "publishedAt": "2026-10-09"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026",
+      "title": "September Ban List Updates (Effective September 18, 2026)",
+      "publishedAt": "2026-09-15"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates",
+      "title": "Vendetta Errata Updates",
+      "publishedAt": "2026-07-23"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata",
+      "title": "Riftbound: Origins Card Errata",
+      "publishedAt": "2025-10-28"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata",
+      "title": "Riftbound Spiritforged Errata",
+      "publishedAt": "2026-01-14"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq",
+      "title": "Riftbound Spiritforged FAQ",
+      "publishedAt": "2026-01-14"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates",
+      "title": "Unleashed Errata Updates",
+      "publishedAt": "2026-04-03"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications",
+      "title": "Unleashed Rules FAQ and Clarifications",
+      "publishedAt": "2026-04-29"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications",
+      "title": "Vendetta Rules FAQ and Clarifications",
+      "publishedAt": "2026-08-14"
+    },
+    {
+      "url": "https://playriftbound.com/en-us/rules-hub",
+      "title": "Rules Hub",
+      "publishedAt": "2026-07-17"
+    }
+  ],
+  "bans": [
+    {
+      "card": "aspirants-climb",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "aspirants-climb",
+      "format": "standard",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "baited-hook",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "baited-hook",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "brynhir-thundersong",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "brynhir-thundersong",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "called-shot",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "called-shot",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "dazzling-aurora",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "dazzling-aurora",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "draven-vanquisher",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "draven-vanquisher",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "ekko-recurrent",
+      "format": "2v2",
+      "effective": "2026-09-18",
+      "source": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026"
+    },
+    {
+      "card": "ekko-recurrent",
+      "format": "standard",
+      "effective": "2026-09-18",
+      "source": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026"
+    },
+    {
+      "card": "emperors-dais",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "emperors-dais",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "fight-or-flight",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "fight-or-flight",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "nocturne-horrifying",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "nocturne-horrifying",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "obelisk-of-power",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "obelisk-of-power",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "reavers-row",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "reavers-row",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "rhasa-the-sunderer",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "rhasa-the-sunderer",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "riven-broken-blade",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "riven-broken-blade",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "scrapheap",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "scrapheap",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "stacked-deck",
+      "format": "2v2",
+      "effective": "2026-09-18",
+      "source": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026"
+    },
+    {
+      "card": "stacked-deck",
+      "format": "standard",
+      "effective": "2026-09-18",
+      "source": "https://playriftbound.com/en-us/news/announcements/september-ban-list-updates-effective-september-18-2026"
+    },
+    {
+      "card": "star-spring",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "star-spring",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "stealthy-pursuer",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "stealthy-pursuer",
+      "format": "standard",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "stellacorn-herder",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "stellacorn-herder",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "the-arenas-greatest",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "the-arenas-greatest",
+      "format": "standard",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "the-dreaming-tree",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "the-dreaming-tree",
+      "format": "standard",
+      "effective": "2026-03-31",
+      "source": "https://playriftbound.com/en-us/news/announcements/announcing-riftbounds-first-bans"
+    },
+    {
+      "card": "wuju-bladesman-starter",
+      "format": "2v2",
+      "effective": "2026-07-24",
+      "source": "https://playriftbound.com/en-us/news/announcements/july-ban-list-updates"
+    },
+    {
+      "card": "zhonyas-hourglass",
+      "format": "2v2",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    },
+    {
+      "card": "zhonyas-hourglass",
+      "format": "standard",
+      "effective": "2026-11-23",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-ban-list-updates-effective-november-23-2026"
+    }
+  ],
+  "errata": [
+    {
+      "card": "ava-achiever",
+      "previous": "When I attack, you may pay :rb_rune_mind: to play a card with [Hidden] from your hand here, ignoring its cost.",
+      "current": "When I attack, you may pay :rb_rune_mind: to play a card with [Hidden] from your hand, ignoring its cost. If it’s a unit, play it here.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "baited-hook",
+      "previous": ":rb_energy_1::rb_rune_order:, :rb_exhaust:: Kill a friendly unit. Look at the top 5 cards of your Main Deck. You may play a unit from among them that has Might up to 1 more than the killed unit, ignoring its cost. Then recycle the rest.",
+      "current": ":rb_energy_1::rb_rune_order:, :rb_exhaust:: Kill a friendly unit. Look at the top 5 cards of your Main Deck. You may banish a unit from among them that has Might up to 1 more than the killed unit and play it, ignoring its cost. Then recycle the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "blind-fury",
+      "previous": "[Action] (Play on your turn or in showdowns.)\nEach opponent reveals the top card of their Main Deck. Choose one and play it, ignoring its cost. Then recycle the rest.",
+      "current": "[Action] (Play on your turn or in showdowns.)\nEach opponent reveals the top card of their Main Deck. Choose one and banish it, then play it, ignoring its cost. Then recycle the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "clockwork-keeper",
+      "previous": "As you play me, you may pay :rb_rune_calm: as an additional cost. If you do, draw 1.",
+      "current": "You may pay :rb_rune_calm: as an additional cost to play me.\nWhen you play me, if you paid the additional cost, draw 1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "convergent-mutation",
+      "previous": "[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. Increase its Might until it equals the Might of another friendly unit.",
+      "current": "[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. This turn, increase its Might to the Might of another friendly unit.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "dark-child-starter",
+      "previous": "At the end of your turn, ready 2 runes.",
+      "current": "At the end of your turn, ready up to 2 runes.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "dazzling-aurora",
+      "previous": "At the end of your turn, reveal cards from the top of your Main Deck until you reveal a unit. Play it, ignoring its cost, and recycle the rest.",
+      "current": "At the end of your turn, reveal cards from the top of your Main Deck until you reveal a unit and banish it. Play it, ignoring its cost, and recycle the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "disintegrate",
+      "previous": "[Action] (Play on your turn or in showdowns.)\nDeal 3 to a unit at a battlefield. If this kills it, draw 1.",
+      "current": "Action (Play on your turn or in showdowns.)\nDeal 3 to a unit at a battlefield. If this kills it, do this: draw 1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "dragons-rage-lee-sin",
+      "previous": "Move an enemy unit. Then choose another enemy unit at its destination. They deal damage equal to their Mights to each other.",
+      "current": "Move an enemy unit. Then do this: Choose another enemy unit at its destination. They deal damage equal to their Mights to each other.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "dune-drake",
+      "previous": "When I attack, give me +2 :rb_might: if there is a ready enemy unit here.",
+      "current": "When I attack, give me +2 :rb_might: this turn if there is a ready enemy unit here.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "highlander-yi",
+      "previous": "[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. The next time it dies this turn, recall it exhausted instead. (Send it to base. This isn't a move.)",
+      "current": "[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose a friendly unit. The next time it would die this turn, heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "karma-channeler",
+      "previous": "[Vision] (When you play me, look at the top card of your Main Deck. You may recycle it.)\nWhen you recycle one or more cards, buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff. Runes aren't cards.)",
+      "current": "[Vision] (When you play me, look at the top card of your Main Deck. You may recycle it.)\nWhen you recycle one or more cards to your Main Deck, buff a friendly unit. (If it doesn't have a buff, it gets a +1 :rb_might: buff. Runes aren't cards.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "kinkou-monk",
+      "previous": "When you play me, buff two other friendly units. (Each one that doesn't have a buff gets a +1 :rb_might: buff.)",
+      "current": "When you play me, buff up to two other friendly units. (Each one that doesn't have a buff gets a +1 :rb_might: buff.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "nocturne-horrifying",
+      "previous": "[Ganking] (I can move from battlefield to battlefield.)\nWhen you look at cards from the top of your deck (and don't draw them) and see me, you may play me for :rb_rune_rainbow:.",
+      "current": "[Ganking] (I can move from battlefield to battlefield.)\nAs you look at or reveal me from the top of your deck, you may banish me. If you do, you may play me for :rb_rune_rainbow:.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "pack-of-wonders",
+      "previous": ":rb_exhaust:: Return another friendly gear, unit, or [Hidden] card to its owner's hand.",
+      "current": ":rb_exhaust:: Return another friendly gear, unit, or facedown card to its owner's hand.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "portal-rescue",
+      "previous": "[Action] (Play on your turn or in showdowns.)\nBanish a friendly unit, then play it to base, ignoring its cost.\nNote: Text only differs for English version of the card",
+      "current": "[Action] (Play on your turn or in showdowns.)\nBanish a friendly unit, then its owner plays it to their base, ignoring its cost.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "promising-future",
+      "previous": "Each player looks at the top 5 cards of their Main Deck, chooses one, then recycles the rest. Starting with the next player, each player plays those cards, ignoring Energy costs. (They must still pay Power costs.)",
+      "current": "Each player looks at the top 5 cards of their Main Deck, banishes one of them, then recycles the rest. Starting with the next player, each player plays those cards, ignoring Energy costs. (They must still pay Power costs.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "ravenborn-tome",
+      "previous": ":rb_exhaust:: The next spell you play deals 1 Bonus Damage. (Each instance of damage the spell deals is increased by 1.)",
+      "current": ":rb_exhaust:: The next spell you play this turn deals 1 Bonus Damage. (Each instance of damage the spell deals is increased by 1.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "salvage",
+      "previous": "[Action] (Play on your turn or in showdowns.)\nYou may kill a gear. Draw 1.",
+      "current": "[Action] (Play on your turn or in showdowns.)\nYou may kill up to one gear. Draw 1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "sigil-of-the-storm",
+      "previous": "When you conquer here, recycle one of your runes.",
+      "current": "When you conquer here, you must recycle one of your runes. (This doesn’t choose anything.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "sona-harmonious",
+      "previous": "While I'm at a battlefield, ready 4 friendly runes at the end of your turn.",
+      "current": "At the end of your turn, if I'm at a battlefield, ready up to 4 friendly runes.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "targons-peak",
+      "previous": "When you conquer here, ready 2 runes at the end of this turn.",
+      "current": "When you conquer here, ready up to 2 runes at the end of this turn.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "teemo-strategist",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen I defend or I'm played from [Hidden], reveal the top 5 cards of your Main Deck. Deal 1 to an enemy unit here for each card with [Hidden], then recycle them.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen I defend, choose an enemy unit here and reveal the top 5 cards of your Main Deck. Deal 1 to that unit for each card with [Hidden] revealed this way, then recycle the revealed cards.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "the-boss",
+      "previous": "When a buffed unit you control would die, you may pay :rb_rune_rainbow: and exhaust me to spend its buff and recall it exhausted instead. (Send it to base. This isn't a move.)\nWhen you conquer, ready me.",
+      "current": "If a buffed unit you control would die, you may pay :rb_rune_rainbow:, exhaust me, and spend its buff to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)\nWhen you conquer, ready me.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "the-dreaming-tree",
+      "previous": "The first time you choose a friendly unit with a spell here each turn, draw 1.",
+      "current": "When a player chooses a friendly unit here with a spell for the first time each turn, they draw 1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "the-syren",
+      "previous": ":rb_energy_1:, :rb_exhaust:: Move a friendly unit at a battlefield to your base.\nNote: Text only differs for English version of the card",
+      "current": ":rb_energy_1:, :rb_exhaust:: Move a friendly unit at a battlefield to its base.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "tideturner",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play me, you may choose a friendly unit. Move me to its location and it to my original location.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play me, you may choose a unit you control at another location. Move me to its location and it to my original location.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "unforgiven",
+      "previous": ":rb_energy_2:, :rb_exhaust:: Move a friendly unit to or from your base.\nNote: Text only differs for English version of the card",
+      "current": ":rb_energy_2:, :rb_exhaust:: Move a friendly unit to or from its base.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "unlicensed-armory",
+      "previous": "Discard 1, :rb_exhaust:: Choose a friendly unit. The next time it dies this turn, you may pay :rb_rune_fury: to recall it exhausted instead. (Send it to base. This isn't a move.)",
+      "current": "Discard 1, :rb_exhaust:: Choose a friendly unit. The next time it would die this turn, you may pay :rb_rune_fury: to heal it, exhaust it, and recall it instead. (Send it to base. This isn't a move.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "void-gate",
+      "previous": "Spells and abilities affecting units here each deal 1 Bonus Damage. (Each instance of damage the spell deals is increased by 1.)",
+      "current": "Spells and abilities deal 1 Bonus Damage to units here. (Each instance of damage the spell deals to a unit here is increased by 1.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "zhonyas-hourglass",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nThe next time a friendly unit would die, kill this instead. Recall that unit exhausted. (Send it to base. This isn't a move.)",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nIf a friendly unit would die, kill this instead. Heal that unit, exhaust it, and recall it. (Send it to base. This isn't a move.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-origins-card-errata"
+    },
+    {
+      "card": "falling-star",
+      "previous": "Do this twice:\nDeal 3 to a unit. (You can choose different units.)",
+      "current": "Deal 3 to a unit.\nDeal 3 to a unit.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "icathian-rain-kaisa",
+      "previous": "Do this 6 times:\nDeal 2 to a unit. (You can choose different units.)",
+      "current": "Deal 2 to a unit.\nDeal 2 to a unit.\nDeal 2 to a unit.\nDeal 2 to a unit.\nDeal 2 to a unit.\nDeal 2 to a unit.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "reinforce",
+      "previous": "Look at the top 5 cards of your Main Deck. You may play a unit from among them. Its Energy cost is reduced by :rb_energy_5:. Then recycle the remaining cards.",
+      "current": "Look at the top 5 cards of your Main Deck. You may banish a unit from among them, then play it, reducing its cost by :rb_energy_5:. Recycle the remaining cards.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "arise",
+      "previous": "Play a 2 :rb_might: Sand Soldier unit token for each Equipment you control. Then ready two of them.",
+      "current": "Play a 2 :rb_might: Sand Soldier unit token for each Equipment you control. Then do this: Ready up to two of them.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "blood-rush",
+      "previous": "[Action] (Play on your turn or in showdowns.)\n[Repeat] :rb_energy_1: (You may pay the additional cost to repeat this spell's effect.)\nGive a unit [Assault 2]. (+2 :rb_might: while it's an attacker.)",
+      "current": "[Action] (Play on your turn or in showdowns.)\n[Repeat] :rb_energy_1: (You may pay the additional cost to repeat this spell's effect.)\nGive a unit [Assault 2] this turn. (+2 :rb_might: while it's an attacker.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "deathgrip",
+      "previous": "[Reaction] (Play any time, even before spells and abilities resolve.)\nKill a friendly unit to give +:rb_might: equal to its Might to another friendly unit this turn. Draw 1.",
+      "current": "[Reaction] (Play any time, even before spells and abilities resolve.)\nKill a friendly unit. If you do, give +:rb_might: equal to its Might to another friendly unit this turn.\nDraw 1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "edge-of-night",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play this from face down, attach it to a unit you control here.\n[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.)",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play this from face down, attach it to a unit you control (here).\n[Equip] :rb_rune_chaos: (:rb_rune_chaos:: Attach this to a unit you control.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "janna-savior",
+      "previous": "[Reaction] (Play any time, even before spells and abilities resolve, including to a battlefield you control.)\nWhen you play me, heal your units here, then move an enemy unit from here to its base.",
+      "current": "[Reaction] (Play any time, even before spells and abilities resolve, including to a battlefield you control.)\nWhen you play me, heal your units here, then move up to one enemy unit from here to its base.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "jax-unmatched",
+      "previous": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nEach Equipment in your hand has [Quick-Draw]. (It gains [Reaction]. When you play it, attach it to a unit you control.)",
+      "current": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nYour Equipment everywhere have [Quick-Draw]. (Each gains [Reaction]. When you play it, attach it to a unit you control.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "kato-the-arm",
+      "previous": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhen I move to a battlefield, give a friendly unit my keywords and +:rb_might: equal to my Might this turn.",
+      "current": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhen I move to a battlefield, give another friendly unit my keywords and +:rb_might: equal to my Might this turn.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "reksai-swarm-queen",
+      "previous": "When I attack, you may reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest. If the played card is a unit, you may play it here.",
+      "current": "When I attack, you may reveal the top 2 cards of your Main Deck. You may banish one, then play it. If it is a unit, you may play it here. Recycle the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "rell-magnetic",
+      "previous": "[Tank] (I must be assigned combat damage first.)\nWhen I attack, you may play an Equipment with Energy cost no more than :rb_energy_2:, ignoring its cost, and attach it to me.",
+      "current": "[Tank] (I must be assigned combat damage first.)\nWhen I attack, you may play an Equipment with Energy cost no more than :rb_energy_2:, ignoring its cost. If you do, then do this: Attach it to me.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "tianna-crownguard",
+      "previous": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhile I'm at a battlefield, opponents can't score points.",
+      "current": "[Deflect] (Opponents must pay :rb_rune_rainbow: to choose me with a spell or ability.)\nWhile I'm at a battlefield, opponents can't gain points.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "void-burrower",
+      "previous": "When you conquer, you may exhaust me to reveal the top 2 cards of your Main Deck. You may play one. Then recycle the rest.",
+      "current": "When you conquer, you may exhaust me to reveal the top 2 cards of your Main Deck. You may banish one, then play it. Recycle the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "void-rush",
+      "previous": "Reveal the top 2 cards of your Main Deck. You may play one of them, reducing its cost by :rb_energy_2:. Draw any you did not play this way.",
+      "current": "Reveal the top 2 cards of your Main Deck. You may banish one, then play it, reducing its cost by :rb_energy_2:. Draw any you didn't banish.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "yone-blademaster",
+      "previous": "[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)\nWhen I conquer an open battlefield, deal damage equal to my Might to an enemy unit in a base.",
+      "current": "[Weaponmaster] (When you play me, you may [Equip] one of your Equipment to me for :rb_rune_rainbow: less, even if it's already attached.)\nWhen I conquer a battlefield that was uncontrolled, deal damage equal to my Might to an enemy unit in a base.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-errata"
+    },
+    {
+      "card": "guards",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nPlay a 2 :rb_might: Sand Soldier unit token. You may pay :rb_rune_order: to ready it.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nPlay a 2 :rb_might: Sand Soldier unit token. Then do this: You may pay :rb_rune_order: to ready it.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "relentless-pursuit",
+      "previous": "[Action] (Play on your turn or in showdowns.)\nMove a friendly unit. You may attach an Equipment with the same controller to it. This turn, that unit has \"When I conquer, you may move me to my base.\"",
+      "current": "[Action] (Play on your turn or in showdowns.)\nMove a friendly unit. You may attach up to one Equipment with the same controller to it. This turn, that unit has \"When I conquer, you may move me to my base.\"",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "death-from-below",
+      "previous": "Kill a unit at a battlefield. Then, if it had 3 :rb_might: or less, you may play this from your trash for :rb_rune_rainbow:.",
+      "current": "Kill a unit at a battlefield. Then, if it had 3 :rb_might: or less, do this: You may play this from your trash for :rb_rune_rainbow:.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "bone-skewer",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nChoose a battlefield. An opponent reveals their hand. You may choose a unit from it. They play that unit to that battlefield, ignoring any and all costs. When they do, [Stun] it. (It doesn't deal combat damage this turn.)",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nChoose a battlefield. An opponent reveals their hand. You may choose a unit from it. They play that unit to that battlefield, ignoring any and all costs. If they do, then do this: [Stun] it. (It doesn't deal combat damage this turn.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "deceiver",
+      "previous": "When you conquer or hold, you may discard 1 and exhaust me to play a ready Reflection unit token there. It becomes a copy of another unit there. Give it [Temporary].",
+      "current": "When you conquer or hold, you may discard 1 and exhaust me to play a ready Reflection unit token there. Then do this: It becomes a copy of another unit there. Give it [Temporary].",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "mirror-image",
+      "previous": "Choose a unit. Play a ready Reflection unit token to your base. It becomes a copy of that unit. Give it [Temporary]. (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+      "current": "Choose a unit. Play a ready Reflection unit token to your base. Then do this: It becomes a copy of that unit. Give it [Temporary]. (Kill it at the start of its controller's Beginning Phase, before scoring.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "keeper-of-masks",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Temporary] (Kill me at the start of my controller's Beginning Phase, before scoring.)\nWhen you play me, play two Reflection unit tokens here. They become copies of me.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Temporary] (Kill me at the start of my controller's Beginning Phase, before scoring.)\nWhen you play me, play two Reflection unit tokens here. Then do this: They become copies of me.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "rengar-trophy-hunter",
+      "previous": "[Ambush] (You may play me as a [Reaction] to a battlefield where you have units.)\nI can be played to a battlefield where there are enemy units (even if you don't have units there).",
+      "current": "[Ambush] (You may play me as a [Reaction] to a battlefield where you have units.)\nI can [Ambush] to a battlefield where there are enemy units, even if you don't have units there.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-errata-updates"
+    },
+    {
+      "card": "draven-vanquisher",
+      "previous": "When I win a combat, play a Gold gear token exhausted.\nWhen I attack or defend, you may pay :rb_rune_fury:. If you do, give me +2 :rb_might: this turn.",
+      "current": "When I win a combat, play a Gold gear token exhausted.\nWhen I attack or defend, you may pay :rb_rune_fury: to give me +2 :rb_might: this turn.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "emperors-dais",
+      "previous": "When you conquer here, you may pay :rb_energy_1: and return a unit you control here to its owner's hand. If you do, play a 2 :rb_might: Sand Soldier unit token here.",
+      "current": "When you conquer here, you may pay :rb_energy_1: and return a unit you control here to its owner's hand to play a 2 :rb_might: Sand Soldier unit token here.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "fizz-trickster",
+      "previous": "When you play me, you may play a spell from your trash with Energy cost no more than :rb_energy_3:, ignoring its Energy cost. Recycle that spell after you play it. (You must still pay its Power cost.)",
+      "current": "When you play me, you may play a spell from your trash with Energy cost no more than :rb_energy_3:, ignoring its Energy cost. Then recycle it. (You must still pay its Power cost.)",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "diana-lunari",
+      "previous": "When a showdown begins here, you may pay :rb_energy_1:. If you do, [Predict], then reveal the top card of your Main Deck. If it's a spell, draw it. (To Predict, look at the top card of your Main Deck. You may recycle it.)",
+      "current": "When a showdown begins here, you may pay :rb_energy_1: to [Predict], then reveal the top card of your Main Deck. If it's a spell, draw it. (To Predict, look at the top card of your Main Deck. You may recycle it.)",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "stalking-wolf",
+      "previous": "[Ambush] (You may play me as a [Reaction] to a battlefield where you have units.)\nAs an additional cost to play me, kill a Bird, Cat, Dog, or Poro you control. You may play me to its battlefield (even if you don't have other units there).",
+      "current": "[Ambush] (You may play me as a [Reaction] to a battlefield where you have units.)\nAs an additional cost to play me, kill a Bird, Cat, Dog, or Poro you control. You may [Ambush] me to its battlefield, even if you don't have other units there.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "astral-heron",
+      "previous": "When you play your first card each turn, if I'm at a battlefield, your next card costs :rb_energy_2::rb_rune_rainbow::rb_rune_rainbow: less.",
+      "current": "When you play your first card each turn, if I'm at a battlefield, the next card you play this turn costs :rb_energy_2::rb_rune_rainbow::rb_rune_rainbow: less.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "gangplank-naval",
+      "previous": "[Empower] :rb_rune_body::rb_rune_body: (:rb_rune_body::rb_rune_body:: Empower me. Use only if not Empowered.)\n[Empowered][>] If a spell or ability that chooses me would stun me, give me -:rb_might:, or return me to hand, give me +3 :rb_might: instead.",
+      "current": "[Empower] :rb_rune_body::rb_rune_body: (:rb_rune_body::rb_rune_body:: Empower me. Use only if not Empowered.)\n[Empowered][>] If a spell or ability that chooses me would stun me, give me -:rb_might:, or return me to hand, give me +3 :rb_might: this turn instead.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "resonating-strike",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Reaction] (Play on your turn or in showdowns.)\nChoose a battlefield you control and a unit you control at a different location. Move that unit to that battlefield and give it +2 :rb_might: this turn.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\n[Reaction] (Play any time, even before spells and abilities resolve.)\nChoose a battlefield you control and a unit you control at a different location. Move that unit to that battlefield and give it +2 :rb_might: this turn.",
+      "source": "https://playriftbound.com/en-us/news/announcements/vendetta-errata-updates"
+    },
+    {
+      "card": "elnuk-herd",
+      "previous": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play me, give another friendly unit +3 :rb_might: this turn, then recycle me if I was played from face down.",
+      "current": "[Hidden] (Hide now for :rb_rune_rainbow: to react with later for :rb_energy_0:.)\nWhen you play me, give a friendly unit +3 :rb_might: this turn, then recycle me if I was played from face down.",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates"
+    },
+    {
+      "card": "last-caress",
+      "previous": "[Reaction] (Play any time, even before spells and abilities resolve.)\nThe next unit you play this turn (even from face down) can be played to any battlefield. When you play it, [Buff] it. (Give it a +1 :rb_might: buff if it doesn't have one.)",
+      "current": "[Reaction] (Play any time, even before spells and abilities resolve.)\nThe next unit you play this turn, even from face down, can be played to any battlefield. When you play it, [Buff] it. (Give it a +1 :rb_might: buff if it doesn't have one.)",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates"
+    },
+    {
+      "card": "forbidden-technique",
+      "previous": "Ready a unit.\nWhen you play a card with Energy cost :rb_energy_7: or more, you may play this from your trash for :rb_energy_1::rb_rune_fury::rb_rune_fury:. Banish this.",
+      "current": "Ready a unit.\nWhen you play a card with Energy cost :rb_energy_7: or more, you may play this from your trash for :rb_energy_1::rb_rune_fury::rb_rune_fury:. Then banish this.",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates"
+    },
+    {
+      "card": "neeko-blending-in",
+      "previous": "(Neutral cards can go in decks of any Domain.)\nIf Neeko is in your deck, choose 3 different legends in addition to your starting legend. (Different means none match names.)\nWhen you play me, choose one of those Legends and add it to your Legend Zone while I'm on the board.",
+      "current": "(Neutral cards can go in decks of any Domain.)\nIf Neeko is in your deck, choose up to 3 different legends in addition to your starting legend. (Different means none match names.)\nWhen you play me, choose one of those Legends and add it to your Legend Zone while I'm on the board.",
+      "source": "https://playriftbound.com/en-us/news/announcements/radiance-errata-updates"
+    }
+  ],
+  "rulings": [
+    {
+      "cards": [
+        "blind-fury",
+        "promising-future"
+      ],
+      "question": "Q: Origins cards that instruct players to play cards from their deck, like Promising Future and Blind Fury, received errata to banish those cards before playing them. Will Spiritforged cards with similar abilities receive similar errata?",
+      "answer": "Yes! This is mostly a bookkeeping thing—banishing the card ensures that the game has a place to put the card until it’s actually played, and a place to send the card back to if it can’t be played for whatever reason. 99% of the time, these cards work the same with or without this errata, but we need to cover those weird corner cases. This impacts 3 Spiritforged cards, plus 1 Origins card that got past us last time.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "arise",
+        "guards"
+      ],
+      "question": "Q: Should the reflexive trigger system introduced in the Origins FAQ apply to any cards in Spiritforged?",
+      "answer": "Yes! This is another one where if you don’t know the finer points of the rules, you’re probably already playing these cards correctly, but the machinery of the rules requires a slightly different wording than we thought. Reflexive triggers, identified by “do this:” language, create new chain items to handle things that need to offer players a chance to react, or just need to happen later than the rest of a spell or ability. This impacts 2 cards in Spiritforged, both of which let you play something and then try to do something to that thing.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "blood-rush",
+        "convergent-mutation"
+      ],
+      "question": "Q: Should Blood Rush say “this turn” on it?",
+      "answer": "It should! Like Convergent Mutation in Origins, the phrase “this turn” was accidentally omitted.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "deathgrip",
+        "zhonyas-hourglass"
+      ],
+      "question": "Q: Is the first friendly unit on Deathgrip a cost or a target? When do I kill it, and what happens if I don’t?",
+      "answer": "Deathgrip uses a nonstandard wording that we normally avoid, precisely because of these ambiguities. We’re issuing errata to bring it more in line with how other cards and abilities work. This errata establishes that 1) the friendly unit is a target, not a cost; 2) it is chosen along with the other friendly unit and killed as the spell resolves; 3) if you don’t actually kill it for any reason, either because it’s no longer a legal target or because you replaced its death with an effect like Zhonya’s Hourglass, you do not give the second friendly unit any Might. (You do still draw 1; we’ve introduced a paragraph break to make that clear.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "edge-of-night"
+      ],
+      "question": "Q: Does Edge of Night’s auto-attach ability work?",
+      "answer": "Because unattended gear at battlefields are recalled, Edge of Night does a strange little dance on its way to becoming attached, returning to your base while its ability is on the chain. And because of that dance, it’s no longer “here” when the attachment is supposed to happen. We need to change its wording so it can still find the unit you chose.\nBut we don’t want any confusion here—the card works exactly the same as it did before. The Hidden rules still require that you choose a unit at the battlefield where you played it from face down. For that reason, we’ve included reminder text in the errata.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "janna-savior"
+      ],
+      "question": "Q: Can Janna’s play effect be used to heal my units without an enemy unit present?",
+      "answer": "Triggered abilities in Riftbound can’t be placed on the chain unless all required targets can be chosen. They can resolve and perform part of their text without all targets still being available, but all targets must be available to put them on the chain to begin with. This is weird, and we generally try not to force players to know it. We think 99% of players probably expect that Janna can heal their units without enemies present, so we’re meeting that expectation with a simple “up to,” similar to some “up to” errata for triggered abilities in Origins.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "jax-unmatched"
+      ],
+      "question": "Q: How does Jax, Unmatched work?",
+      "answer": "Jax, Unmatched grants Quick-Draw to Equipment in your hand, which works as far as letting you play them as Reactions… but doesn’t work so well when the Equipment hits the board and the other part of Quick-Draw tries to take effect. We’re fixing that.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "kato-the-arm"
+      ],
+      "question": "Q: Can Kato the Arm give himself his own Might and keywords?",
+      "answer": "“Friendly unit” does properly include Kato himself, but that wasn’t the intent behind this card—Kato can’t throw himself, after all. It was a simple goof that Kato made it out the door without the word “another,” and the gameplay is so divergent from the design intent that we’re changing it to fix this error.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "kato-the-arm"
+      ],
+      "question": "Q: Does Kato give keywords he’s gained during play? What about Might bonuses from various sources like Equipment?",
+      "answer": "Yes. Kato gives his current keywords and additional Might equal to his current Might to the unit you choose. Later changes to Kato don’t matter; what the unit gets is locked in as the ability resolves.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "tianna-crownguard",
+        "tryndamere-barbarian"
+      ],
+      "question": "Q: Can I still conquer and hold battlefields while my opponent has Tianna? Do I get conquer and hold triggers? What about drawing a card instead of getting the 8th point from conquering?",
+      "answer": "Riftbound rules and card text use the word “score” in a couple different ways. You can score battlefields; you can also score points, as on cards like Tryndamere, Barbarian. The difference between these two is usually clear… but Tianna muddles them more than we anticipated. Tianna is solely concerned with points and doesn’t interfere with the process of conquering or holding battlefields. You can still conquer and hold battlefields and get your conquer and hold triggers. You can even draw a card if you conquer a battlefield and can’t score because it’s the final point and you haven’t scored every battlefield yet. It’s not until you reach for your scorepad, app, or tracking die that Tianna says “No.”\nThe “gain points” meaning of score is underdeveloped in the current rules, so in the future we are likely to revisit the rules and/or card wordings for scoring points without scoring battlefields. For now, we’re issuing errata to make Tianna’s function clearer and leaving the rest unchanged.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "forgotten-monument",
+        "renata-glasc-mastermind",
+        "tianna-crownguard"
+      ],
+      "question": "Q: Does Forgotten Monument work the same as Tianna? Will it receive similar errata?",
+      "answer": "Forgotten Monument works differently from Tianna, and we agree that’s confusing. That’s part of why we decided to issue errata for Tianna (and not for Forgotten Monument).\nForgotten Monument completely prevents the process of scoring there. That means no conquer triggers, no hold triggers, and no points from doing those things. “Extra” points such as those from Renata Glasc, Mastermind are unaffected. You can still gain control of the battlefield following a showdown—you just can’t conquer it.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "yone-blademaster"
+      ],
+      "question": "Q: When and how does Yone trigger? If you conquer a battlefield, is it still open?",
+      "answer": "Yone’s current text is a little, well, open to interpretation. A strict reading suggests that he can never trigger at all—once you’ve conquered a battlefield, it’s no longer open—but obviously that’s not the intent. We’re tweaking his text to cue off the control status of the battlefield immediately before conquering it. This means that he works as intended, triggering at the end of a noncombat showdown in which he conquers. It also means that he now triggers in “surprise defense” scenarios, caused when units move around during showdowns and you wind up defending a battlefield you don’t control.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "draven-audacious"
+      ],
+      "question": "Q: What does it mean to win or lose a combat?",
+      "answer": "Winning and losing combats is a system that was inadvertently left out of the most recent rules update. Here are the conditions under which you win, lose, or tie a combat.\nAfter combat damage has been dealt:\n- If neither player has units remaining at the battlefield or both players have units remaining, combat is a tie. If both players do, attackers are recalled.\n- If only one player has units remaining at the battlefield, that player wins the combat and the other player loses. Draven triggers if he’s among the units that survive.\nIt doesn’t matter whether combat damage was actually dealt, only that there was a combat showdown and only your units were left after combat damage. If you killed or removed all the opposing units with spells and abilities before Draven had to throw any punches, he still wins. (Think of it as winning by default.)\nYou can win a combat on either offense or defense.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "draven-audacious"
+      ],
+      "question": "Q: If I win on the attack and conquer, does this happen before or after I score? Before or after conquer effects?",
+      "answer": "Draven’s ability will trigger and resolve before you gain your regular point for scoring the battlefield and before any conquer effects are triggered. This means that you can’t win from 6 points by conquering a battlefield with Draven without having scored all other battlefields—you’ll gain your point from Draven, then the game will see that you’re at 7 points and give you a card draw instead of a point for conquering.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "gold",
+        "pickpocket",
+        "rumble-hotheaded"
+      ],
+      "question": "Q: Can Pickpocket kill a Gold token?",
+      "answer": "Yes, but we see why you’d ask. The rules use a “NULL” system for values that aren’t available, such as the Might of a unit that’s been removed from the board. The unit is gone and the information is missing, so you can’t do any calculations or comparisons with it (not even “is it no more than 1?”).\nThat system could reasonably be applied to the costs of tokens, but we feel that results in unintuitive situations, like not being able to kill a Gold token with Pickpocket. After all, the token’s not missing; it just doesn’t have a cost because it doesn’t need one. We’ll be updating the rules to clarify that the cost of a token can be treated as 0 for all purposes.\nRumble, Hotheaded",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "rumble-hotheaded"
+      ],
+      "question": "Q: Can Rumble, Hotheaded choose a Mech token to recycle? If he does, where does it go?",
+      "answer": "Yes, he can. This is a minor gap in the rules. Main Deck cards are recycled to the Main Deck and runes are recycled to the Rune deck, but tokens aren’t actually either of those things. We’ll be clarifying in a future rules updates that tokens “inherit” the recycle destination of their type(s), so a token that’s a unit or gear is recycled to your Main Deck just like any other gear. It then vanishes, as tokens do any time they leave the board, but it still counts as “the unit you recycled” and Rumble can check its Might.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "cleave",
+        "svellsongur"
+      ],
+      "question": "Q: Does Svellsongur copy text that the unit has gained from other sources, such as the Assault granted by Cleave? What about text it’s gained from other Equipment?",
+      "answer": "No, Svellsongur only copies the text that’s actually printed on the unit. This is an ambiguity in the current rules, which refer to “appending” and “removing” rules text without reference to whether that text is original to the unit or not.\nThe key word here is actually copy, a system that will be fleshed out in a future rules update. For now, we’ll just tell you that copies of objects or text take on their original traits, without regard to any subsequent alterations.\nSvellsongur doesn’t grant the unit additional “copies” of the abilities of other Equipment. So putting 3 Svellsongur on the same unit will give that unit four total instances of its abilities, not eight. (Four should be plenty.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "aphelios-exalted",
+        "svellsongur"
+      ],
+      "question": "Q: Aphelios, Exalted has an ability that triggers when I attach an Equipment to him and tells me to “choose one that hasn’t been chosen this turn.” If I attach Svellsongur to him, does he have the second copy of his ability in time for both to trigger? And do I have to choose different options?",
+      "answer": "He does have the second copy of his ability in time, and it will trigger. The “one that hasn’t been chosen this turn” restriction applies separately to each instance of his ability. So you could choose the same option for both, but you’ll have to track which options you’ve used for each copy of his ability.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "stupefy"
+      ],
+      "question": "Q: I heard that cards that reduce Might will no longer say “to a minimum of 1” on them. Does that mean Origins cards like Stupefy will receive errata?",
+      "answer": "No. This is a change to our design philosophy beginning with Spiritforged, but Origins cards will maintain their functionality.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "recruit",
+        "stupefy",
+        "trifarian-war-camp"
+      ],
+      "question": "Q: Does this mean that units’ Might can go to 0 or below now?",
+      "answer": "Units’ Might could always go to 0 or below; it was just really hard to actually make it happen. For example: If a Recruit was at Trifarian War Camp, it would have 2 Might (its 1 base Might, +1 from War Camp). If it got hit with Stupefy, Stupefy would “snapshot” at -1 Might, reducing the Recruit’s Might to 1. If the Recruit then moved away from Trifarian War Camp, it would lose the +1 Might bonus and end up at 0 Might. It’s much easier to make it happen with Spiritforged cards, though, so it’s worth reviewing the rules for units with 0 or less Might.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "frigid-touch"
+      ],
+      "question": "Q: Does a unit with 0 or less Might automatically die?",
+      "answer": "No, units can stick around on the board with 0 (or less!) Might. They will die if they take any damage, but “0” is not a valid amount of damage, so it takes 1 damage to kill a unit with 0 or less Might. We realize that this is a little weird, but it’s important to us that cards like Frigid Touch can’t be used to actually kill units, only weaken them.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [],
+      "question": "Q: Does a unit with negative Might contribute negative damage to my Might total in combat?",
+      "answer": "No. Negative Might is treated as 0 Might for the purposes of dealing damage, but as its true value for raising it back above 0. So a unit with -3 Might would contribute 0 damage in combat, would die if it was dealt 1 or more damage, and would require +4 Might to get it back up to 1 Might.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "blast-corps-cadet",
+        "ezreal-prodigy"
+      ],
+      "question": "Q: What costs does Ezreal, Prodigy reduce? Does he reduce Repeat costs? Accelerate costs? Equip costs?",
+      "answer": "Ezreal, Prodigy reduces additional costs that are optional to pay. These will generally use both the words “additional cost” and the word “may.” Repeat and Accelerate are the two main sources of optional additional costs, but Ezreal can also offer a discount for one-off oddballs like Blast Corps Cadet.\nEzreal can’t reduce Equip costs. That’s an activation cost for an ability, so it’s neither optional nor additional. There aren’t currently any optional additional costs that apply to activating abilities.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "ezreal-prodigy"
+      ],
+      "question": "Q: What about Deflect costs? Aren’t those optional now?",
+      "answer": "No, Ezreal won’t help with Deflect costs, and Deflect is not optional. Deflect is a mandatory additional cost, meaning you must pay it if you want to finalize a spell or ability that chooses something with Deflect. It’s true that you can choose not to pay Deflect costs for triggered abilities by choosing not to finalize them, but that doesn’t make it an optional cost.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "hostile-takeover"
+      ],
+      "question": "Q: If I use Hostile Takeover to take control of my opponent’s only unit at a battlefield, will there be a showdown? Will it be a combat?",
+      "answer": "You’ll start a noncombat showdown. (Hostile Takeover’s reminder text is a little misleading in this regard—you have to have some kind of showdown before you can conquer.) This ruling applies any time you have a unit at a battlefield when your opponent still controls that battlefield, but doesn’t have any units there. (Yes, that can happen. Hostile Takeover and Stormbringer are the easiest ways to do it.)\nThere’s a gap in the current rules that leaves this situation without an obvious outcome. We plan to address that gap in the next regular rules update. The issue is surprisingly complex, and we’re not 100% sure what the answer will be when we’re done.\nIn the meantime, though, we believe starting a noncombat showdown is the least disruptive way to handle this scenario. If you need really precise timing: assume that your opponent loses control of the battlefield in the same cleanup that begins the showdown, even though ordinarily control is “frozen” once the battlefield becomes contested.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "find-your-center",
+        "temporal-portal"
+      ],
+      "question": "Q: What parts of a spell does the Repeat ability cause to be repeated? Is it the entire effect? If I use Temporal Portal to give Find Your Center Repeat and pay the cost while its cost reduction applies, does the cost reduction happen once or twice, and does the final spell cost 2 or 4?",
+      "answer": "Repeat causes you to repeat execution of a spell’s “instructions,” which are the things the spell tells you to do as it resolves. (We’ll give a better definition of “instructions” and how to define them in an upcoming rules update.) And the Repeat cost of Find Your Center isn’t reduced, even when its base cost is, because anything that asks for a card’s cost finds its printed cost as the answer.\nThis means that Find Your Center’s cost reduction applies only once and the final spell costs 4—its base cost of 3, plus its Repeat cost of 3, minus its cost reduction of 2.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [],
+      "question": "Q: The reminder text of Weaponmaster says “You may”, but the Core Rules reads like it is mandatory. Which is it?",
+      "answer": "Oh, sharp catch. Weaponmaster as a keyword is always meant to be optional. While the rules utilize a language structure that imply a mandatory target, the reminder text is more accurate here. It is always a choice on whether or not to use this play ability. We will clean up that language in the future.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/riftbound-spiritforged-faq"
+    },
+    {
+      "cards": [
+        "aspirants-climb",
+        "brush",
+        "green-father"
+      ],
+      "question": "What happens when you conquer Aspirant’s Climb with Green Father and Brush the battlefield when both players are at 8 points?",
+      "answer": "If this is the first battlefield that player has scored, they'll draw 1 and the game will continue with both players at 8 points.\nIf you replace Aspirant’s Climb with Brush via Green Father’s conquer or hold effect, the Victory Score will change immediately as the passive ability of Aspirant’s Climb is no longer in effect, bringing both players to the Victory Score simultaneously. Rules 323.1. and 467. define winning the game as happening during a cleanup when one player has points greater than or equal to the Victory Score and greater than any opponent. If both players are at 8 points, they have not fulfilled both requirements for winning the game. They will need to score additional points in order to win. When they do so, 466.1.b. says “when a player tries to gain a point through a Score, and their current point total is one point from the Victory Score for their Mode of Play or higher, do the following: …” If the point is from Conquering, they will draw 1 instead of gaining the point unless they have scored each battlefield that turn. In effect, every point at or above the Victory Score becomes the final point.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "brush"
+      ],
+      "question": "What happens if you Brush a Brush? Can you swap back the original battlefield you Brushed?",
+      "answer": "The Brush token will cease to exist. When swapping back, a player can choose to swap back to any object that was replaced, including the original battlefield.\nThis is because a replacing game object inherits all of the statuses and conditions of the game object it replaced, per 438.1. A game object can be instructed to “swap back”; the token stops existing and the original card is returned to the space that the token occupied, inheriting all its current effects and statuses per rule 438.7.b. “All of the effects and statuses” includes not only temporary effects applied to the battlefield, but also the relationship between replaced and replacing battlefields.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "turn-to-dust"
+      ],
+      "question": "If I play Turn to Dust on an attached Equipment, will the Equipment die in the Beginning Phase?",
+      "answer": "Yes. The granted Temporary keyword will be active. It will trigger and kill the equipment in its controller’s next Beginning Phase.\nAttached Equipment only have their printed rules text made inactive per rules 718.2. and 135.4. This means that any granted rules text will still be active; granted Temporary will trigger and kill attached Equipment and granted Deflect will add [A] to the cost of enemy spells and abilities that target them. Prior to this rules update, all rules text of attached Equipment was inactive.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "arcane-shift",
+        "baited-hook",
+        "cruel-patron",
+        "glasc-mixologist",
+        "recruit",
+        "spinning-axe",
+        "thousand-tailed-watcher"
+      ],
+      "question": "If Temporary is granted to an attached Spinning Axe, will it die at the start of my Beginning Phase?",
+      "answer": "Yes. The Spinning Axe will have two instances of the Temporary keyword - one that is active and one that is inactive. The inactive keyword will not trigger, but the active one will. Alas, Spinning Axe will die.\nMultiple instances of the Temporary keyword are redundant per rule 816.2., but that rule refers to the fact that multiple instances that could trigger will only trigger once, as clarified by rule 816.2.a. In the case of granted Temporary on an attached Spinning Axe, that rule isn’t of any concern - there is only one instance of Temporary that could trigger, so it will.\nIt can help to visualize the attached permanent as it is undergoing these changes, as if it were being digitally simulated. Imagine all of its printed rules text as going gray while it is attached, as it is inactive. Then the granted Temporary keyword, because it is active, is the normal text color for Spinning Axe. There are two colors of Temporary on Spinning Axe, but the grey Temporary doesn’t have any function. We can treat it as if it didn’t exist for the purposes of rule 816.2.a.\nYou mentioned rule 187.4.c. earlier and it says “open state”, I don’t remember that in the old rules. What gives?\nControl of battlefields cannot be lost while there are items on the chain, per rule 187.4.c. in the Unleashed rules update. This means that spells and abilities that banish and play units, or that kill units as a cost or effect in order to play another unit, will be able to kill or banish units at battlefields and then play the resulting unit to that same battlefield.\nLet’s look at some examples:\nI play Cruel Patron, and I have a 1 [M] Recruit alone at a battlefield I control. I choose to kill my Recruit to pay the additional cost of Cruel Patron. Although this causes a cleanup, because there is an item on the chain (Cruel Patron) I don’t lose control of the battlefield. I can choose to play Cruel Patron to that same battlefield with no issue.\nI activate Baited Hook targeting a 4 [M] unit that is alone at a battlefield I control. When Baited Hook resolves, I kill that unit and look at the top 5 cards of my Main Deck. I choose to play a unit from among them, which goes pending on the chain. When Baited Hook’s activated ability resolves, the outstanding cleanup initiates, but I can’t lose control of the battlefield because the played unit is on the chain pending. Once the cleanup finishes, I will finalize the unit and I can choose the battlefield where I killed my 4 [M] unit to play it to.\nI play Arcane Shift targeting my Thousand-Tailed Watcher who is alone at a battlefield I control. As it resolves, Watcher is banished and played to the chain. When Arcane Shift has finished resolving, a cleanup is outstanding and because Watcher is still pending on the chain, control of the battlefield can’t be lost. When finalizing Watcher, the battlefield I banished it from is a valid location to play it to because I still control it.\nThere is one final example worth discussing, though the interaction worked similarly prior to this rules update: in the previous rules update, if my Glasc Mixologist died alone in Combat at a battlefield I control, the active Combat at the battlefield prevented me from losing control of the battlefield. Thus I could play the unit from Mixologist’s Deathknell to the same Battlefield it died at. Previously this was only possible in Combat, but as of this rules update the same process will occur whenever Glasc Mixologist dies alone at a battlefield with the same controller, regardless of if there is a Combat there or not.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [],
+      "question": "Can a cleanup happen while I’m finalizing a card or ability?",
+      "answer": "No. A cleanup cannot occur during the process of finalizing a card or ability.\nFinalizing is part of the FEPR process—Finalize, Execute, Pass, Resolve—which is the process that handles items on the chain. Finalizing is the step where you make choices, pay costs, and check legality. Cleanups will occur after adding an item to the chain, after finalizing that item, and after that item resolves. At each point that a cleanup occurs, it will pause the FEPR process until it is complete. However, cleanups will only happen between these steps and never during a step itself.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "deceiver",
+        "reflection",
+        "zilean-time-mage"
+      ],
+      "question": "If I conquer a battlefield with Zilean, Time Mage, can I copy him with my Deceiver legend? Will I make infinite Zileans?",
+      "answer": "Yes, you can copy Zilean, but you will not make an infinite number. The Deceiver reflexive trigger effect for turning the tokens into copies of Zilean takes place after they are already resolved.\nLet’s walk through this step by step. Remember, we are first going to add to the chain and then we will work in reverse order to resolve these things.\n- You trigger Deceiver when you score the battlefield, discarding a card and exhausting her as the cost to finalize the trigger.\n- When the effect resolves, you play a 0 [M] Reflection token to the chain.\n- Zilean’s replacement effect sees you playing a token and it replaces that event with you playing the token and a copy of that token. Now there are two 0 [M] Reflection tokens waiting on the chain.\n- The Deceiver trigger puts the reflexive trigger on the chain that copies a unit (chosen on finalization) and gives the tokens Temporary.\nRemember, you finalize all of these items in the order that they were added to the chain, starting with the two tokens that are placed on the chain in the order of their controller’s choosing.\nSo now we work through the above ordering in reverse:\n- As soon as either token is finalized, it resolves immediately.\n- Both tokens enter ready when they resolve this way, because the copy that is generated by Zilean’s replacement effect inherits any modifications (rule 375).\n- Next you finalize the reflexive trigger, choosing a unit to copy. You target Zilean.\n- When it resolves, it will cause the two Reflection tokens to become a copy of Zilean, as well as granting them Temporary—both Reflections receive this modification for the same reason that they are both ready, because of rule 375.\nBy this point, even if the two tokens become copies of Zilean, there is no subsequent play game action involving tokens to apply their replacement effects to, so they will not be able to cause any further tokens to be produced.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "counter-strike",
+        "elder-dragon"
+      ],
+      "question": "If I play Counter Strike in response to my opponent’s Elder Dragon’s play effect, will the chosen unit still die?",
+      "answer": "No, the unit protected by Counter Strike will not die.\nElder Dragon’s passive ability changes the definition for what is considered lethal damage for a unit, as long as that unit has damage marked by Elder Dragon’s controller on it. However, this doesn’t change the actual amount of damage being dealt. Elder Dragon deals 1 damage to up to one unit at each location—if one of those units has a prevent effect applied to it, that prevent effect will replace as much of that damage as it can. In the case of Counter Strike, it will replace all of the damage. If the damage is entirely prevented, it is never dealt per rule 437.2.a., and thus there is no opportunity for the passive ability of Elder Dragon to apply to that unit.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "elder-dragon",
+        "flash"
+      ],
+      "question": "My opponent plays Elder Dragon and targets my two units at the two battlefields, as well as one of my units in base. If I play Flash in reaction, moving the two units at battlefields to base, will they be dealt damage?",
+      "answer": "They will not.\nElder Dragon’s play effect has a number of targeting restrictions equal to the number of locations on the board. Its controller chooses up to one enemy unit at each of those locations to target with the ability and each of those units must follow their respective targeting restriction. It is the equivalent to saying “Deal 1 to up to one enemy unit at battlefield A. Deal 1 to up to one enemy unit at battlefield B. Deal 1 to up to one enemy unit in your base. Deal 1 to up to one enemy unit in Opponent A’s Base. …” Each of those targeting restrictions is fulfilled separately for each unit targeted.\nIf you play Flash in reaction to the play effect of Elder Dragon, any units that are moved to a location other than the one where they were targeted will no longer fulfill the targeting restriction of the Elder Dragon play effect and will be unaffected by the ability as it resolves.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "jhin-meticulous-killer",
+        "singularity"
+      ],
+      "question": "If I play Singularity and my opponent counters it, can I still play Jhin, Meticulous Killer for [C] this turn?",
+      "answer": "You can. Jhin checks the energy spent to play a spell, not whether that spell resolved. If the energy was spent and the spell became a Finalized Chain Item (and was not undone, for example as part of step 5 of the process of play) then it doesn’t matter if the spell is later countered. The energy wasn’t unspent, even if the spell was countered.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "alpha-strike",
+        "flash",
+        "grim-apothecary",
+        "heedless-resurrection",
+        "master-yi-unstoppable",
+        "repulse",
+        "thrill-of-the-hunt"
+      ],
+      "question": "I play Alpha Strike targeting my Master Yi, Unstoppable and splitting 12 damage among three of the four enemy units at battlefields. If my opponent plays Flash in reaction to my Alpha Strike, moving two of the targeted units to base, can they then play Repulse and counter my Alpha Strike?",
+      "answer": "No, they cannot play Repulse targeting your Alpha Strike. (Except if both of the other chosen units have changed to a non-board zone, such as via the effect of something like Grim Apothecary’s play effect, Heedless Resurrection’s additional cost, or the instructions of Thrill of the Hunt.)\nA spell that targets a game object creates a targeting relationship between it and the targeted game object. As long as that targeted game object remains on the board, that relationship is maintained even if the target no longer fulfills the targeting restrictions of the spell. Even if the units in this example aren’t at a battlefield anymore, they are still being chosen by Alpha Strike. We know this is true because the spell remembers that it is targeting those units if they happen to fulfill its targeting restrictions again per rule 359.3.e.3. The only exception to this principle is if the units change to a non-board zone—in such a case, they are no longer the same game object and any relationship between them and the spell that targets them is severed. Even if they returned to the same battlefield, they won’t be legal targets and the spell won’t be choosing them.\nIt can help to visualize Alpha Strike’s targets with a colored arrow pointing from Alpha Strike to those units. Even if the units move to base and are no longer legal targets, they are still being chosen by Alpha Strike; we can imagine that the arrow is greyed out, but still present. Meanwhile, if they moved to a non-board zone the arrow would disappear entirely, since the game object it is connected to no longer exists. Repulse cares about the number of those arrows that point to friendly units, not the color of the arrows.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "reckoners-arena",
+        "yone-blademaster"
+      ],
+      "question": "If I hold Reckoner’s Arena with Yone, Blademaster, will I place his triggered ability on the chain when the hold effect of Reckoner’s Arena resolves?",
+      "answer": "No, you will not. The main thing you need to know is that activating a conquer effect such as the Reckoner’s Arena effect is the equivalent of checking the condition of all of the specified conquer effects, as if a conquer had occurred at Reckoner’s Arena. Any triggered abilities of units at Reckoner’s Arena that trigger on conquering will see a conquer event occurring, but they will still need to check their other conditions in order to go on the chain.\nIn this case, the rest of Yone’s conquer effect condition is “...that was previously uncontrolled,” and since the battlefield wasn’t previously uncontrolled, Yone’s ability will not trigger.\nNote that no actual conquer occurs—we’re simply treating the game as if a conquer had occurred at that battlefield for the purposes of the specified abilities. In Reckoner’s Arena’s case it specifies units, so only units with conquer effects at Reckoner’s Arena will see this conquer event and potentially trigger.\n(We recognize the rules for “activate” in the way discussed above are underdefined. Expect further revisions in the next rules update.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "atakhan",
+        "reksai-breacher"
+      ],
+      "question": "What happens if I play Atakhan from my deck with Rek’Sai, Breacher on the board? Can I pay the Accelerate cost and kill Rek’Sai for the Atakhan additional cost? Will it enter ready?",
+      "answer": "Yes, as long as you pay the Accelerate cost, Atakhan will enter ready, even if he kills Rek’Sai for his additional cost. This is because Accelerate creates a delayed replacement effect that causes Atakhan to enter ready. Although he lacks the Accelerate keyword when he resolves, he still has the delayed replacement effect that Accelerate generates.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/unleashed-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "abandon",
+        "fizz-trickster",
+        "kaisa-evolutionary"
+      ],
+      "question": "What happens when you play Abandon on a spell that was played for its Flow cost?",
+      "answer": "It will be banished when it attempts to leave the chain.\n“[T]hen banish it” in flow’s text is short for “if it would leave the chain after becoming a finalized chain item, and leaving the chain wasn’t instructed by its own execution, banish it instead.” Abandon returns the countered card to hand after countering it, but for the purposes of flow’s “then banish it”, this is also leaving the chain. No matter how it happens, as long as the flow spell leaving the chain wasn’t instructed by the execution of the spell itself, it will be banished.\nThis also applies to effects like Kai’Sa, Evolutionary from Origins, or Fizz, Trickster from Spiritforged.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "azir-sovereign",
+        "iascylla"
+      ],
+      "question": "What is the difference between Iascylla and Azir, Sovereign’s uses of “this battlefield”?",
+      "answer": "Iascylla’s delayed trigger refers to the battlefield that she held. Azir, Sovereign’s attack trigger refers to the battlefield where he is located.\nThe difference between these two is that Iascylla has a delayed trigger that references implicit information from her trigger condition: the battlefield where she held. Azir, Sovereign’s attack trigger does not reference information from his trigger condition, which purely checks for the event of Azir gaining the attacker designation for the first time each combat. Without that information being checked from the trigger condition, the “this battlefield” in Azir, Sovereign’s attack trigger will be checked when the triggered ability resolves. If it resolves and he is not located at a battlefield, any instructions related to that battlefield will be ignored; otherwise, the battlefield he is currently located at will be used.\nComparatively, when a triggered ability refers to information from its trigger condition, that information is checked when the ability triggers and not on resolution. In the case of Iascylla, her delayed trigger is linked with her hold effect, so the information from the trigger condition of the hold effect can be shared with the delayed trigger.\nIn future sets, we’ve moved to use more precise templating and wording for abilities like Iascylla’s.\nRelevant Rules: 359.3.f.1., 359.3.f.2., 359.3.f.3., 359.3.f.3.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "mel-newly-awakened",
+        "moonfall"
+      ],
+      "question": "What happens when I play Moonfall choosing an enemy unit while I control an empowered Mel, Newly Awakened?",
+      "answer": "The chosen unit will be given -3 [M]. All other enemy units at the chosen battlefield will be given -2 [M].\nMel, Newly Awakened’s empowered ability is a replacement effect. It replaces the event of a spell or ability you control giving a unit it chooses -[M]. The event it replaces that with is the spell or ability giving an additional -1 [M].\nAlthough Moonfall gives -[M] to multiple units, only one of them is chosen, and thus the only event that is eligible to be replaced is the chosen unit being given -2 [M]. It will be replaced with that unit being given -3 [M]. The events of the other units being given -[M] will not be affected by this replacement effect.\nRelevant Rules: 370.1., 370.1.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "mel-newly-awakened",
+        "stupefy"
+      ],
+      "question": "What about casting Stupefy while I have an empowered Mel, Newly Awakened?",
+      "answer": "The chosen unit will be given -2 [M], to a minimum of 1 [M]. If it was 2 [M], it will become 1 [M].\nIn the case of Stupefy, Mel, Newly Awakened replaces the event of Stupefy giving -1 [M] with it giving -2 [M] instead. However, a replacement effect that replaces an event modified by the game effect that generated that event will inherit any of those modifications. In this case, Stupefy modifies the “give -1 [M]” game action and thus event with “to a minimum of 1 [M].” The replaced event will inherit the same modification.\nRelevant Rules: 375.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "abandon",
+        "mel-newly-awakened"
+      ],
+      "question": "Speaking of Mel, can my opponent play Abandon on my spell while I control an empowered Mel, Newly Awakened? What happens?",
+      "answer": "They can play Abandon targeting your spell. On resolution, they will Predict, but nothing else will happen.\nMel, Newly Awakened says “your spells and abilities can’t be countered.” If the spell can’t be countered, Abandon will attempt to counter it and fail, and then it will replace the event of it being put in the Trash with it being returned to its owner’s hand. However, that event never occurred, so there is nothing for the replacement effect to replace. Thus, Abandon will resolve to no effect. The replacement effect only functions within the limit of the resolution of the ability (it’s not a delayed replacement effect that specifies a duration), so even if the spell resolves later, it will go to the Trash as normal.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "abandon",
+        "mel-newly-awakened",
+        "rebuttal"
+      ],
+      "question": "How does it work if I cast Abandon while having an empowered Mel, Newly Awakened but they Rebuttal my spell?",
+      "answer": "In the case of Rebuttal, gaining control of a spell is not the same thing as countering that spell. Effects that prevent spells being countered don’t prevent their controller from changing. If Rebuttal is played choosing your spell, and they pay [A] during resolution of Rebuttal, they will gain control of it. However, them not paying [A] does not mean the spell will be countered.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "rebuttal"
+      ],
+      "question": "What new choices can I make when I play Rebuttal and pay [A]?",
+      "answer": "You can choose any number of targets or modes to make new choices for. The rest remain the same.\nIf you are remaking choices in this way, any choices you choose not to remake must be legal choices. You can’t choose to have some but not all choices be legal choices. Of course, you can always choose not to make new choices. In that case, any of the current choices will remain in their current state, whether that state is illegal or not.\nIf a spell has some rules or requirements about the choices made for it, those apply regardless of who controls that spell. For example, if a player plays a spell from face down, they must target game objects located at the battlefield the spell was played from unless the instructions of that spell indicate that a target must be chosen from some other location. Gaining control of such a spell doesn’t change this requirement when making new choices for the spell.\nWe’ll look at shaping up this section in a future rules update.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "shady-spectacles"
+      ],
+      "question": "What happens if I choose to copy an empowered unit when I equip an unempowered unit with Shady Spectacles?",
+      "answer": "Being empowered is a status and is not copyable, thus the equipped unit will remain unempowered.\nShady Spectacles applies a copy effect to the equipped unit. Copy effects copy the printed (or copied, if another copy effect has already been applied) traits of the unit being copied. empowered is a status, a temporary modification, and not part of the printed traits of the card, so it will not be copied by Shady Spectacles. Whatever temporary modifications are applied to the unit as the copy effect is executed on that unit will be unaffected by the copy effect. If the unit has Might increases or decreases, a buff, the empowered status, Temporary, attacker, defender, etc those will remain in place.\nRelevant Rules: 477.1.b.1.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "akshan-mischievous",
+        "shady-spectacles",
+        "svellsongur"
+      ],
+      "question": "What happens when my opponent’s Akshan, Mischievous steals my equipped Shady Spectacles? What happens if they want to copy Aphelios?",
+      "answer": "If it was attached to a unit, the equipped unit loses its copy effect. Akshan will then become a copy of a friendly unit of his controller’s choice. If he becomes a copy of Aphelios, his ability will not trigger.\nThis question deserves a bit more depth. As of the Vendetta rules update, we have clarified how effects like Shady Spectacles and Svellsongur work; they are replacement effects that replace the event of the equipment being attached to a unit with that event plus whatever their effect specifies.\nIn the case of Svellsongur, the resulting series of events will be:\nAttach → Copy the equipped unit’s text to Svellsongur’s effect text for as long as Svellsongur is attached\nFor Shady Spectacles, the resulting series of events will be:\nAttach → Choose a friendly unit and make the equipped unit a copy of that unit for as long as Shady Spectacles is attached\nThese events are not simultaneous. The attach event executes first, and then whatever event is instructed by the replacement effect is executed. Thus, the answer in the Spiritforged FAQ is no longer true: if you attach Svellsongur to Aphelios, he will not trigger twice. Svellsongur doesn’t have the copied effect text when the attach event executes.\nSimilarly here, if Akshan nabs Shady Spectacles from an opponent, it will attach and then make him a copy. If his controller chooses to make him a copy of Aphelios, it’s too late by that point for his new triggered ability to see the attachment event; it’s already been completed.\nRelevant Rules: 369.1., 370.1.b.1., 370.1.a.2.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "shady-spectacles",
+        "svellsongur"
+      ],
+      "question": "My Sand Soldier has Shady Spectacles equipped and is a copy of Azir, Ascendent. What happens if I activate the copied Azir’s activatedability before detaching the Shady Spectacles and then attach them to the same Sand Soldier as a copy of the same Azir, Ascendent? Can I use the activated ability again?",
+      "answer": "You can.\nEach instance of the copied ability is a different ability. The game object remains the same throughout this whole process, so any temporary modifications will remain on the Sand Soldier as it transforms, but the copied rules text is an entirely new instance of the ability. It is the same idea as Svellsongur’s copy of an ability being “refreshed” if Svellsongur is detached and then reattached to the same unit.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "ki-barrier",
+        "lotus-trap"
+      ],
+      "question": "What happens during combat damage assignment if my 4 [M] unit has both Ki Barrier and Lotus Trap played on it this turn and my opponent has a 4 [M] defender?",
+      "answer": "You can order the replacement effects on your unit. If Ki Barrier is first, your unit will take no damage and you will have 3 damage prevention remaining on your unit. If Lotus Trap is first, your unit will take 1 damage and will have no damage prevention remaining on your unit.\nWith the Vendetta rules update, we’ve streamlined how replacement effects that apply to damage work in combat. Specifically, any replacement effect that would apply to combat damage being dealt will apply instead to combat damage assignment. This was already the case for prevention effects like Ki Barrier or Counterstrike, to prevent several strange edge cases. Now, damage increasing replacement effects will also apply during damage assignment.\nRelevant Rules: 465.2.c.4.a., 465.2.c.5.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "hwei-brooding-painter",
+        "patched-porobot",
+        "twisted-fate-gambler"
+      ],
+      "question": "What happens when I discard a Patched Porobot with Hwei, Brooding Painter’s move trigger?",
+      "answer": "Two triggers will go on the chain, in the order of your choosing. One says “Give me +3 [M] this turn.” while the other says “Ready up to 2 runes.”\nHwei, Brooding Painter says “do the following based on the discarded card's type …” Unlike our previous reflexive triggers printed on cards that use a similar template (cf Twisted Fate, Gambler), Hwei doesn’t say “do one of the following …” As long as the card has the appropriate type, you will put the corresponding reflexive trigger on the chain. If somehow there existed a card that was a spell unit gear, you would put three reflexive triggers on the chain when you discard it to Hwei.\nRelevant Rules: 387.1.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "crumbling-sands"
+      ],
+      "question": "If my opponent plays two spells in succession, can I counter the first one with Crumbling Sands?",
+      "answer": "Yes.\nCrumbling Sands uses the “finalize” meaning of play, because it checks whether cards have been “played” and isn’t a triggered ability. As long as an opponent (not even necessarily the one who played this spell) has chosen targets, paid costs, checked legality, and completed the process of finalizing another spell, even if that spell was countered, Crumbling Sands can counter a spell. That means it can counter the first spell played, as long as another spell was played by an opponent after that one.\nRelevant Rules: 419.4.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "fallen-feline"
+      ],
+      "question": "When can I react to my opponent playing Fallen Feline to a battlefield? And how does naming a card work?",
+      "answer": "You can react to the play effect of Fallen Feline, before they’ve named a spell.\nFallen Feline’s play effect instructs its controller to name a spell. This occurs on resolution of the triggered ability. If Fallen Feline is played to a battlefield, as soon as the ability resolves, opponents cannot play spells with that name. Meaning spells by that name can not be put onto a chain. Any spells already on the chain when Fallen Feline’s ability resolves will be unaffected. However, by the time you know the chosen spell it’s too late to play that spell.\nNaming a card or tag has new rules with the Vendetta rules update. When naming something in this way, the overarching rule that applies to all naming is that you can’t name something that doesn’t exist in Riftbound. You can’t name the “Locke” tag, the “totem” type, nor a card named “Lingering Tentacles,” because none of those has been printed on cards or tokens in Riftbound.\nHowever, you can name a card using information that uniquely identifies it. That information could be its name, but it could just as well be something like “the [3] spell with Flow that makes tentacles” or “the red Kai’Sa” or “Illaoi.” As long as there is no ambiguity as to what card is being named, a player can use whatever method is clear to their opponents and teammates. You can’t name a card by saying just “Kai’Sa” if there are two or more cards that could be identified in that way—you won’t have named a card if that’s all you say.\nRelevant Rules: 761., 761.1., 761.2., 762., 762.1., 762.2.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "kayle-justified"
+      ],
+      "question": "If I disempower a Kayle, Justified who has been empowered 3 times, does she lose all of her empowered statuses?",
+      "answer": "No. She will lose one of her empowered statuses.\nFor every Riftbound card other than Kayle, empowered is a binary status. They are either empowered or not. Kayle utilizes the golden rule “Card text supersedes rules text” to overcome this and be able to escape the normal bounds of what the empowered status means. On Kayle, empowered isn’t a binary status but a stacking status; she can have up to 3 empowered statuses. When Kayle is disempowered, the disempower action attempts to remove the empowered status. If she only has one empowered status, great, it’s gone. If she has more than one empowered status, the disempower action will remove one of the empowered statuses from Kayle.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "kayle-justified"
+      ],
+      "question": "But can I activate Kayle’s empower ability even if she’s already empowered?",
+      "answer": "Yes.\nKayle’s empower ability can be activated any number of times. If she has less than 3 empowered statuses, she will become empowered. If she has 3 empowered statuses, the ability can still be activated but nothing will happen when the ability resolves.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "akali-silent",
+        "flash",
+        "star-crossed"
+      ],
+      "question": "What happens if my opponent plays Flash on their Akali, Silent that’s currently in combat after I play Star-Crossed targeting her?",
+      "answer": "Akali will be unaffected by Star Crossed as it resolves.\nAkali, Silent is what the rules refer to as “untargetable” for enemy spells and abilities when she isn’t in combat; meaning she is not a legal target for them. Enemy spells and abilities being played when she’s untargetable can’t choose her. If she becomes untargetable after she’s already been chosen by an effect and retains it as that effect begins to resolve, it will “mistarget” her. She will be unaffected by any of the spell or ability’s instructions. If an instruction chooses only her, that instruction will be ignored.\nRelevant Rules: 757.1., 758., 758.1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "battering-ram",
+        "ravenbloom-student",
+        "rebuttal",
+        "stupefy"
+      ],
+      "question": "I have a Ravenbloom Student on the board and I haven’t played any spells this turn. What happens when I play Rebuttal targeting my opponent’s Stupefy and pay [A] on resolution? After everything resolves, how much will Battering Ram cost? Will my opponent’s Legion abilities be active?",
+      "answer": "Ravenbloom Student will trigger twice, Battering Ram will cost [4], and your opponent’s Legion abilities will be active.\nRavenbloom Student’s triggered ability checks whether a spell that you control resolves. You gained control of the Stupefy, and it resolved, so you will have triggered Ravenbloom Student’s ability. Battering Ram and Legion, on the other hand, check whether cards were finalized. Although you gained control of Stupefy, you did not finalize it; you got it after it was already finalized by your opponent. Thus, your opponent’s Legion abilities will be active, and Battering Ram will only receive a [1] Energy discount.\nRelevant Rules: 419.4., 419.4.a., 419.4.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "patched-porobot",
+        "stupefy",
+        "swain-visionary"
+      ],
+      "question": "What happens when I conquer with Swain, Visionary, if I’ve only played a Patched Porobot and Stupefy this turn?",
+      "answer": "You will score 2 points total. 1 from conquering, 1 from Swain.\nSwain only checks whether you’ve played a non-token unit, a non-token gear, and a spell. Checks like that do not care whether they were satisfied by multiple cards or a single card relevant to the trigger conditions.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "gangplank-naval",
+        "mel-newly-awakened",
+        "switcheroo"
+      ],
+      "question": "What happens when my opponent plays Switcheroo on their 2 [M] unit and my empowered Gangplank, Naval?",
+      "answer": "Gangplank, Naval will replace his Might being lowered with him being given +3 [M] this turn.\nSwap calculates the difference in Might and generates two effects: an increase, and a decrease. When a swap effect is applied to two units’ Mights, it gives those units +[M] and -[M] respective to who has the higher Might.\nUnder the hood, Gangplank’s replacement effect sees the event of him being given -[M] and replaces it with him being given +3 [M] this turn instead. The event of the other unit being given +[M] is unaffected by Gangplank’s replacement effect. By the time we apply the replacement effect, the difference between the two units has been calculated. In the example with the 2 [M] unit, the final Mights of the two units will be 2 [M] → 6 [M], and 6 [M] → 9 [M].\nThe way this works is not immediately obvious based on how the swap game action rules are written. We will clarify this in a future rules update.\nNote that this logic also applies to Mel, Newly Awakened and Switcheroo.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "back-off",
+        "blast-cone",
+        "gangplank-naval"
+      ],
+      "question": "What happens when my empowered Gangplank, Naval is moved by my opponent’s Blast Cone’s play effect and they exhaust Blast Cone to stun Gangplank? Will he be stunned? What happens if I then play Back Off choosing my Gangplank? Will he get +3 [M] this turn?",
+      "answer": "Blast Cone will stun Gangplank. If you play Back Off choosing your stunned Gangplank, he will not receive +3 [M] this turn.\nBlast Cone’s triggered ability that stuns units doesn’t choose them, so Gangplank’s replacement effect can’t apply to that event. Back Off played on a stunned Gangplank does not actually perform the stun game action, because Gangplank is already stunned. It’s legal to play Back Off, but the instruction will be negated. In order for Gangplank’s replacement effect to replace an event of him being stunned, the stun game action must actually be performed. Similarly, if an effect that said “Friendly units can’t be stunned” were active with a friendly empowered Gangplank, Naval is on the board, a stun effect that is played choosing Gangplank wouldn’t generate an event that Gangplank could replace, because no stun game action is performed.\nRelevant Rules: 423.1.a.1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "gangplank-naval",
+        "stupefy"
+      ],
+      "question": "What happens if I play Stupefy on my 1 [M] empowered Gangplank, Naval? Will he get +3 [M] this turn?",
+      "answer": "He will not.\nIn order for his replacement effect to apply, the event of him being given -[M] must occur. In the case of Stupefy played on a 1 [M] unit, no -[M] is given; it is snapshot to -0 [M]. Thus, there is no suitable event for Gangplank’s replacement effect to replace.\nRelevant Rules: 477.3.b.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "akali-deadly-weapon",
+        "hidden-blade",
+        "iascylla"
+      ],
+      "question": "What happens when my opponent plays Hidden Blade targeting my Akali, Deadly Weapon in reaction to her move trigger? Will it still deal damage to the chosen unit?",
+      "answer": "It will.\nAkali is another case where her ability refers to information implicit to its own trigger condition, similar to Iascylla. Akali’s “battlefield I moved to or from” doesn’t require her to be on the board in order for us to be able to identify it, nor does it reference information about her current state. Even if she leaves the board, that information was checked when her ability triggered, and it is still available to us on resolution.\nRelevant Rules: 359.3.f.3.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "defender-of-tomorrow",
+        "heimerdinger-inventor"
+      ],
+      "question": "Can I activate an empowered Heimerdinger, Inventor to ready 2 gear if my Jayce, Defender of Tomorrow legend isn’t empowered? What about if my Heimerdinger isn’t empowered?",
+      "answer": "You can activate Heimerdinger’s ability if he is empowered, regardless of the empowered status of Jayce, Defender of Tomorrow.\nThere is a bit of a trick here, in that there are two important details to this question relating to dependent keywords:\n- First is that a dependent keyword (the kind of ability that [Level][>] or [Empowered][>] are when they appear with the arrow) includes the whole of the ability, including the dependent ability. They’re all one object, so to speak.\n- Second is that a dependent keyword’s dependent ability still exists and can be referenced while it is inactive—that is, if its condition isn’t met. In this case, the condition is that the source of the ability is empowered.\nHeimerdinger gains all activated abilities that have the [E] symbol in their cost, and he gains the entire ability, restrictions, costs, dependent keywords and all. In effect, Defender of Tomorrow’s ability that Heimerdinger is gaining is the whole line that says:\n[Empowered][>] [1], [E]: Ready 2 gear.\nHeimerdinger can gain this ability even if Defender of Tomorrow isn’t empowered because of that second point we made previously.\nThe key rule for this case is 727.1.b.1., which reads:\nThe Dependent Ability is present on the card for the sake of reference or evaluation until the Condition is met.\nThis means that the ability isn’t active and its text isn’t being processed yet, but other effects can reference or evaluate its text before the condition is met. Heimerdinger, Inventor is exactly one such effect.\nRelevant Rules: 727.1., 727.1.b., 727.1.b.1.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "astral-heron"
+      ],
+      "question": "What card does Astral Heron’s triggered ability discount?",
+      "answer": "It discounts the next card played (added to the chain and queued for finalization) this turn after the ability resolves.\nAstral Heron has received an erratum to update its wording: “When you play your first card each turn, if I'm at a battlefield, the next card you play this turn costs [2][A][A] less.”",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "dragon-roost",
+        "elder-dragon",
+        "perched-grimwyrm",
+        "rockfall-path",
+        "temporal-breach"
+      ],
+      "question": "What happens when I play Temporal Breach targeting my Elder Dragon in base and pay [A][A] for Dragon Roost while playing Elder Dragon? Will it be played to base or to Dragon Roost?",
+      "answer": "You can choose which of those two locations you want to play it to.\nIn general, there are not many cases where we have this kind of competing instruction: one effect that tells you to play a unit to one location, and one that tells you to play it to another. That being said, when they do arise with contradictory requirements, the precedent from other areas of the rules is that the player chooses one of those requirements and ignores all others.\nNote that this only applies to mandatory positive requirements, ones that specify a location or method without also preventing the action from being performed to other locations or with other methods and that aren’t optional. For example, an effect like Perched Grimwyrm’s passive ability is a restriction on playing that unit to any location other than a battlefield you’ve conquered this turn. Rockfall Path’s passive ability is a restriction on playing units to Rockfall Path. If you’ve conquered only Rockfall Path this turn, you can’t play Perched Grimwyrm at all, because those two restrictions are contradictory.\nIn this case, the contradictory requirements don’t directly prohibit the playing of these units to other locations, so we can choose one of the contradictory requirements and ignore the rest.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "baron-nashor",
+        "baron-pit",
+        "dragon-roost",
+        "mageseeker-warden",
+        "perched-grimwyrm"
+      ],
+      "question": "What happens when I play Perched Grimwyrm while I haven’t conquered Dragon Roost this turn? Can I pay [A][A] and play it to Dragon Roost? What if I’ve conquered another battlefield this turn?",
+      "answer": "You cannot.\nIn Riftbound, “can’t” beats “can.” Perched Grimwyrm’s effect is a “can’t,” as in it can’t be played to any location but to a battlefield you’ve conquered this turn. Dragon Roost’s ability tries to give the Grimwyrm permission to be played to the Roost, but that can’t overcome Perched Grimwyrm’s own restriction. If you have no ability to play Perched Grimwyrm to Dragon Roost after paying for it, you will not be able to finalize Perched Grimwyrm at all. The actions taken as part of playing Perched Grimwyrm will be undone and it will be returned to the zone it was played from.\nThis is true even if you’ve conquered another battlefield this turn. If you have the ability, you can play Perched Grimwyrm to that battlefield without paying the additional cost of Dragon Roost, but you can’t play it to Dragon Roost itself unless you’ve conquered it.\nSharp eyed readers may remember that Baron Nashor doesn’t work this way. He enters at the Baron Pit regardless of effects preventing him from being played to battlefields. The reason for this is that Baron Nashor’s passive ability generates a delayed replacement effect, the one that reads “I enter there.” This replacement effect replaces the event of him entering to any other location with him entering to the Baron Pit. The replacement effect gets around effects like Mageseeker Warden which limit where you can play units. However, Dragon Roost is not written as a replacement effect. It tells you where to play the dragon you’ve paid the additional cost for, but it doesn’t specify how that dragon enters the board. Therefore it is a permission on play location, but not a replacement effect.\nRelevant Rules: 054.2., 369.3.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "matriarch-of-war",
+        "profiteer"
+      ],
+      "question": "Can I disempower my Ambessa, Matriarch of War with Profiteer to empower my Kayle? Do I control my own legend?",
+      "answer": "Yes, you can disempower Ambessa, Matriarch of War with Profiteer. And yes, you control your own legend.\nWe don’t typically consider the possibility that any player controls a legend, because control of legends cannot change, but you do indeed control your own legend.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "dragon-form",
+        "grand-duelist",
+        "stupefy"
+      ],
+      "question": "What happens if I play Dragon Form on a unit that has -1 [M] from Stupefy applied to it? Will my Fiora, Grand Duelist trigger? Is there a moment where my unit becomes 5 [M] before the -1 [M] from Stupefy brings it down to 4 [M]?",
+      "answer": "She will not trigger.\nAlthough Dragon Form sets the base Might of a unit to 5 [M], it does so via layers. Layers are evaluated when the effect is applied and their evaluation includes all existing applied layer alterations. We process layers in order, starting from the Trait-Altering layer (where this base Might setting effect is applied), proceeding to the Ability-Altering layer (not part of this example), and proceeding to the Arithmetic layer (where Stupefy’s -1 [M] is applied), but this process happens instantaneously; there is no window while evaluating layers for the unit to see itself become 5 [M] and then go down to 4 [M]. As soon as the effect of Dragon Form is applied, the unit is 4 [M].\nAs a side note, Might is one of the traits that is managed in the Trait-Altering layer, and it is one of the copyable traits that copy effects can replace or add to.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "hostile-takeover",
+        "temporal-breach"
+      ],
+      "question": "What happens when I play Hostile Takeover gaining control of my opponent’s ready unit, move it to base, and then play Temporal Breach choosing it? Where will the unit go?",
+      "answer": "The unit will remain in Banishment.\nUnits cannot be played to a base of a player other than their own controller under any circumstances. Because the owner of the unit is the one being instructed to play the unit, and the location they are being instructed to play it to is a base other than their own, it isn’t possible to play the unit. During the check legality step of finalization, the unit will be returned to banishment from the chain and all actions taken will be undone.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "profiteer",
+        "renekton-brute",
+        "stupefy"
+      ],
+      "question": "My 11 Might Renekton, Brute is disempowered by my own Profiteer. What happens when my opponent plays Stupefy choosing him? Will his ability trigger? What happens if instead I activated his ability?",
+      "answer": "Renekton’s ability will not trigger in either scenario.\nIn order to “become 10 or more,” his Might would have to have previously been less than 10. “10 or more” is a state, and Renekton’s triggered ability checks for the event of him achieving that state. If he maintains that state, regardless of how his Might changes, he will not “become” that state.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "heisho-shell-of-the-world",
+        "irelia-fervent",
+        "recruit"
+      ],
+      "question": "What happens when I play Icathian Rain choosing a Recruit at Heisho, Shell of the World once and Irelia, Fervent in base five times? How many times do I pay for deflect?",
+      "answer": "You will not pay for deflect.\nWhile your spell or ability chooses a unit at Heisho, Shell of the World, you ignore deflect while paying for the spell. Ignore, in this context, means you treat deflect on the specified units as being inactive, like it’s turned off temporarily. In the case of Heisho, it doesn’t specify any units whose deflect to ignore, so you ignore all instances of deflect on units.\nThis only applies to the specified spell or ability. You can’t play a spell or ability choosing a unit at Heisho, and then play another one choosing a unit at another location and not at Heisho and still ignore deflect. Only while at least one target of the spell or ability is a unit located at Heisho do you ignore deflect while paying costs for that spell or ability.\nRelevant Rules: 766., 767.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "elder-dragon",
+        "hextech-ray",
+        "immortal-phoenix",
+        "imperial-decree"
+      ],
+      "question": "What happens when I play Hextech Ray on an Elder Dragon while Imperial Decree’s delayed trigger is active and I have an Immortal Phoenix in the Trash? Can I play Immortal Phoenix from the Trash?",
+      "answer": "You can.\nPer the current rules, there is nothing that would stop Imperial Decree’s delayed trigger from triggering Immortal Phoenix. It is a triggered ability generated by a spell; it is attributed a kill action, and thus the spell that generated it will also be attributed the same kill action. The owner of Imperial Decree is the controller of the delayed triggered ability; the player responsible for the kill action is the one who controls the ability; and that same player is the owner of Immortal Phoenix in the Trash. Thus all three conditions for Immortal Phoenix triggering are complete, and it will trigger.",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    },
+    {
+      "cards": [
+        "buff",
+        "flash",
+        "hidden-blade",
+        "ride-the-wind",
+        "smite",
+        "star-crossed",
+        "vilemaws-lair",
+        "zhonyas-hourglass"
+      ],
+      "question": "If I play Ride the Wind targeting my unit at Vilemaw’s Lair and attempt to move them to base, what happens?",
+      "answer": "They will be readied.\nThis is a rules quirk that players and judges identified as a result of a small additional rule added in the Vendetta rules update. We’re going to give some clarity to this that will resolve this issue, but if you don’t understand the conversation or why it is necessary, don’t worry. This isn’t an actual change to how we’ve been interpreting and ruling cards, but smoothing out a bug.\nIn short, the linked instructions rules are too expansive currently on what qualifies as an “ignored” instruction. To clarify this definition: an ignored instruction is one that wasn’t performed as part of the execution of a spell or ability’s instructions because it mistargeted (i.e. because the targeted object wasn’t a legal target on resolution). This is a case where, for example, you play Hidden Blade choosing an enemy unit and they play Star-Crossed in reaction, returning their unit to hand. When Hidden Blade resolves, the unit isn’t on the board, so we ignore the “Its controller draws 2.” instruction. Alternatively, if Hidden Blade is given the Repeat keyword by the Academy and both executions target the same unit, this is the reason why the unit’s controller doesn’t draw 4 cards.\nAn instruction is not ignored if an ability, effect, or circumstance of the game prevents it from occurring. This could take the form of a replacement effect that replaces the event of the instruction with something else, it could take the form of an ability like Vilemaw’s Lair that says “Units can’t move from here to base.” or it could take the form of a game action like Buff or Ready being performed on a unit that already has the appropriate state. It could even take the form of a unit, gear, or spell no longer being in an appropriate zone as long as the instruction doesn’t target those objects. The instruction in these cases isn’t ignored, but instead negated. A negated instruction has its effects skipped, replaced, or prevented. A negated instruction will not cause any linked instructions to be ignored unless those instructions refer specifically to the action being performed.\nSome examples:\n- If a unit at a battlefield says “I can’t be killed.” and a player plays Hidden Blade choosing that unit, the unit’s controller will still draw 2 on resolution of Hidden Blade. (The instruction was negated and not ignored, so the linked instruction will still execute.)\n- If a unit at a battlefield is chosen by Hidden Blade and in reaction its controller plays Flash moving it to base, that unit’s controller will not draw 2 on resolution of Hidden Blade. (The instruction was ignored, so any linked instructions will be ignored.)\n- If a unit at a battlefield is chosen by Hidden Blade and in reaction its controller plays Zhonya’s Hourglass, that unit’s controller will draw 2 on resolution of Hidden Blade. (The unit is on the board and can have its information checked, and the instruction was negated and not ignored.)\n- If a unit at a battlefield has been affected by Smite previously this turn and it is chosen by Hidden Blade, that unit’s controller will not draw 2 on resolution of Hidden Blade. (Although the instruction is executed, the unit is not on the board to have its information checked. Additionally, the unit was moved to a non-board zone by an effect other than Hidden Blade and thus no longer has a controller that Hidden Blade can reference.)",
+      "source": "https://playriftbound.com/en-us/news/rules-and-releases/vendetta-rules-faq-and-clarifications"
+    }
+  ]
+}

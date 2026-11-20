@@ -5,6 +5,7 @@
   "scripts": {
     "scrape": "bun src/scrape.ts",
     "prices": "bun src/prices.ts",
+    "rules": "bun src/rules.ts",
     "test": "bun test",
     "typecheck": "tsc --noEmit"
   },

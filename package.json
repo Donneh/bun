@@ -12,6 +12,7 @@
     "test:e2e": "bun run --filter @riftkeeper/web test:e2e",
     "scrape": "bun run --filter @riftkeeper/ingest scrape",
     "prices": "bun run --filter @riftkeeper/ingest prices",
+    "rules": "bun run --filter @riftkeeper/ingest rules",
     "test": "bun run --filter \"*\" --sequential test && bun test ./infrastructure",
     "test:api": "bun run --filter @riftkeeper/api test:api",
     "test:scheduler": "bun run --filter @riftkeeper/scheduler test:worker",

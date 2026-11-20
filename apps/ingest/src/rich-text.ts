@@ -10,7 +10,7 @@ const NAMED_ENTITIES: Readonly<Record<string, string>> = {
 const TOKEN = /(<[^>]*>)/;
 const TAG = /^<(\/?)([a-z0-9]+)\s*\/?>$/i;
 
-function decodeEntities(text: string): string {
+export function decodeEntities(text: string): string {
   return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, body: string) => {
     if (body.startsWith("#x") || body.startsWith("#X")) {
       return String.fromCodePoint(Number.parseInt(body.slice(2), 16));

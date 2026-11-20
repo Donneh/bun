@@ -8,10 +8,10 @@ const NextDataSchema = z.object({
 });
 const CardsBladeSchema = z.object({ cards: z.object({ items: z.array(z.unknown()) }) });
 
-function parseNextData(html: string): unknown {
+export function parseNextData(html: string): unknown {
   const script = NEXT_DATA_SCRIPT.exec(html);
   if (!script?.[1]) {
-    throw new Error("Gallery HTML has no __NEXT_DATA__ script tag");
+    throw new Error("Page HTML has no __NEXT_DATA__ script tag");
   }
   try {
     return JSON.parse(script[1]);
