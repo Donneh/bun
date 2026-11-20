@@ -7,7 +7,8 @@ import {
   type Variant,
   VariantSchema,
 } from "@riftkeeper/cards";
-import type { ComparisonOperator, Filter, NumericField, TextField } from "./filter.ts";
+import type { ComparisonOperator, Filter, FilterField, NumericField, TextField } from "./filter.ts";
+import { COLOR_ALIASES, FILTER_KEYWORDS, UNSUPPORTED_KEYWORDS } from "./keywords.ts";
 
 export type Parsed<T> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly message: string };
 
@@ -18,22 +19,11 @@ const invalid = (message: string): Parsed<never> => ({ ok: false, message });
 
 const OPERATORS_LONGEST_FIRST: readonly ComparisonOperator[] = [">=", "<=", "!=", ">", "<", "="];
 
-const COLOR_ALIASES = new Map<string, Domain>([
-  ["red", "fury"],
-  ["green", "calm"],
-  ["blue", "mind"],
-  ["orange", "body"],
-  ["purple", "chaos"],
-  ["yellow", "order"],
-]);
-
 const VARIANT_ALIASES = new Map<string, Variant>([
   ["alt art", "alt-art"],
   ["altart", "alt-art"],
   ["signature", "signed"],
 ]);
-
-const UNSUPPORTED_KEYWORDS = new Set(["promo", "owned", "flavor", "legal", "keyword", "k"]);
 
 function numeric(field: NumericField): FilterParser {
   return (value) => {
@@ -115,23 +105,25 @@ function domain(value: string): Parsed<Filter> {
   return ok({ field: "domain", anyOf, allOf, noneOf });
 }
 
-const FILTERS: ReadonlyArray<readonly [readonly string[], FilterParser]> = [
-  [["cost"], numeric("cost")],
-  [["might", "m"], numeric("might")],
-  [["power", "p"], numeric("power")],
-  [["domain", "d", "c", "color"], domain],
-  [["tag", "t"], text("tag")],
-  [["type"], enumeration("type", CardTypeSchema.options)],
-  [["supertype"], enumeration("supertype", SupertypeSchema.options)],
-  [["rarity", "r"], enumeration("rarity", RaritySchema.options)],
-  [["variant"], enumeration("variant", VariantSchema.options, VARIANT_ALIASES)],
-  [["set", "s"], text("set")],
-  [["artist", "a"], text("artist")],
-  [["ability"], text("ability")],
-];
+const FILTERS: { readonly [F in FilterField]: FilterParser } = {
+  cost: numeric("cost"),
+  might: numeric("might"),
+  power: numeric("power"),
+  domain,
+  tag: text("tag"),
+  type: enumeration("type", CardTypeSchema.options),
+  supertype: enumeration("supertype", SupertypeSchema.options),
+  rarity: enumeration("rarity", RaritySchema.options),
+  variant: enumeration("variant", VariantSchema.options, VARIANT_ALIASES),
+  set: text("set"),
+  artist: text("artist"),
+  ability: text("ability"),
+};
 
 const PARSERS_BY_KEYWORD = new Map(
-  FILTERS.flatMap(([keywords, parser]) => keywords.map((keyword) => [keyword, parser] as const)),
+  Object.values(FILTER_KEYWORDS).flatMap(([field, ...aliases]) =>
+    [field, ...aliases].map((keyword) => [keyword, FILTERS[field]] as const),
+  ),
 );
 
 export function parseFilter(keyword: string, value: string): Parsed<Filter> {

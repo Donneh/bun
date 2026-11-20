@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { CARD_TYPES, DOMAINS, RARITIES, SUPERTYPES, VARIANTS } from "./values.ts";
 
 export const CardIdSchema = z
   .string()
@@ -12,19 +13,19 @@ export const PrintingIdSchema = z
   .brand<"PrintingId">();
 export type PrintingId = z.infer<typeof PrintingIdSchema>;
 
-export const DomainSchema = z.enum(["fury", "calm", "mind", "body", "chaos", "order", "colorless"]);
+export const DomainSchema = z.enum(DOMAINS);
 export type Domain = z.infer<typeof DomainSchema>;
 
-export const CardTypeSchema = z.enum(["legend", "unit", "spell", "gear", "rune", "battlefield"]);
+export const CardTypeSchema = z.enum(CARD_TYPES);
 export type CardType = z.infer<typeof CardTypeSchema>;
 
-export const SupertypeSchema = z.enum(["champion", "signature", "basic", "token"]);
+export const SupertypeSchema = z.enum(SUPERTYPES);
 export type Supertype = z.infer<typeof SupertypeSchema>;
 
-export const RaritySchema = z.enum(["common", "uncommon", "rare", "epic", "showcase"]);
+export const RaritySchema = z.enum(RARITIES);
 export type Rarity = z.infer<typeof RaritySchema>;
 
-export const VariantSchema = z.enum(["standard", "alt-art", "signed", "special", "token", "rune"]);
+export const VariantSchema = z.enum(VARIANTS);
 export type Variant = z.infer<typeof VariantSchema>;
 
 export const OrientationSchema = z.enum(["portrait", "landscape"]);
