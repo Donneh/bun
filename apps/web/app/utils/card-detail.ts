@@ -209,6 +209,14 @@ export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHis
     kicker: kicker(card),
     stats: stats(card),
     rules: [card.ability, card.effect].filter((text): text is string => Boolean(text)),
+    ...(card.type === "legend"
+      ? {
+          legendSearch: {
+            label: "Cards for this legend",
+            href: searchHref(`id:${card.domains.join(",") || "colorless"}`),
+          },
+        }
+      : {}),
     tags: card.tags.map((tag) => ({ label: tag, href: searchHref(`t:${quotedValue(tag)}`) })),
     artist:
       printing.artist === null

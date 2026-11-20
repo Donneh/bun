@@ -18,6 +18,7 @@ describe("keywords", () => {
       "might:",
       "power:",
       "domain:",
+      "identity:",
       "tag:",
       "type:",
       "supertype:",
@@ -60,6 +61,14 @@ describe("values", () => {
     expect(apply("c:-ch")).toBe("c:-chaos");
   });
 
+  test("suggests legend identity and completes only its current domain", () => {
+    expect(labels("id")).toEqual(["id:"]);
+    expect(atEnd("id:").hint).toContain("including colorless");
+    expect(apply("id:fury,ch")).toBe("id:fury,chaos");
+    expect(apply("identity:mi,fury", 11)).toBe("identity:mind,fury");
+    expect(labels("id:fury,chaos")).toEqual([]);
+  });
+
   test("a complete value needs no suggestion", () => {
     expect(labels("type:spell")).toEqual([]);
     expect(labels("c:fury+calm")).toEqual([]);
@@ -98,7 +107,19 @@ describe("t: with a card type", () => {
 });
 
 test("every suggested completion parses without warnings", () => {
-  for (const query of ["", "ty", "type:", "r:", "variant:", "supertype:", "c:fury,", "s:", "t:unit"]) {
+  for (const query of [
+    "",
+    "ty",
+    "type:",
+    "r:",
+    "variant:",
+    "supertype:",
+    "c:fury,",
+    "id:",
+    "id:fury,",
+    "s:",
+    "t:unit",
+  ]) {
     for (const [index] of suggest(query, query.length).suggestions.entries()) {
       const applied = apply(query, query.length, index);
       if (applied.trimEnd().endsWith(":")) continue;

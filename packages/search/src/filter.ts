@@ -12,6 +12,7 @@ export type TextField = "tag" | "set" | "artist" | "ability";
 
 export type Filter =
   | { readonly field: NumericField; readonly comparison: NumberComparison }
+  | { readonly field: "identity"; readonly domains: readonly Domain[] }
   | {
       readonly field: "domain";
       readonly anyOf: readonly Domain[];

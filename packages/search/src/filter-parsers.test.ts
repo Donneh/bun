@@ -117,6 +117,18 @@ describe("domain filter", () => {
   });
 });
 
+describe("identity filter", () => {
+  test("accepts domain lists, color aliases and either keyword", () => {
+    for (const keyword of ["id", "identity"]) {
+      expect(filterOf(`${keyword}:" RED, chaos "`)).toEqual({ field: "identity", domains: ["fury", "chaos"] });
+    }
+  });
+
+  test.each(["", "fury,", "fury,,chaos", "pink", "fury+chaos", "-fury"])("rejects %p as an identity", (value) => {
+    expect(rejection(`id:${value}`)).toHaveLength(1);
+  });
+});
+
 describe("enum filters", () => {
   test.each([
     ["type:Unit", { field: "type", value: "unit" }],

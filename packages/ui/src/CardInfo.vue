@@ -51,6 +51,12 @@ function follow(event: MouseEvent, href: string) {
       <CardText v-for="(text, index) in card.rules" :key="index" :text="text" />
     </div>
 
+    <div v-if="card.legendSearch" class="section">
+      <a class="credit-link" :href="card.legendSearch.href" @click="follow($event, card.legendSearch.href)">{{
+        card.legendSearch.label
+      }}</a>
+    </div>
+
     <CardPricing v-if="card.pricing" class="section" :pricing="card.pricing" />
 
     <PrintingList

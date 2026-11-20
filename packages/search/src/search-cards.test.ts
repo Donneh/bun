@@ -5,6 +5,7 @@ import { makeCard, makePrinting } from "@riftkeeper/cards/testing";
 import snapshot from "../../../apps/api/data/cards.json";
 import type { SearchNode } from "./ast.ts";
 import type { ComparisonOperator, Filter, TextField } from "./filter.ts";
+import { parseQuery } from "./parser.ts";
 import { PAGE_SIZE, type SearchRequest } from "./search.ts";
 import { searchCards } from "./search-cards.ts";
 
@@ -260,6 +261,28 @@ describe("domain filter", () => {
   test("empty lists add no constraint", () => {
     expect(names(cards, domain({}))).toHaveLength(4);
   });
+});
+
+test("legend identity admits subsets and colorless, not cards with any outside domain", () => {
+  const cards = [
+    buildCard({ id: "a", name: "Fury", domains: ["fury"], type: "unit" }),
+    buildCard({ id: "b", name: "Chaos", domains: ["chaos"], type: "spell" }),
+    buildCard({ id: "c", name: "Both", domains: ["fury", "chaos"], type: "unit" }),
+    buildCard({ id: "d", name: "Outside", domains: ["fury", "mind"], type: "unit" }),
+    buildCard({ id: "e", name: "Colorless", domains: ["colorless"], type: "gear" }),
+    buildCard({ id: "f", name: "Empty", domains: [], type: "battlefield" }),
+    buildCard({ id: "g", name: "Mind", domains: ["mind"], type: "unit" }),
+  ];
+  for (const [query, expected] of [
+    ["id:fury,chaos", ["Both", "Chaos", "Colorless", "Empty", "Fury"]],
+    ["identity:RED,purple type:unit", ["Both", "Fury"]],
+    ["id:colorless", ["Colorless", "Empty"]],
+    ["-id:fury,chaos", ["Mind", "Outside"]],
+  ] as const) {
+    const { root, warnings } = parseQuery(query);
+    expect(warnings).toEqual([]);
+    expect(names(cards, root)).toEqual([...expected]);
+  }
 });
 
 describe("enumerated filters", () => {

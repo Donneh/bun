@@ -65,6 +65,7 @@ export interface CardInfoContent {
   readonly kicker: readonly CardKickerItem[];
   readonly stats: readonly CardStat[];
   readonly rules: readonly string[];
+  readonly legendSearch?: CardLink;
   readonly tags: readonly CardLink[];
   readonly artist: CardLink | null;
   readonly pricing: PricingContent | null;

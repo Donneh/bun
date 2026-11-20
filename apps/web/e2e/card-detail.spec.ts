@@ -16,6 +16,7 @@ interface ApiPrinting {
 interface ApiCard {
   readonly id: string;
   readonly name: string;
+  readonly domains: readonly string[];
   readonly ability: string | null;
   readonly effect: string | null;
   readonly printings: readonly ApiPrinting[];
@@ -184,6 +185,24 @@ test("a card page opens directly, survives a reload and fits a phone", async ({ 
 
   await expect(page.getByRole("heading", { level: 1, name: "Search the whole set. Instantly." })).toBeAttached();
   expect(new URL(page.url()).pathname).toBe("/");
+});
+
+test("a legend links to cards within its domains", async ({ page, request }) => {
+  const { data } = await apiSearch(request, "type:legend");
+  const legend = data[0] as ApiCard;
+  const query = `id:${legend.domains.join(",")}`;
+  const matching = await apiSearch(request, query);
+  expect(matching.meta.total).toBeGreaterThan(0);
+  for (const card of matching.data) {
+    expect(card.domains.every((domain) => domain === "colorless" || legend.domains.includes(domain))).toBe(true);
+  }
+
+  await page.goto(`/cards/${legend.id}`);
+  const link = page.getByRole("link", { name: "Cards for this legend" });
+  await expect(link).toHaveAttribute("href", `/?q=${encodeURIComponent(query)}`);
+  await link.click();
+  await expect(page.getByRole("searchbox", { name: "Search cards" })).toHaveValue(query);
+  await expect(tiles(page)).toHaveCount(Math.min(matching.meta.total, matching.meta.pageSize));
 });
 
 test("rules text shows each symbol as a named glyph instead of its token", async ({ page, request }) => {

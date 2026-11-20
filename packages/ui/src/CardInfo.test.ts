@@ -119,4 +119,15 @@ describe("CardInfo", () => {
       ["/?q=a%3A%22Six%20More%20Vodka%22"],
     ]);
   });
+
+  test("renders the legend search as a real link with ordinary and modified-click navigation", async () => {
+    const href = "/?q=id%3Amind%2Ccalm";
+    const { emitted } = renderInfo({ ...ahri, legendSearch: { label: "Cards for this legend", href } });
+    const link = screen.getByRole("link", { name: "Cards for this legend" });
+    expect(link.getAttribute("href")).toBe(href);
+    await fireEvent.click(link, { ctrlKey: true });
+    expect(emitted("navigate")).toBeUndefined();
+    await userEvent.click(link);
+    expect(emitted("navigate")).toEqual([[href]]);
+  });
 });
