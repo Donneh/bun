@@ -62,6 +62,30 @@ describe("numeric filters", () => {
   });
 });
 
+describe("price filters", () => {
+  test.each([
+    ["usd<1", "<", 1],
+    ["USD<=1.25", "<=", 1.25],
+    ["price>2.50", ">", 2.5],
+    ["usd>=.50", ">=", 0.5],
+    ["usd!=0", "!=", 0],
+    ["usd=1.01", "=", 1.01],
+    ["usd:0.99", "=", 0.99],
+    ["price:<=2.50", "<=", 2.5],
+  ])("parses %s", (query, operator, value) => {
+    expect(filterOf(query)).toEqual({ field: "price", comparison: { operator, value } });
+  });
+
+  test.each(["", "-1", "NaN", "Infinity", "1e2", "1.2.3", "=", "$1", "9".repeat(400)])(
+    "rejects the invalid USD amount %p",
+    (value) => {
+      expect(rejection(`usd:${value}`)).toEqual([
+        `Invalid value for "usd": "${value}" is not a non-negative USD amount.`,
+      ]);
+    },
+  );
+});
+
 describe("domain filter", () => {
   test.each(["c", "color", "d", "domain"])("%s is a domain alias", (keyword) => {
     expect(filterOf(`${keyword}:fury`)).toEqual({ field: "domain", anyOf: ["fury"], allOf: [], noneOf: [] });

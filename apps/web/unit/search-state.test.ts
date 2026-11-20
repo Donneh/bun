@@ -24,7 +24,7 @@ describe("parseSearchState", () => {
   });
 
   test("falls back to the defaults for unknown or repeated values", () => {
-    expect(parseSearchState({ q: ["a", "b"], sort: "price", direction: ["desc"] })).toEqual({
+    expect(parseSearchState({ q: ["a", "b"], sort: "unknown", direction: ["desc"] })).toEqual({
       query: "",
       view: "printings",
       sort: "set",
@@ -81,6 +81,7 @@ describe("SORT_OPTIONS", () => {
       "Cost",
       "Might",
       "Power",
+      "Price (USD)",
     ]);
   });
 });

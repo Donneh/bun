@@ -29,7 +29,12 @@ const ashe = makeCard({
     }),
   ],
 });
-const prices = makePriceSnapshot();
+const prices = makePriceSnapshot({
+  printings: {
+    "ogn-001": { normal: { market: 0.75, low: 0.1, mid: 1, high: 2 } },
+    "ogs-002": { foil: { market: 1.25, low: 0.5, mid: 2, high: 3 } },
+  },
+});
 const app = createApp({ cards: [annie, ashe], prices, priceHistory: makePriceHistory() });
 
 interface SearchBody {
@@ -77,6 +82,25 @@ describe("GET /search", () => {
     expect(body.data.map((card) => card.id)).toEqual([annie.id, ashe.id]);
   });
 
+  test("filters joined market prices and exposes price sorting and chips", async () => {
+    const { status, body } = await search({ q: "usd<1", sort: "price" });
+    expect(status).toBe(200);
+    expect(body.data).toEqual(withPrices([annie], prices));
+    expect(body.warnings).toEqual([]);
+    expect(body.parsed).toMatchObject({
+      filters: [
+        {
+          field: "price",
+          label: "Price (USD)",
+          expression: "usd<1",
+          value: { kind: "numeric", operator: "<", value: 1 },
+        },
+      ],
+    });
+    const descending = await search({ sort: "price", direction: "desc" });
+    expect(descending.body.data.map((card) => card.id)).toEqual([ashe.id, annie.id]);
+  });
+
   test("returns warnings with their position for parts of the query it ignored", async () => {
     const { status, body } = await search({ q: "flavor:calm annie" });
 
@@ -94,7 +118,7 @@ describe("GET /search", () => {
   });
 
   test.each([
-    ["sort", { sort: "price" }],
+    ["sort", { sort: "unknown" }],
     ["direction", { direction: "sideways" }],
     ["page", { page: "0" }],
     ["q", { q: "a".repeat(MAX_QUERY_LENGTH + 1) }],

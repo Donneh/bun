@@ -17,6 +17,7 @@ describe("keywords", () => {
       "cost:",
       "might:",
       "power:",
+      "price:",
       "domain:",
       "identity:",
       "tag:",
@@ -62,6 +63,17 @@ describe("keywords", () => {
 });
 
 describe("values", () => {
+  test("completes either price keyword and explains decimal USD comparisons", () => {
+    expect(apply("pr")).toBe("price:");
+    expect(apply("us")).toBe("usd:");
+    for (const query of ["price:", "usd:", "usd<1", "-USD>=2.50"]) {
+      expect(atEnd(query)).toEqual({
+        suggestions: [],
+        hint: "Price: cheapest normal or foil market price in USD, such as usd<1 or price:<=2.50. Unpriced printings do not match.",
+      });
+    }
+  });
+
   test("completes an enumerated value and leaves room for the next term", () => {
     expect(apply("type:sp")).toBe("type:spell ");
     expect(apply("-r:e")).toBe("-r:epic ");

@@ -96,6 +96,29 @@ describe("GET /search", () => {
     expect(second.data.some((card) => firstIds.has(card.id))).toBe(false);
   });
 
+  test("filters and sorts printing market prices from the joined snapshot", async () => {
+    const [cards, result] = await Promise.all([allCards(), search({ q: "usd<1", sort: "price", view: "printings" })]);
+    const amounts = cards
+      .flatMap((card) =>
+        card.printings.flatMap((printing) => {
+          const markets = [printing.prices?.normal?.market, printing.prices?.foil?.market].filter(
+            (amount): amount is number => amount != null,
+          );
+          return markets.length === 0 ? [] : [Math.min(...markets)];
+        }),
+      )
+      .filter((amount) => amount < 1)
+      .toSorted((a, b) => a - b);
+    expect(result.warnings).toEqual([]);
+    expect(result.meta.total).toBe(amounts.length);
+    expect(
+      result.data.map((card) => {
+        const prices = card.printings[0]?.prices;
+        return Math.min(prices?.normal?.market ?? Infinity, prices?.foil?.market ?? Infinity);
+      }),
+    ).toEqual(amounts.slice(0, result.meta.pageSize));
+  });
+
   test("ignored parts of the query come back as warnings", async () => {
     const result = await search({ q: "unknown:1" });
 
@@ -103,7 +126,7 @@ describe("GET /search", () => {
   });
 
   test("responds 400 invalid_request for an unknown sort", async () => {
-    const { status, body } = await get("/search", { sort: "price" });
+    const { status, body } = await get("/search", { sort: "unknown" });
 
     expect(status).toBe(400);
     expect(body).toMatchObject({ error: { code: "invalid_request" } });

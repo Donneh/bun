@@ -69,6 +69,10 @@ export function tokenize(query: string): LexResult {
     }
 
     if (colon === null) {
+      const comparison = /^(price|usd)([<>=!].*)$/i.exec(lexeme);
+      if (comparison) {
+        return { type: "keywordValue", lexeme, span, keyword: comparison[1]!, value: comparison[2]! };
+      }
       return { type: "word", lexeme, span };
     }
 
