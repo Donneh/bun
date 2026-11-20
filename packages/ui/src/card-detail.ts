@@ -8,8 +8,13 @@ export interface CardStat {
   readonly valueShown: boolean;
 }
 
-export interface CardTag {
+export interface CardLink {
   readonly label: string;
+  readonly href: string;
+}
+
+export interface CardKickerItem {
+  readonly parts: readonly GlyphTextPart[];
   readonly href: string;
 }
 
@@ -57,10 +62,10 @@ export interface PrintingSummary {
 export interface CardInfoContent {
   readonly name: string;
   readonly subtitle: string | null;
-  readonly kicker: readonly (readonly GlyphTextPart[])[];
+  readonly kicker: readonly CardKickerItem[];
   readonly stats: readonly CardStat[];
   readonly rules: readonly string[];
-  readonly tags: readonly CardTag[];
-  readonly artist: string | null;
+  readonly tags: readonly CardLink[];
+  readonly artist: CardLink | null;
   readonly pricing: PricingContent | null;
 }

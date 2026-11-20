@@ -11,8 +11,9 @@ export { default as CardTile } from "./CardTile.vue";
 export { default as CardTileSkeleton } from "./CardTileSkeleton.vue";
 export type {
   CardInfoContent,
+  CardKickerItem,
+  CardLink,
   CardStat,
-  CardTag,
   FinishPricing,
   PriceDay,
   PriceFigure,

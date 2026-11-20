@@ -86,18 +86,27 @@ describe("cardInfo", () => {
     expect(info.name).toBe("Ahri");
     expect(info.subtitle).toBe("Inquisitive");
     expect(info.kicker).toEqual([
-      [
-        { kind: "glyph", name: "rune_mind", decorative: true },
-        { kind: "text", text: "Mind" },
-      ],
-      [
-        { kind: "glyph", name: "rune_calm", decorative: true },
-        { kind: "text", text: "Calm" },
-      ],
-      [
-        { kind: "glyph", name: "card_type_unit", decorative: true },
-        { kind: "text", text: "Champion Unit" },
-      ],
+      {
+        parts: [
+          { kind: "glyph", name: "rune_mind", decorative: true },
+          { kind: "text", text: "Mind" },
+        ],
+        href: searchHref("d:mind"),
+      },
+      {
+        parts: [
+          { kind: "glyph", name: "rune_calm", decorative: true },
+          { kind: "text", text: "Calm" },
+        ],
+        href: searchHref("d:calm"),
+      },
+      {
+        parts: [
+          { kind: "glyph", name: "card_type_unit", decorative: true },
+          { kind: "text", text: "Champion Unit" },
+        ],
+        href: searchHref("supertype:champion type:unit"),
+      },
     ]);
   });
 
@@ -134,14 +143,20 @@ describe("cardInfo", () => {
     expect(info.tags).toEqual([]);
     expect(info.rules).toEqual(["When a player plays a spell, they may give a unit +1 :rb_might:."]);
     expect(info.kicker).toEqual([
-      [
-        { kind: "glyph", name: "colorless", decorative: true },
-        { kind: "text", text: "Colorless" },
-      ],
-      [
-        { kind: "glyph", name: "card_type_battlefield", decorative: true },
-        { kind: "text", text: "Battlefield" },
-      ],
+      {
+        parts: [
+          { kind: "glyph", name: "colorless", decorative: true },
+          { kind: "text", text: "Colorless" },
+        ],
+        href: searchHref("d:colorless"),
+      },
+      {
+        parts: [
+          { kind: "glyph", name: "card_type_battlefield", decorative: true },
+          { kind: "text", text: "Battlefield" },
+        ],
+        href: searchHref("type:battlefield"),
+      },
     ]);
   });
 
@@ -159,8 +174,11 @@ describe("cardInfo", () => {
     ]);
   });
 
-  test("credits the artist of the chosen printing", () => {
-    expect(cardInfo(ahri, firstPrinting(ahri)).artist).toBe("Six More Vodka");
+  test("credits the artist of the chosen printing with a link to an artist search", () => {
+    expect(cardInfo(ahri, firstPrinting(ahri)).artist).toEqual({
+      label: "Six More Vodka",
+      href: searchHref('a:"Six More Vodka"'),
+    });
     expect(cardInfo(ahri, secondPrinting(ahri)).artist).toBeNull();
   });
 

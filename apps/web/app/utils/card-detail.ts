@@ -3,6 +3,7 @@ import type { HistoryFinish, PriceHistory } from "@riftkeeper/cards/price-histor
 import type { PricedCard, PricedPrinting, PriceQuote, PrintingPrices } from "@riftkeeper/cards/prices";
 import type {
   CardInfoContent,
+  CardKickerItem,
   CardStat,
   GlyphName,
   GlyphTextPart,
@@ -47,16 +48,23 @@ const labelled = (name: GlyphName, value: string): GlyphTextPart[] => [
   { kind: "text", text: value },
 ];
 
-function kicker(card: Card): GlyphTextPart[][] {
-  const typeWords = [card.supertype, card.type]
-    .filter((word): word is NonNullable<typeof word> => word !== null)
-    .map(capitalize)
-    .join(" ");
-  const domains = card.domains.map((domain) => labelled(domainGlyph(domain), capitalize(domain)));
-  if (!typeWords) return domains;
+function kicker(card: Card): CardKickerItem[] {
+  const domains = card.domains.map((domain) => ({
+    parts: labelled(domainGlyph(domain), capitalize(domain)),
+    href: searchHref(`d:${domain}`),
+  }));
+  const typeFilters = [
+    card.supertype === null ? null : ["supertype", card.supertype],
+    card.type === null ? null : ["type", card.type],
+  ].filter((filter): filter is [string, string] => filter !== null);
+  if (typeFilters.length === 0) return domains;
+  const typeWords = typeFilters.map(([, word]) => capitalize(word)).join(" ");
   return [
     ...domains,
-    card.type === null ? [{ kind: "text", text: typeWords }] : labelled(`card_type_${card.type}`, typeWords),
+    {
+      parts: card.type === null ? [{ kind: "text", text: typeWords }] : labelled(`card_type_${card.type}`, typeWords),
+      href: searchHref(typeFilters.map(([keyword, word]) => `${keyword}:${word}`).join(" ")),
+    },
   ];
 }
 
@@ -202,7 +210,10 @@ export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHis
     stats: stats(card),
     rules: [card.ability, card.effect].filter((text): text is string => Boolean(text)),
     tags: card.tags.map((tag) => ({ label: tag, href: searchHref(`t:${quotedValue(tag)}`) })),
-    artist: printing.artist,
+    artist:
+      printing.artist === null
+        ? null
+        : { label: printing.artist, href: searchHref(`a:${quotedValue(printing.artist)}`) },
     pricing: pricing(printing, history),
   };
 }
