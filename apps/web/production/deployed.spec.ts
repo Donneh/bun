@@ -1,52 +1,33 @@
 import type { APIRequestContext } from "@playwright/test";
 import { expectedApiVersion, expectedBuildId, webUrl, wwwUrl } from "../playwright.production.config.ts";
+import { appReadiness, servesTheApp } from "./app-readiness.ts";
 import { expect, test } from "./staged-version.ts";
 
 const READY_TIMEOUT_MS = 180_000;
 const API_VERSION_TIMEOUT_MS = 60_000;
 const query = "c:fury cost:<=2";
 
-async function homePage(request: APIRequestContext) {
-  const response = await request.get("/", { headers: { "cache-control": "no-cache" } });
-  return { response, html: response.ok() ? await response.text() : "" };
-}
-
-function servesTheApp(html: string) {
-  if (!html.includes('<div id="__nuxt">')) return false;
-  return expectedBuildId === undefined || html.includes(`buildId:"${expectedBuildId}"`);
-}
-
-function assetPaths(html: string) {
-  return [...new Set([...html.matchAll(/(?:src|href)="(\/_nuxt\/[^"]+\.(?:js|css))"/g)].map(([, path]) => path ?? ""))];
-}
-
-test.beforeAll(async ({ request }) => {
-  test.setTimeout(READY_TIMEOUT_MS + 10_000);
+async function waitForApp(request: APIRequestContext, path: string) {
+  test.setTimeout(READY_TIMEOUT_MS + 30_000);
   await expect
-    .poll(async () => servesTheApp((await homePage(request)).html), {
-      message: `${webUrl} serves the app${expectedBuildId ? ` at build ${expectedBuildId}` : ""}`,
+    .poll(() => appReadiness(request, path, expectedBuildId), {
+      message: `${webUrl}${path} serves the app and its assets${expectedBuildId ? ` at build ${expectedBuildId}` : ""}`,
       timeout: READY_TIMEOUT_MS,
       intervals: [2_000, 5_000],
     })
-    .toBe(true);
+    .toBe("ready");
+}
+
+test.beforeAll(async ({ request }) => {
+  await waitForApp(request, "/");
 });
 
 test("the home page and its scripts and styles load", async ({ request }) => {
-  const { response, html } = await homePage(request);
-  expect(response.headers()["content-type"]).toContain("text/html");
-
-  const paths = assetPaths(html);
-  expect(paths.filter((path) => path.endsWith(".js")).length).toBeGreaterThan(0);
-  expect(paths.filter((path) => path.endsWith(".css")).length).toBeGreaterThan(0);
-
-  for (const path of paths) {
-    const asset = await request.get(path);
-    expect(asset.status(), path).toBe(200);
-    expect(asset.headers()["content-type"], path).toMatch(path.endsWith(".css") ? /text\/css/ : /javascript/);
-  }
+  expect(await appReadiness(request, "/", expectedBuildId)).toBe("ready");
 });
 
-test("a shared search link shows its cards", async ({ page }) => {
+test("a shared search link shows its cards", async ({ page, request }) => {
+  await waitForApp(request, `/?q=${encodeURIComponent(query)}`);
   const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
   await page.goto(`/?q=${encodeURIComponent(query)}`);
 
@@ -72,6 +53,7 @@ test("a shared search link shows its cards", async ({ page }) => {
 });
 
 test("a card link opened directly serves the app and shows the card", async ({ page, request }) => {
+  await waitForApp(request, `/?q=${encodeURIComponent(query)}`);
   const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");
   await page.goto(`/?q=${encodeURIComponent(query)}`);
   const { data } = (await (await searchResponse).json()) as { data: { id: string; name: string }[] };
@@ -79,10 +61,11 @@ test("a card link opened directly serves the app and shows the card", async ({ p
   if (!card) throw new Error(`${query} finds no card`);
   const path = `/cards/${card.id}`;
 
+  await waitForApp(request, path);
   const response = await request.get(path, { headers: { "cache-control": "no-cache" } });
   expect(response.status(), path).toBe(200);
   expect(
-    servesTheApp(await response.text()),
+    servesTheApp(await response.text(), expectedBuildId),
     `${path} serves the app${expectedBuildId ? ` at build ${expectedBuildId}` : ""}`,
   ).toBe(true);
 
@@ -93,9 +76,10 @@ test("a card link opened directly serves the app and shows the card", async ({ p
 });
 
 test("an unknown path serves the app, which says the page was not found", async ({ page, request }) => {
+  await waitForApp(request, "/no-such-page");
   const response = await request.get("/no-such-page", { headers: { "cache-control": "no-cache" } });
   expect(response.status()).toBe(200);
-  expect(servesTheApp(await response.text())).toBe(true);
+  expect(servesTheApp(await response.text(), expectedBuildId)).toBe(true);
 
   await page.goto("/no-such-page");
 
