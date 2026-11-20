@@ -5,6 +5,7 @@ import type { RulesSnapshot } from "@riftkeeper/cards/rules";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { createCardsRoutes } from "./cards/cards.routes.ts";
+import { createRandomRoutes } from "./cards/random.routes.ts";
 import { errorBody } from "./http/errors.ts";
 import { createSearchRoutes } from "./search/search.routes.ts";
 
@@ -29,6 +30,7 @@ export function createApp({
     .get("/health", (c) =>
       c.json({ data: { status: "ok", cards: cards.length, version: c.env?.CF_VERSION_METADATA?.id ?? null } }, 200),
     )
+    .route("/cards/random", createRandomRoutes({ cards: pricedCards }))
     .route("/cards", createCardsRoutes({ cards: pricedCards, priceHistory, rules }))
     .route("/search", createSearchRoutes({ cards: pricedCards }))
     .notFound((c) =>

@@ -56,6 +56,21 @@ export async function fetchCard(apiBase: string, id: string): Promise<CardOutcom
   }
 }
 
+export async function fetchRandomCard(apiBase: string, query: string): Promise<CardOutcome> {
+  try {
+    const { data: card } = await $fetch<{ data: PricedCard | null }>("/cards/random", {
+      baseURL: apiBase,
+      query: { q: query },
+      retry: 0,
+    });
+    if (!card) return { kind: "not-found" };
+    rememberCards([card]);
+    return { kind: "card", card };
+  } catch (error) {
+    return { kind: "error", message: apiErrorMessage(error) ?? UNREACHABLE_MESSAGE };
+  }
+}
+
 export async function fetchPriceHistory(apiBase: string, cardId: string): Promise<PriceHistory | null> {
   try {
     const path = `/cards/${encodeURIComponent(cardId)}/price-history`;
