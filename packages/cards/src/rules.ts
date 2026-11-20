@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CardIdSchema } from "./card.ts";
+import { type CardId, CardIdSchema } from "./card.ts";
 
 export const FormatSchema = z.enum(["standard", "2v2"]);
 export type Format = z.infer<typeof FormatSchema>;
@@ -60,4 +60,12 @@ export function parseRulesSnapshot({ json, path }: { json: unknown; path: string
   const parsed = RulesSnapshotSchema.safeParse(json);
   if (parsed.success) return parsed.data;
   throw new Error(`Rules snapshot ${path} does not match the rules schema: ${z.prettifyError(parsed.error)}`);
+}
+
+export function rulesOf(snapshot: RulesSnapshot, cardId: CardId): RulesSnapshot {
+  const bans = snapshot.bans.filter((ban) => ban.card === cardId);
+  const errata = snapshot.errata.filter((entry) => entry.card === cardId);
+  const rulings = snapshot.rulings.filter((ruling) => ruling.cards.includes(cardId));
+  const used = new Set([...bans, ...errata, ...rulings].map((entry) => entry.source));
+  return { sources: snapshot.sources.filter((source) => used.has(source.url)), bans, errata, rulings };
 }

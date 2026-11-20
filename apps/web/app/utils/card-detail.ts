@@ -1,12 +1,14 @@
 import type { Card, Domain, PrintingId, Variant } from "@riftkeeper/cards";
 import type { HistoryFinish, PriceHistory } from "@riftkeeper/cards/price-history";
 import type { PricedCard, PricedPrinting, PriceQuote, PrintingPrices } from "@riftkeeper/cards/prices";
+import type { Format, RulesSnapshot } from "@riftkeeper/cards/rules";
 import type {
   CardInfoContent,
   CardKickerItem,
   CardStat,
   GlyphName,
   GlyphTextPart,
+  LegalityRow,
   PriceDay,
   PriceFigure,
   PriceTrend,
@@ -202,7 +204,34 @@ function marketPrices(prices: PrintingPrices | null): PriceFigure[] {
   return finishQuotes(prices).flatMap(({ finish, quote }) => figure(finish, quote.market, money));
 }
 
-export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHistory | null = null): CardInfoContent {
+const FORMATS: readonly { readonly format: Format; readonly label: string }[] = [
+  { format: "standard", label: "Standard" },
+  { format: "2v2", label: "2v2 Constructed" },
+];
+
+export function legality(rules: RulesSnapshot, today: string): LegalityRow[] {
+  const titles = new Map(rules.sources.map((source) => [source.url, source.title.replace(/\s*\(.*\)$/, "")]));
+  const constructed = FORMATS.map(({ format, label }): LegalityRow => {
+    const ban = rules.bans.find((entry) => entry.format === format);
+    if (ban === undefined) return { format: label, status: "legal", label: "Legal" };
+    const source = { label: titles.get(ban.source) ?? "Riot announcement", href: ban.source };
+    return ban.effective <= today
+      ? { format: label, status: "banned", label: "Banned", source }
+      : { format: label, status: "upcoming", label: `Banned ${DAY_DATE.format(Date.parse(ban.effective))}`, source };
+  });
+  return [...constructed, { format: "Sealed", status: "legal", label: "Legal", note: "No ban list" }];
+}
+
+export function localDate(now: Date): string {
+  return [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((part) => String(part).padStart(2, "0")).join("-");
+}
+
+export function cardInfo(
+  card: Card,
+  printing: PricedPrinting,
+  history: PriceHistory | null = null,
+  legalityRows: readonly LegalityRow[] | null = null,
+): CardInfoContent {
   return {
     name: card.name,
     subtitle: card.subtitle,
@@ -223,6 +252,7 @@ export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHis
         ? null
         : { label: printing.artist, href: searchHref(`a:${quotedValue(printing.artist)}`) },
     pricing: pricing(printing, history),
+    legality: legalityRows,
   };
 }
 

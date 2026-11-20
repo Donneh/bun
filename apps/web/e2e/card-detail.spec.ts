@@ -187,6 +187,42 @@ test("a card page opens directly, survives a reload and fits a phone", async ({ 
   expect(new URL(page.url()).pathname).toBe("/");
 });
 
+test("a card shows its legality per format, dating a ban that is not in force yet", async ({ page, request }) => {
+  const card = await cardWithPrintings(request, 1);
+  const announcement = "https://playriftbound.com/en-us/news/announcements/test-ban-list-updates";
+  await page.route(`${apiBase}/cards/${card.id}/rules`, (route) =>
+    route.fulfill({
+      json: {
+        data: {
+          sources: [
+            { url: announcement, title: "Test Ban List Updates (Effective March 1, 2999)", publishedAt: "2026-01-01" },
+          ],
+          bans: [
+            { card: card.id, format: "standard", effective: "2999-03-01", source: announcement },
+            { card: card.id, format: "2v2", effective: "2026-01-02", source: announcement },
+          ],
+          errata: [],
+          rulings: [],
+        },
+      },
+    }),
+  );
+
+  await page.goto(`/cards/${card.id}`);
+
+  const legality = page.getByRole("region", { name: "Legality" });
+  await expect(legality.getByRole("definition")).toHaveText([
+    /^Banned Mar 1Test Ban List Updates$/,
+    /^BannedTest Ban List Updates$/,
+    /^LegalNo ban list$/,
+  ]);
+  await expect(legality.getByRole("term")).toHaveText(["Standard", "2v2 Constructed", "Sealed"]);
+  await expect(legality.getByRole("link", { name: "Test Ban List Updates" }).first()).toHaveAttribute(
+    "href",
+    announcement,
+  );
+});
+
 test("a legend links to cards within its domains", async ({ page, request }) => {
   const { data } = await apiSearch(request, "type:legend");
   const legend = data[0] as ApiCard;

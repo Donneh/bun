@@ -59,6 +59,16 @@ export interface PrintingSummary {
   readonly prices: readonly PriceFigure[];
 }
 
+export type LegalityStatus = "legal" | "banned" | "upcoming";
+
+export interface LegalityRow {
+  readonly format: string;
+  readonly status: LegalityStatus;
+  readonly label: string;
+  readonly note?: string;
+  readonly source?: CardLink;
+}
+
 export interface CardInfoContent {
   readonly name: string;
   readonly subtitle: string | null;
@@ -69,4 +79,5 @@ export interface CardInfoContent {
   readonly tags: readonly CardLink[];
   readonly artist: CardLink | null;
   readonly pricing: PricingContent | null;
+  readonly legality: readonly LegalityRow[] | null;
 }

@@ -1,5 +1,6 @@
 import type { PriceHistory } from "@riftkeeper/cards/price-history";
 import type { PricedCard } from "@riftkeeper/cards/prices";
+import type { RulesSnapshot } from "@riftkeeper/cards/rules";
 import type { Decomposition, SearchWarning } from "@riftkeeper/search";
 import type { CardSummary } from "@riftkeeper/ui";
 import { rememberCards } from "./card-cache";
@@ -59,6 +60,15 @@ export async function fetchPriceHistory(apiBase: string, cardId: string): Promis
   try {
     const path = `/cards/${encodeURIComponent(cardId)}/price-history`;
     return (await $fetch<{ data: PriceHistory }>(path, { baseURL: apiBase })).data;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCardRules(apiBase: string, cardId: string): Promise<RulesSnapshot | null> {
+  try {
+    return (await $fetch<{ data: RulesSnapshot }>(`/cards/${encodeURIComponent(cardId)}/rules`, { baseURL: apiBase }))
+      .data;
   } catch {
     return null;
   }

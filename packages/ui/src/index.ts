@@ -5,6 +5,7 @@ export { default as CardDetailSkeleton } from "./CardDetailSkeleton.vue";
 export { default as CardGrid } from "./CardGrid.vue";
 export { default as CardImage } from "./CardImage.vue";
 export { default as CardInfo } from "./CardInfo.vue";
+export { default as CardLegality } from "./CardLegality.vue";
 export { default as CardPricing } from "./CardPricing.vue";
 export { default as CardText } from "./CardText.vue";
 export { default as CardTile } from "./CardTile.vue";
@@ -15,6 +16,8 @@ export type {
   CardLink,
   CardStat,
   FinishPricing,
+  LegalityRow,
+  LegalityStatus,
   PriceDay,
   PriceFigure,
   PriceTrend,

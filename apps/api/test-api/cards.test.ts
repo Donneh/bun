@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { PRICE_HISTORY_DAYS, PriceHistorySchema } from "@riftkeeper/cards/price-history";
 import { PricedCardSchema } from "@riftkeeper/cards/prices";
+import { RulesSnapshotSchema } from "@riftkeeper/cards/rules";
 import { z } from "zod";
 
 const baseUrl = process.env.BASE_URL;
@@ -92,6 +93,26 @@ describe("printing prices", () => {
     const printings = CardResponseSchema.parse(body).data.printings;
     expect(printings.map((printing) => printing.prices)).toEqual(card.printings.map((printing) => printing.prices));
     expect(printings.some((printing) => printing.prices !== null)).toBe(true);
+  });
+});
+
+describe("GET /cards/:id/rules", () => {
+  test("returns only that card's bans, errata and rulings, with every source they cite", async () => {
+    const [card] = await getCardList();
+
+    const { status, body } = await get(`/cards/${card.id}/rules`);
+
+    expect(status).toBe(200);
+    const rules = z.object({ data: RulesSnapshotSchema }).parse(body).data;
+    expect([...rules.bans, ...rules.errata].every((entry) => entry.card === card.id)).toBe(true);
+    expect(rules.rulings.every((ruling) => ruling.cards.includes(card.id))).toBe(true);
+  });
+
+  test("responds 404 card_not_found for an unknown id", async () => {
+    const { status, body } = await get("/cards/no-such-card/rules");
+
+    expect(status).toBe(404);
+    expect(ErrorResponseSchema.parse(body).error.code).toBe("card_not_found");
   });
 });
 

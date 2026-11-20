@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { type Card, CardIdSchema } from "@riftkeeper/cards";
 import { historyOf, type PriceHistory } from "@riftkeeper/cards/price-history";
+import { type RulesSnapshot, rulesOf } from "@riftkeeper/cards/rules";
 import { Hono } from "hono";
 import { z } from "zod";
 import { errorBody } from "../http/errors.ts";
@@ -17,7 +18,15 @@ const cardParams = zValidator("param", CardParamsSchema, (result, c) => {
 
 const cardNotFound = (id: string) => errorBody({ code: "card_not_found", message: `Card ${id} does not exist` });
 
-export function createCardsRoutes({ cards, priceHistory }: { cards: readonly Card[]; priceHistory: PriceHistory }) {
+export function createCardsRoutes({
+  cards,
+  priceHistory,
+  rules,
+}: {
+  cards: readonly Card[];
+  priceHistory: PriceHistory;
+  rules: RulesSnapshot;
+}) {
   const cardsById = new Map(cards.map((card) => [card.id, card]));
   return new Hono()
     .get("/", (c) => c.json({ data: cards }, 200))
@@ -33,5 +42,10 @@ export function createCardsRoutes({ cards, priceHistory }: { cards: readonly Car
       if (!card) return c.json(cardNotFound(id), 404);
       const printingIds = card.printings.map((printing) => printing.id);
       return c.json({ data: historyOf(priceHistory, printingIds) }, 200);
+    })
+    .get("/:id/rules", cardParams, (c) => {
+      const { id } = c.req.valid("param");
+      if (!cardsById.has(id)) return c.json(cardNotFound(id), 404);
+      return c.json({ data: rulesOf(rules, id) }, 200);
     });
 }

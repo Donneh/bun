@@ -24,6 +24,7 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 | GET    | `/cards`                   | `200 { data: Card[] }`                                                   |
 | GET    | `/cards/:id`               | `200 { data: Card }`, `400` bad id, `404` no card                        |
 | GET    | `/cards/:id/price-history` | `200 { data: PriceHistory }`, `400` bad id, `404` no card                |
+| GET    | `/cards/:id/rules`         | `200 { data: RulesSnapshot }`, `400` bad id, `404` no card               |
 | GET    | `/search`                  | `200 { data: Card[], meta, warnings, parsed }`, `400` bad parameters     |
 | GET    | `/search/options`          | `200 { data: { domains, types, supertypes, rarities, variants, sets } }` |
 
@@ -61,6 +62,8 @@ Every card response (`/cards`, `/cards/:id` and `/search`) also gives each print
 ```
 
 `dates` are the UTC days on which TCGCSV built prices, ascending, and each series has one value per date. A day without a price for a finish is `null`, and a day on which no prices were recorded at all is missing from `dates`, so a gap is never filled with another day's price. A printing without any price in the window is left out. The schema lives in `packages/cards/src/price-history.ts`.
+
+`GET /cards/:id/rules` gives the card's entries from Riot's ban lists, errata and set FAQs, in the shape of `data/rules.json` (see `apps/ingest/README.md`): `bans` (one per format, with the `effective` day, which can still be in the future), `errata`, `rulings` that name the card, and only the `sources` those entries cite. A card without any has empty lists. The schema lives in `packages/cards/src/rules.ts`.
 
 ## Search
 
@@ -129,6 +132,8 @@ On a lightly used API almost every request lands on a new Worker instance, so st
 `src/cards/card-snapshot.ts` imports `data/cards.json`, so Wrangler bundles the snapshot into the Worker. The schema and parser live in `packages/cards/src/card-snapshot.ts`. The Worker does not validate the snapshot when it starts. `bun run build` runs `scripts/validate-snapshot.ts` first, which fails the build when the snapshot does not match the card schema or has fields the schema does not know, with one message instead of a list of Zod issues. The unit tests check the same.
 
 `src/cards/price-snapshot.ts` bundles `data/prices.json` and `data/price-history.json` the same way, and `scripts/validate-snapshot.ts` checks them against their schemas. Prices are keyed by printing id and joined to the cards once, when the Worker starts. A printing missing from the price snapshot gets `prices: null`, and a price for a printing that no longer exists is ignored, so the two snapshots can be updated independently.
+
+`src/cards/rules-snapshot.ts` bundles `data/rules.json`, which `scripts/validate-snapshot.ts` also checks. A unit test checks that every card it names is in the card snapshot.
 
 ## Black-box tests
 
