@@ -27,6 +27,14 @@ BASE_URL=https://riftkeeper.app WWW_URL=https://www.riftkeeper.app bun run test:
 
 The browser calls the API directly, so the API must allow the page's origin. It sends `Access-Control-Allow-Origin: *`.
 
+## Search indexing
+
+`public/_redirects` permanently redirects the retired `/login` and `/login/` URLs to the public search at `/`. This is an HTTP 301 from Cloudflare's static asset handler, not a JavaScript redirect. OpenTofu uploads the built `_redirects` file as a text module on the web Worker version; copying it into the asset directory alone is not enough for that provider. Other missing paths keep the existing SPA fallback.
+
+`public/robots.txt` allows crawling and advertises `public/sitemap.xml`, which lists the homepage. The sitemap is deliberately small: it does not list the retired login, arbitrary searches or the changing card snapshot. The initial HTML still contains only the app shell, title and description, not rendered search results or card content. There is no global homepage canonical because that same shell also serves card deep links.
+
+After deployment, use Google Search Console's URL Inspection on `https://riftkeeper.app/login` to check the redirect and on `https://riftkeeper.app/` to test the live URL and request indexing. Submit `https://riftkeeper.app/sitemap.xml` in Sitemaps. Keep `/login` crawlable so Google can see the redirect. The Removals tool is not the normal fix for a moved URL; it only temporarily hides results. Google must recrawl and reprocess the URLs, which can take days to weeks, and requesting indexing does not guarantee indexing, timing or ranking. These files do not turn the site into an SSR app.
+
 ## The page
 
 - `/random` chooses a random card through `GET /cards/random` and replaces the URL with its card page. An optional `?q=` restricts the choice using the search language, for example `/random?q=type:legend`. The navbar's **Random** link chooses again. A query without matches shows a no-results message; failed requests can be retried.

@@ -26,6 +26,16 @@ test("the home page and its scripts and styles load", async ({ request }) => {
   expect(await appReadiness(request, "/", expectedBuildId)).toBe("ready");
 });
 
+test("retired login links permanently redirect to the public search", async ({ request }) => {
+  for (const path of ["/login", "/login/", "/login?next=%2Fcards%2Fold-card"]) {
+    const response = await request.get(path, { maxRedirects: 0 });
+    expect(response.status(), path).toBe(301);
+    const destination = new URL(response.headers().location ?? "", response.url());
+    expect(destination.origin).toBe(webUrl);
+    expect(destination.pathname).toBe("/");
+  }
+});
+
 test("a shared search link shows its cards", async ({ page, request }) => {
   await waitForApp(request, `/?q=${encodeURIComponent(query)}`);
   const searchResponse = page.waitForResponse((response) => new URL(response.url()).pathname === "/search");

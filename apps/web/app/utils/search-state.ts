@@ -27,6 +27,7 @@ const SORT_LABELS: Record<SortKey, string> = {
   cost: "Cost",
   might: "Might",
   power: "Power",
+  price: "Price (USD)",
 };
 
 export const SORT_OPTIONS: readonly SortOption[] = SORT_KEYS.map((key) => ({ value: key, label: SORT_LABELS[key] }));

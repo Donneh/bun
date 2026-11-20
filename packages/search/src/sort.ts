@@ -1,4 +1,5 @@
 import type { Card, Printing, Rarity } from "@riftkeeper/cards";
+import { marketPrice } from "./price.ts";
 import type { SortDirection, SortKey } from "./search.ts";
 import { setReleaseRank } from "./set-order.ts";
 
@@ -79,7 +80,14 @@ function compareCardKey(key: CardSortKey, a: Card, b: Card, direction: SortDirec
       return compareStat(a.might, b.might, direction);
     case "power":
       return compareStat(a.powerCost, b.powerCost, direction);
+    case "price":
+      return compareStat(cheapestPrice(a), cheapestPrice(b), direction);
   }
+}
+
+function cheapestPrice(card: Card): number | null {
+  const prices = card.printings.flatMap((printing) => marketPrice(printing) ?? []);
+  return prices.length === 0 ? null : Math.min(...prices);
 }
 
 function isPrintingSortKey(key: SortKey): key is PrintingSortKey {

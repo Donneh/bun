@@ -148,6 +148,12 @@ resource "cloudflare_worker_version" "web" {
   worker_id          = cloudflare_worker.web.id
   compatibility_date = local.web_wrangler_config.compatibility_date
 
+  modules = [{
+    name         = "_redirects"
+    content_type = "text/plain"
+    content_file = "${path.module}/../apps/web/${local.web_wrangler_config.assets.directory}/_redirects"
+  }]
+
   assets = {
     directory = "${path.module}/../apps/web/${local.web_wrangler_config.assets.directory}"
     config = {
