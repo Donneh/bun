@@ -36,6 +36,13 @@ function hasTag(card: Card, value: string): boolean {
   return card.tags.some((tag) => equalsIgnoringCase(tag, value));
 }
 
+function hasKeyword(source: string | null, value: string): boolean {
+  return [...(source ?? "").matchAll(/\[([A-Za-z][^\][]*)\]/g)].some((match) => {
+    const keyword = match[1] ?? "";
+    return equalsIgnoringCase(keyword, value) || equalsIgnoringCase(keyword.replace(/ \d+$/, ""), value);
+  });
+}
+
 const FILTER_MATCHERS: FilterMatchers = {
   cost: (filter, card) => compare(card.energyCost, filter.comparison.operator, filter.comparison.value),
   power: (filter, card) => compare(card.powerCost, filter.comparison.operator, filter.comparison.value),
@@ -54,6 +61,11 @@ const FILTER_MATCHERS: FilterMatchers = {
   artist: (filter, _card, printing) => containsIgnoringCase(printing.artist, filter.text),
   ability: (filter, card) =>
     containsIgnoringCase(card.ability, filter.text) || containsIgnoringCase(card.effect, filter.text),
+  effect: (filter, card) => containsIgnoringCase(card.effect, filter.text),
+  keyword: (filter, card) => hasKeyword(card.ability, filter.text) || hasKeyword(card.effect, filter.text),
+  name: (filter, card) =>
+    equalsIgnoringCase(card.name, filter.text) ||
+    (card.subtitle !== null && equalsIgnoringCase(`${card.name}, ${card.subtitle}`, filter.text)),
 };
 
 function matchesFilter(filter: Filter, card: Card, printing: Printing): boolean {

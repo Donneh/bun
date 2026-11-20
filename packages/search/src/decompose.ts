@@ -40,6 +40,9 @@ const FIELD_MAPPINGS: FieldMappings = {
   tag: { label: "Tag", toValue: text },
   artist: { label: "Artist", toValue: text },
   ability: { label: "Card text", toValue: text },
+  effect: { label: "Effect", toValue: text },
+  keyword: { label: "Keyword", toValue: text },
+  name: { label: "Exact name", toValue: text },
 };
 
 function toValue<F extends FilterField>(filter: FilterOf<F>): FilterChipValue {

@@ -4,7 +4,9 @@ import { parseCardSnapshot } from "@riftkeeper/cards/snapshot";
 import { makeCard, makePrinting } from "@riftkeeper/cards/testing";
 import snapshot from "../../../apps/api/data/cards.json";
 import type { SearchNode } from "./ast.ts";
+import { decompose } from "./decompose.ts";
 import type { ComparisonOperator, Filter, TextField } from "./filter.ts";
+import { parseQuery } from "./parser.ts";
 import { PAGE_SIZE, type SearchRequest } from "./search.ts";
 import { searchCards } from "./search-cards.ts";
 
@@ -573,6 +575,67 @@ describe("pagination", () => {
 
     expect(page.page).toBe(1);
     expect(page.cards[0]?.name).toBe("Card 000");
+  });
+});
+
+describe("keyword, effect and exact-name queries", () => {
+  const cards = [
+    buildCard({ id: "jinx", name: "Jinx", subtitle: "Loose Cannon", ability: "[Shield 2] Draw 1.", effect: null }),
+    buildCard({ id: "jinx-rebel", name: "Jinx", subtitle: "Rebel", ability: null, effect: "[Shield 3] Draw 2." }),
+    buildCard({ id: "jinxed", name: "Jinxed", ability: "[Shield]", effect: "[Show Off]" }),
+    buildCard({ id: "prose", name: "Prose", ability: "Give Shield 2.", effect: "Draw 1.", tags: ["Shield", "Jinx"] }),
+    buildCard({ id: "partial", name: "Partial", ability: "[Shielding] [>>][Flow][>]", effect: null }),
+    buildCard({ id: "blank", name: "Blank", ability: null, effect: null }),
+  ];
+
+  const ids = (query: string) => {
+    const { root, warnings } = parseQuery(query);
+    expect(warnings).toEqual([]);
+    return searchCards(cards, request(root)).cards.map((card) => String(card.id));
+  };
+
+  test("keyword matches whole bracketed keywords in either text field, including numbered keywords", () => {
+    expect(ids("keyword:SHIELD")).toEqual(["jinx", "jinx-rebel", "jinxed"]);
+    expect(ids('k:"shield 2"')).toEqual(["jinx"]);
+    expect(ids('k:"show off"')).toEqual(["jinxed"]);
+    expect(ids("k:flow")).toEqual(["partial"]);
+    expect(ids("k:shi")).toEqual([]);
+    expect(ids('k:">"')).toEqual([]);
+    expect(ids('k:shield -k:"shield 2"')).toEqual(["jinx-rebel", "jinxed"]);
+  });
+
+  test("effect searches only effect text while ability still searches both", () => {
+    expect(ids('effect:"DRAW 1"')).toEqual(["prose"]);
+    expect(ids('ability:"draw 1"')).toEqual(["jinx", "prose"]);
+    expect(ids("effect:shield")).toEqual(["jinx-rebel"]);
+  });
+
+  test("exact names match a whole name or name with subtitle, never tags or substrings", () => {
+    expect(ids('!"JINX"')).toEqual(["jinx", "jinx-rebel"]);
+    expect(ids('!"Jinx, Loose Cannon"')).toEqual(["jinx"]);
+    expect(ids('name:"Jinx, Rebel"')).toEqual(["jinx-rebel"]);
+    expect(ids('(!"Jinx" or !"Blank") -k:shield')).toEqual(["blank"]);
+    expect(ids('!"Jinx" k:"shield 3"')).toEqual(["jinx-rebel"]);
+  });
+
+  test("new filters expose removable chips with the original query spans", () => {
+    const query = '!"Jinx" k:shield effect:draw';
+    const { root } = parseQuery(query);
+    const result = decompose(query, root);
+    expect(result.hasAdvancedConditions).toBe(false);
+    expect(
+      result.filters.map(({ field, label, expression, span, editable }) => ({
+        field,
+        label,
+        expression,
+        span,
+        editable,
+      })),
+    ).toEqual([
+      { field: "name", label: "Exact name", expression: '!"Jinx"', span: { start: 0, end: 7 }, editable: true },
+      { field: "keyword", label: "Keyword", expression: "k:shield", span: { start: 8, end: 16 }, editable: true },
+      { field: "effect", label: "Effect", expression: "effect:draw", span: { start: 17, end: 28 }, editable: true },
+    ]);
   });
 });
 

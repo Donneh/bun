@@ -118,6 +118,9 @@ const FILTERS: { readonly [F in FilterField]: FilterParser } = {
   set: text("set"),
   artist: text("artist"),
   ability: text("ability"),
+  effect: text("effect"),
+  keyword: text("keyword"),
+  name: text("name"),
 };
 
 const PARSERS_BY_KEYWORD = new Map(
