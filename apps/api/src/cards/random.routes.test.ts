@@ -48,15 +48,18 @@ describe("GET /cards/random", () => {
     expect(await response.json()).toMatchObject({
       data: { printings: printings.map((p) => ({ ...p, prices: null })) },
     });
-    expect((await full.request("/cards/random?q=r:epic%20r:common")).status).toBe(404);
+    expect(await (await full.request("/cards/random?q=r:epic%20r:common")).json()).toEqual({
+      data: null,
+      warnings: [],
+    });
   });
 
-  test.each([{ snapshot: cards }, { snapshot: [] }])("responds 404 when there are no matches", async ({ snapshot }) => {
+  test.each([{ snapshot: cards }, { snapshot: [] }])("answers no card when nothing matches", async ({ snapshot }) => {
     const empty = createApp({ cards: snapshot, prices, priceHistory: makePriceHistory() });
     const response = await empty.request("/cards/random?q=cost:>999");
 
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: { code: "card_not_found", message: "No cards match this query." } });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ data: null, warnings: [] });
   });
 
   test("reports ignored query terms with the same warning limit as search", async () => {

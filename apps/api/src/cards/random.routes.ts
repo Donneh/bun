@@ -23,10 +23,7 @@ export function createRandomRoutes({ cards }: { cards: readonly Card[] }) {
         root === null
           ? cards
           : cards.filter((card) => card.printings.some((printing) => matchesNode(root, card, printing)));
-      const card = matches[Math.floor(Math.random() * matches.length)];
-      if (!card) {
-        return c.json(errorBody({ code: "card_not_found", message: "No cards match this query." }), 404);
-      }
+      const card = matches[Math.floor(Math.random() * matches.length)] ?? null;
       return c.json({ data: card, warnings: warnings.slice(0, MAX_WARNINGS) }, 200);
     },
   );

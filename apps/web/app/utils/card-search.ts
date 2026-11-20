@@ -57,15 +57,15 @@ export async function fetchCard(apiBase: string, id: string): Promise<CardOutcom
 
 export async function fetchRandomCard(apiBase: string, query: string): Promise<CardOutcome> {
   try {
-    const response = await $fetch<{ data: PricedCard }>("/cards/random", {
+    const { data: card } = await $fetch<{ data: PricedCard | null }>("/cards/random", {
       baseURL: apiBase,
       query: { q: query },
       retry: 0,
     });
-    rememberCards([response.data]);
-    return { kind: "card", card: response.data };
+    if (!card) return { kind: "not-found" };
+    rememberCards([card]);
+    return { kind: "card", card };
   } catch (error) {
-    if ((error as { statusCode?: unknown } | null)?.statusCode === 404) return { kind: "not-found" };
     return { kind: "error", message: apiErrorMessage(error) ?? UNREACHABLE_MESSAGE };
   }
 }

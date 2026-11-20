@@ -27,8 +27,7 @@ test("random forwards the query and opens a matching card", async ({ page }) => 
   await expect(page.getByRole("article")).toBeVisible();
 });
 
-test("a random query without matches says so and links back to search", async ({ page, browserConsole }) => {
-  browserConsole.expect(failedResponse(404, "/cards/random"));
+test("a random query without matches says so and links back to search", async ({ page }) => {
   await page.goto("/random?q=cost:>999");
 
   await expect(page.getByRole("status")).toContainText("No cards match “cost:>999”.");
