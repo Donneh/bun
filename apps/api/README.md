@@ -22,6 +22,7 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 | ------ | -------------------------- | ------------------------------------------------------------------------ |
 | GET    | `/health`                  | `200 { data: { status: "ok", cards: number, version: string \| null } }` |
 | GET    | `/cards`                   | `200 { data: Card[] }`                                                   |
+| GET    | `/cards/random`            | `200 { data: Card \| null, warnings }`, `400` bad query                  |
 | GET    | `/cards/:id`               | `200 { data: Card }`, `400` bad id, `404` no card                        |
 | GET    | `/cards/:id/price-history` | `200 { data: PriceHistory }`, `400` bad id, `404` no card                |
 | GET    | `/search`                  | `200 { data: Card[], meta, warnings, parsed }`, `400` bad parameters     |
@@ -29,13 +30,15 @@ The Worker code in `src` must not use Bun APIs. `bun run typecheck` checks `src`
 
 Errors use the shape `{ error: { code, message } }`.
 
+`GET /cards/random` chooses uniformly from all cards, or from the cards matching an optional `q` search query (at most 512 characters). It uses the same query language and warning limit as `/search`, without pagination. Each card has an equal chance regardless of its printing count. A printing must satisfy the whole query for its card to qualify; the response includes the chosen card's full set of printings and prices. When no card matches, `data` is `null`. Responses use `Cache-Control: no-store` so repeated visits can choose again.
+
 Every response sends `Access-Control-Allow-Origin: *`, so a browser on any origin, such as the web app, can call the API. Only `GET` is allowed, and the API never asks for credentials.
 
 A card id is a lowercase slug of the card name and subtitle with apostrophes removed, for example `agonys-embrace` or `jinx-rebel`.
 
 A `Card` holds the gameplay facts shared by all printings: `id`, `name`, `subtitle`, `type`, `supertype`, `domains` (can be empty), `energyCost`, `powerCost`, `might`, `mightBonus`, `ability`, `effect` and `tags`. Facts Riot does not give are `null`. Its `printings` array holds one entry per printed version with `id`, `publicCode`, `set`, `collectorNumber`, `variant`, `rarity`, `artist` (`null` when unknown), `imageUrl` and `orientation`. The schema lives in `packages/cards/src/card.ts`.
 
-Every card response (`/cards`, `/cards/:id` and `/search`) also gives each printing its `prices`, or `null` when TCGplayer has no price for it, such as for tokens:
+Every card response (`/cards`, `/cards/random`, `/cards/:id` and `/search`) also gives each printing its `prices`, or `null` when TCGplayer has no price for it, such as for tokens:
 
 ```json
 {

@@ -48,6 +48,20 @@ describe("GET /cards", () => {
   });
 });
 
+describe("GET /cards/random", () => {
+  test.each(["", "type:unit c:fury"])("returns a full card from the snapshot for query %p", async (q) => {
+    const response = await fetch(new URL(`/cards/random?${new URLSearchParams({ q })}`, baseUrl));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    const card = CardResponseSchema.parse(await response.json()).data;
+    expect((await getCardList()).find((candidate) => candidate.id === card.id)).toEqual(card);
+    if (q) {
+      expect(card.type).toBe("unit");
+      expect(card.domains).toContain("fury");
+    }
+  });
+});
+
 describe("GET /cards/:id", () => {
   test("returns the same card as the list", async () => {
     const [card] = await getCardList();
