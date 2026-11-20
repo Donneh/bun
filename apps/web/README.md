@@ -29,6 +29,7 @@ The browser calls the API directly, so the API must allow the page's origin. It 
 
 ## The page
 
+- `/random` chooses a random card through `GET /cards/random` and replaces the URL with its card page. An optional `?q=` restricts the choice using the search language, for example `/random?q=type:legend`. The navbar's **Random** link chooses again. A query without matches shows a no-results message; failed requests can be retried.
 - The search bar sends its text as `q` to `GET /search`, so the full query syntax works (see [Search](../api/README.md#search)).
 - The query lives in the URL as `?q=`, so a search can be shared and survives a reload. The form also submits `?q=` without JavaScript.
 - The grid shows the first 40 results. Scrolling to within 800px of the end loads the next page of 40 by itself, and the summary says how many of the total are shown. Screen readers hear the new count. At most one page request is in flight, page requests start at least 600ms apart so fast scrolling cannot burst past the API rate limit, and loading stops once every card is shown. A failed page shows the error with a **Try again** button in place of the scroll trigger. A page that arrives for an older query or sort is dropped. Each tile shows the image of the card's first matching printing, its name and its subtitle. Landscape cards span two columns.
