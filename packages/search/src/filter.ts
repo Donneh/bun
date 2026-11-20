@@ -7,7 +7,7 @@ export interface NumberComparison {
   readonly value: number;
 }
 
-export type NumericField = "cost" | "might" | "power";
+export type NumericField = "cost" | "might" | "power" | "price";
 export type TextField = "tag" | "set" | "artist" | "ability";
 
 export type Filter =

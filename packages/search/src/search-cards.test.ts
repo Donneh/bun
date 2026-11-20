@@ -1,10 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { type Card, CardIdSchema, type Domain, type Printing, PrintingIdSchema } from "@riftkeeper/cards";
+import { withPrices } from "@riftkeeper/cards/prices";
 import { parseCardSnapshot } from "@riftkeeper/cards/snapshot";
-import { makeCard, makePrinting } from "@riftkeeper/cards/testing";
+import { makeCard, makePriceSnapshot, makePrinting } from "@riftkeeper/cards/testing";
 import snapshot from "../../../apps/api/data/cards.json";
 import type { SearchNode } from "./ast.ts";
 import type { ComparisonOperator, Filter, TextField } from "./filter.ts";
+import { parseQuery } from "./parser.ts";
 import { PAGE_SIZE, type SearchRequest } from "./search.ts";
 import { searchCards } from "./search-cards.ts";
 
@@ -77,6 +79,85 @@ function cardWithPrintings(name: string, printings: Omit<PrintingInput, "id">[])
     printings: printings.map((overrides, index) => buildPrinting({ id: `${id}-p${index}`, ...overrides })),
   });
 }
+
+describe("market price search", () => {
+  const quote = (market: number | null) => ({ market, low: 0.01, mid: 20, high: 30 });
+  const cards = withPrices(
+    [
+      cardWithPrintings("Alpha", [{ rarity: "rare" }, { rarity: "common" }]),
+      cardWithPrintings("Beta", [{}]),
+      cardWithPrintings("Delta", [{}]),
+      cardWithPrintings("Echo", [{}]),
+      cardWithPrintings("Missing", [{}]),
+      cardWithPrintings("No market", [{}]),
+    ],
+    makePriceSnapshot({
+      printings: {
+        "alpha-p0": { normal: quote(8) },
+        "alpha-p1": { normal: quote(0.75), foil: quote(4) },
+        "beta-p0": { normal: quote(2), foil: quote(0.5) },
+        "delta-p0": { foil: quote(1) },
+        "echo-p0": { normal: quote(null), foil: quote(1.25) },
+        "no-market-p0": { normal: quote(null) },
+      },
+    }),
+  );
+
+  test.each([
+    ["usd<1", ["Alpha", "Beta"]],
+    ["usd<=1", ["Alpha", "Beta", "Delta"]],
+    ["usd=1", ["Delta"]],
+    ["usd!=1", ["Alpha", "Beta", "Echo"]],
+    ["usd>1", ["Alpha", "Echo"]],
+    ["usd>=1", ["Alpha", "Delta", "Echo"]],
+    ["-usd<1", ["Alpha", "Delta", "Echo", "Missing", "No market"]],
+    ["(usd<1 or usd=1.25) -type:spell", ["Alpha", "Beta", "Echo"]],
+    ["r:rare usd<1", []],
+  ])("%s compares market prices per printing", (query, expected) => {
+    const parsed = parseQuery(query);
+    expect(parsed.warnings).toEqual([]);
+    expect(names(cards, parsed.root)).toEqual(expected);
+  });
+
+  test("sorts each printing by its cheapest finish and leaves missing prices last in either direction", () => {
+    const ids = (direction: "asc" | "desc"): string[] =>
+      searchCards(cards, request(null, { sort: "price", direction, view: "printings" })).cards.flatMap((card) =>
+        card.printings.map((printing) => printing.id),
+      );
+    expect(ids("asc")).toEqual([
+      "beta-p0",
+      "alpha-p1",
+      "delta-p0",
+      "echo-p0",
+      "alpha-p0",
+      "missing-p0",
+      "no-market-p0",
+    ]);
+    expect(ids("desc")).toEqual([
+      "alpha-p0",
+      "echo-p0",
+      "delta-p0",
+      "alpha-p1",
+      "beta-p0",
+      "missing-p0",
+      "no-market-p0",
+    ]);
+  });
+
+  test("sorts cards by their cheapest matching printing, not their first or priciest printing", () => {
+    expect(names(cards, null, { sort: "price" })).toEqual(["Beta", "Alpha", "Delta", "Echo", "Missing", "No market"]);
+    expect(names(cards, null, { sort: "price", direction: "desc" })).toEqual([
+      "Echo",
+      "Delta",
+      "Alpha",
+      "Beta",
+      "Missing",
+      "No market",
+    ]);
+    expect(names(cards, parseQuery("usd>=1").root, { sort: "price" })).toEqual(["Delta", "Echo", "Alpha"]);
+    expect(cards[0]?.printings).toHaveLength(2);
+  });
+});
 
 describe("printing-level matching", () => {
   test("printing view sorts and counts individual printings", () => {

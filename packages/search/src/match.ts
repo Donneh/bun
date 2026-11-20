@@ -1,6 +1,7 @@
 import type { Card, Printing } from "@riftkeeper/cards";
 import type { SearchNode } from "./ast.ts";
 import type { ComparisonOperator, Filter, FilterField, FilterOf } from "./filter.ts";
+import { marketPrice } from "./price.ts";
 
 type FilterMatchers = {
   [F in FilterField]: (filter: FilterOf<F>, card: Card, printing: Printing) => boolean;
@@ -40,6 +41,8 @@ const FILTER_MATCHERS: FilterMatchers = {
   cost: (filter, card) => compare(card.energyCost, filter.comparison.operator, filter.comparison.value),
   power: (filter, card) => compare(card.powerCost, filter.comparison.operator, filter.comparison.value),
   might: (filter, card) => compare(card.might, filter.comparison.operator, filter.comparison.value),
+  price: (filter, _card, printing) =>
+    compare(marketPrice(printing), filter.comparison.operator, filter.comparison.value),
   domain: (filter, card) =>
     (filter.anyOf.length === 0 || filter.anyOf.some((domain) => card.domains.includes(domain))) &&
     filter.allOf.every((domain) => card.domains.includes(domain)) &&

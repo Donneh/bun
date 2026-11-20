@@ -66,13 +66,13 @@ Every card response (`/cards`, `/cards/:id` and `/search`) also gives each print
 
 `GET /search` takes these query parameters:
 
-| Parameter   | Values                                                                | Default |
-| ----------- | --------------------------------------------------------------------- | ------- |
-| `q`         | A query in the syntax below, at most 512 characters                   | empty   |
-| `sort`      | `set`, `collector_number`, `name`, `rarity`, `cost`, `might`, `power` | `set`   |
-| `direction` | `asc`, `desc`                                                         | `asc`   |
-| `page`      | 1 or higher, 40 results per page                                      | `1`     |
-| `view`      | `cards`, `printings`                                                  | `cards` |
+| Parameter   | Values                                                                         | Default |
+| ----------- | ------------------------------------------------------------------------------ | ------- |
+| `q`         | A query in the syntax below, at most 512 characters                            | empty   |
+| `sort`      | `set`, `collector_number`, `name`, `rarity`, `cost`, `might`, `power`, `price` | `set`   |
+| `direction` | `asc`, `desc`                                                                  | `asc`   |
+| `page`      | 1 or higher, 40 results per page                                               | `1`     |
+| `view`      | `cards`, `printings`                                                           | `cards` |
 
 A result is a card whose `printings` holds only the printings that matched. A card matches when one of its printings satisfies the whole query. `meta` holds `page`, `pageSize` and `total`. A malformed query never fails: the parts that could not be used come back in `warnings` (at most 20), each with a `message` and the `span` of the query it refers to. `parsed` lists the top-level filters a client can show as editable controls. The default sort is by set in release order: OGS, OGN, SFD, UNL, VEN, RAD.
 
@@ -87,6 +87,7 @@ Bare words search the card name with its subtitle (`Annie, Fiery`) and match tag
 | Energy cost | `cost`                      | `cost:3`, `cost:>=5`, `cost:!=2`                  |
 | Might       | `might`, `m`                | `m:<4`                                            |
 | Power cost  | `power`, `p`                | `p:2`                                             |
+| Price (USD) | `price`, `usd`              | `usd<1`, `price:<=2.50`, `usd:!=0.99`             |
 | Domain      | `domain`, `d`, `c`, `color` | `c:fury,calm`, `c:fury+calm`, `c:-chaos`, `c:red` |
 | Tag         | `tag`, `t`                  | `t:Ionia`                                         |
 | Type        | `type`                      | `type:spell`                                      |
@@ -98,6 +99,8 @@ Bare words search the card name with its subtitle (`Annie, Fiery`) and match tag
 | Card text   | `ability`                   | `ability:"draw 1"`                                |
 
 Numbers take `=`, `!=`, `<`, `<=`, `>` and `>=`. In a domain value, `,` means any of, `+` means all of and `-` means none of. Quote values with spaces. Combine with `and` (or just a space), `or`, `not` (or `-`) and parentheses, for example `(c:fury or c:chaos) -type:spell cost:<=3`.
+
+Price accepts non-negative decimal USD amounts. It uses the cheapest available normal or foil TCGplayer market price of each printing, not its low, mid or high quote. Only price filters allow omitting the colon before a comparison. Printings without a market price never match a price comparison (including `!=`); negating a price filter includes them. `sort=price` orders by the cheapest matching printing in cards view, or each printing's price in printings view. Missing prices sort last in both directions; ties use name and card id.
 
 `promo`, `owned`, `flavor`, `legal` and `keyword` existed in the old API; they are not supported yet and come back as warnings.
 

@@ -5,6 +5,7 @@ export const FILTER_KEYWORDS: { readonly [F in FilterField]: readonly [F, ...str
   cost: ["cost"],
   might: ["might", "m"],
   power: ["power", "p"],
+  price: ["price", "usd"],
   domain: ["domain", "d", "c", "color"],
   tag: ["tag", "t"],
   type: ["type"],

@@ -20,6 +20,10 @@ const FIELD_HELP: { readonly [F in FilterField]: { readonly label: string; reado
   cost: { label: "Energy cost", hint: "Energy cost: a whole number, such as cost:3 or cost:>=5." },
   might: { label: "Might", hint: "Might: a whole number, such as m:<4. Numbers take = != < <= > >=." },
   power: { label: "Power cost", hint: "Power cost: a whole number, such as p:2. Numbers take = != < <= > >=." },
+  price: {
+    label: "Price (USD)",
+    hint: "Price: cheapest normal or foil market price in USD, such as usd<1 or price:<=2.50. Unpriced printings do not match.",
+  },
   domain: { label: "Domain", hint: "Use , for any of, + for all of and - for none of, such as c:fury+calm." },
   tag: { label: "Tag", hint: "Tag: an exact region or creature tag, such as t:ionia." },
   type: { label: "Card type", hint: null },
@@ -58,6 +62,7 @@ export function suggest(query: string, caret: number): SearchSuggestions {
   if (query.charAt(start) === "-" && start < at) start++;
 
   const typed = query.slice(start, at);
+  if (/^(price|usd)[<>=!]/i.test(typed)) return { suggestions: [], hint: FIELD_HELP.price.hint };
   const colon = typed.indexOf(":");
   if (typed.slice(0, colon === -1 ? undefined : colon).includes('"')) return NONE;
   if (colon === -1) {

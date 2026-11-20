@@ -9,7 +9,7 @@ interface FieldMapping<F extends FilterField> {
 
 type FieldMappings = { readonly [F in FilterField]: FieldMapping<F> };
 
-const numeric = (filter: FilterOf<"cost" | "might" | "power">): FilterChipValue => ({
+const numeric = (filter: FilterOf<"cost" | "might" | "power" | "price">): FilterChipValue => ({
   kind: "numeric",
   operator: filter.comparison.operator,
   value: filter.comparison.value,
@@ -23,6 +23,7 @@ const FIELD_MAPPINGS: FieldMappings = {
   cost: { label: "Cost", toValue: numeric },
   might: { label: "Might", toValue: numeric },
   power: { label: "Power", toValue: numeric },
+  price: { label: "Price (USD)", toValue: numeric },
   domain: {
     label: "Domain",
     toValue: (filter) => ({

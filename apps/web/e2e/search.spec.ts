@@ -73,6 +73,26 @@ test("an empty query shows every card in the current sort", async ({ page, reque
   await expect.poll(() => results(page).getByRole("listitem").count()).toBeGreaterThan(meta.pageSize);
 });
 
+test("price suggestions, filters and sort controls share the API price search", async ({ page, request }) => {
+  await page.goto("/");
+  await searchBox(page).fill("us");
+  await expect(page.getByRole("option", { name: /^usd:/ })).toBeVisible();
+  await searchBox(page).press("Tab");
+  await expect(searchBox(page)).toHaveValue("usd:");
+  await expect(page.getByText(/Price: cheapest normal or foil market price in USD/)).toBeVisible();
+  await search(page, "usd<1");
+  await expect(filters(page)).toContainText("Price (USD)");
+  await sortBy(page).selectOption("price");
+  await expect(sortBy(page)).toHaveValue("price");
+  await expect.poll(() => new URL(page.url()).searchParams.get("sort")).toBe("price");
+  const ascending = await apiSearch(request, { q: "usd<1", sort: "price" });
+  await expect.poll(() => shownNames(page)).toEqual(ascending.data.map((card) => card.name));
+  await sortDirection(page).click();
+  await expect(sortDirection(page)).toHaveAccessibleName("Direction: Descending");
+  const descending = await apiSearch(request, { q: "usd<1", sort: "price", direction: "desc" });
+  await expect.poll(() => shownNames(page)).toEqual(descending.data.map((card) => card.name));
+});
+
 test("an empty query keeps the sort from the URL", async ({ page, request }) => {
   const { data } = await apiSearch(request, { q: "", sort: "name" });
 

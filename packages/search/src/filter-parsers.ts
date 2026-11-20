@@ -31,7 +31,11 @@ function numeric(field: NumericField): FilterParser {
     const digits = value.slice(operator?.length ?? 0).trim();
     const number = Number(digits);
 
-    if (!/^-?\d+$/.test(digits) || !Number.isSafeInteger(number)) {
+    if (field === "price") {
+      if (!/^(?:\d+(?:\.\d+)?|\.\d+)$/.test(digits) || !Number.isFinite(number)) {
+        return invalid(`"${value}" is not a non-negative USD amount.`);
+      }
+    } else if (!/^-?\d+$/.test(digits) || !Number.isSafeInteger(number)) {
       return invalid(`"${value}" is not a whole number.`);
     }
 
@@ -109,6 +113,7 @@ const FILTERS: { readonly [F in FilterField]: FilterParser } = {
   cost: numeric("cost"),
   might: numeric("might"),
   power: numeric("power"),
+  price: numeric("price"),
   domain,
   tag: text("tag"),
   type: enumeration("type", CardTypeSchema.options),

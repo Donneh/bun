@@ -1,7 +1,7 @@
 import type { Card } from "@riftkeeper/cards";
 import type { SearchNode } from "./ast.ts";
 
-export const SORT_KEYS = ["set", "collector_number", "name", "rarity", "cost", "might", "power"] as const;
+export const SORT_KEYS = ["set", "collector_number", "name", "rarity", "cost", "might", "power", "price"] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
 export const SORT_DIRECTIONS = ["asc", "desc"] as const;
