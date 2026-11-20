@@ -8,14 +8,20 @@ const ahri: CardInfoContent = {
   name: "Ahri",
   subtitle: "Inquisitive",
   kicker: [
-    [
-      { kind: "glyph", name: "rune_mind", decorative: true },
-      { kind: "text", text: "Mind" },
-    ],
-    [
-      { kind: "glyph", name: "card_type_unit", decorative: true },
-      { kind: "text", text: "Champion Unit" },
-    ],
+    {
+      parts: [
+        { kind: "glyph", name: "rune_mind", decorative: true },
+        { kind: "text", text: "Mind" },
+      ],
+      href: "/?q=d%3Amind",
+    },
+    {
+      parts: [
+        { kind: "glyph", name: "card_type_unit", decorative: true },
+        { kind: "text", text: "Champion Unit" },
+      ],
+      href: "/?q=type%3Aunit",
+    },
   ],
   stats: [
     { label: "Energy", value: "3", glyph: "energy_3", valueShown: false },
@@ -23,7 +29,7 @@ const ahri: CardInfoContent = {
   ],
   rules: ["When I attack, give an enemy unit -2 :rb_might:.", "[Ganking]"],
   tags: [{ label: "Ionia", href: "/?q=t%3AIonia" }],
-  artist: "Six More Vodka",
+  artist: { label: "Six More Vodka", href: "/?q=a%3A%22Six%20More%20Vodka%22" },
   pricing: {
     finishes: [{ finish: "Foil", market: "$12.34", range: [{ label: "Low", amount: "$10.00" }] }],
     attribution: "Prices: TCGplayer market price via TCGCSV, updated Oct 31, 2026",
@@ -94,15 +100,23 @@ describe("CardInfo", () => {
     expect(emitted("select")).toEqual([["ogn-119a"]]);
   });
 
-  test("links each tag to its search and credits the artist", async () => {
+  test("links each tag, domain, type and the artist to its search", async () => {
     const { emitted } = renderInfo();
 
     const tag = within(screen.getByRole("list", { name: "Tags" })).getByRole("link", { name: "Ionia" });
+    const domain = screen.getByRole("link", { name: "Mind" });
+    const type = screen.getByRole("link", { name: "Champion Unit" });
+    const artist = screen.getByRole("link", { name: "Six More Vodka" });
     expect(tag.getAttribute("href")).toBe("/?q=t%3AIonia");
-    expect(screen.getByText("Illustrated by Six More Vodka")).toBeTruthy();
+    expect(artist.closest("p")?.textContent?.replace(/\s+/g, " ").trim()).toBe("Illustrated by Six More Vodka");
 
-    await fireEvent.click(tag, { ctrlKey: true });
-    await userEvent.click(tag);
-    expect(emitted("navigate")).toEqual([["/?q=t%3AIonia"]]);
+    await fireEvent.click(artist, { ctrlKey: true });
+    for (const link of [tag, domain, type, artist]) await userEvent.click(link);
+    expect(emitted("navigate")).toEqual([
+      ["/?q=t%3AIonia"],
+      ["/?q=d%3Amind"],
+      ["/?q=type%3Aunit"],
+      ["/?q=a%3A%22Six%20More%20Vodka%22"],
+    ]);
   });
 });

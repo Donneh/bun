@@ -23,7 +23,15 @@ function follow(event: MouseEvent, href: string) {
   <GlassPanel class="info">
     <hgroup class="section head">
       <p class="kicker">
-        <GlyphText v-for="(item, index) in card.kicker" :key="index" class="kicker-item" :parts="item" />
+        <a
+          v-for="item in card.kicker"
+          :key="item.href"
+          class="kicker-item"
+          :href="item.href"
+          @click="follow($event, item.href)"
+        >
+          <GlyphText :parts="item.parts" />
+        </a>
       </p>
       <h1 class="name">{{ card.name }}</h1>
       <p v-if="card.subtitle" class="subtitle">{{ card.subtitle }}</p>
@@ -58,7 +66,12 @@ function follow(event: MouseEvent, href: string) {
           <a class="tag" :href="tag.href" @click="follow($event, tag.href)">{{ tag.label }}</a>
         </li>
       </ul>
-      <p v-if="card.artist" class="credit">Illustrated by {{ card.artist }}</p>
+      <p v-if="card.artist" class="credit">
+        Illustrated by
+        <a class="credit-link" :href="card.artist.href" @click="follow($event, card.artist.href)">{{
+          card.artist.label
+        }}</a>
+      </p>
     </footer>
   </GlassPanel>
 </template>
@@ -87,12 +100,46 @@ function follow(event: MouseEvent, href: string) {
 .kicker {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rk-space-1) var(--rk-space-3);
-  margin: 0;
+  gap: 0 var(--rk-space-3);
+  margin: calc((1lh - var(--rk-control-height-sm)) / 2) 0;
   color: var(--rk-color-text-muted);
   font: var(--rk-font-size-xs) var(--rk-font-family-mono);
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.kicker-item,
+.credit-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--rk-control-height-sm);
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.25em;
+  transition:
+    color var(--rk-duration-fast) ease,
+    text-decoration-color var(--rk-duration-fast) ease;
+}
+
+.credit-link {
+  color: var(--rk-color-text);
+  text-decoration-color: var(--rk-color-border);
+}
+
+@media (hover: hover) {
+  .kicker-item:hover,
+  .credit-link:hover {
+    color: var(--rk-color-text);
+    text-decoration-color: var(--rk-color-domain-strong);
+  }
+}
+
+.kicker-item:focus-visible,
+.credit-link:focus-visible {
+  outline: var(--rk-focus-width) solid var(--rk-color-accent);
+  outline-offset: 2px;
+  border-radius: var(--rk-radius-sm);
 }
 
 .kicker-item :deep(.glyph) {
