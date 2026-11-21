@@ -141,6 +141,8 @@ jobs:
         env:
           BASE_URL: ${{ steps.stage.outputs.api_url }}
           EXPECTED_VERSION: ${{ steps.stage.outputs.version }}
+      - name: Wait for the API rate limit window to pass
+        run: sleep 11
       - name: Smoke test the deployed web app after promotion
         run: bun run test:production
         working-directory: apps/web
