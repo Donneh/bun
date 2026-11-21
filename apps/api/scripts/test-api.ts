@@ -3,6 +3,7 @@ import "./version-overrides.ts";
 
 const LOCAL_READY_TIMEOUT_MS = 30_000;
 const REMOTE_READY_TIMEOUT_MS = 180_000;
+const TEST_TIMEOUT_MS = 90_000;
 
 async function freePort() {
   const server = Bun.serve({ port: 0, fetch: () => new Response() });
@@ -69,7 +70,16 @@ async function startLocalWorker() {
 async function runSuite(baseUrl: URL) {
   console.log(`Running API tests against ${baseUrl.origin}`);
   const suite = Bun.spawn(
-    ["bun", "test", "--preload", "./scripts/version-overrides.ts", "./test-api", ...process.argv.slice(2)],
+    [
+      "bun",
+      "test",
+      "--preload",
+      "./scripts/version-overrides.ts",
+      "--timeout",
+      String(TEST_TIMEOUT_MS),
+      "./test-api",
+      ...process.argv.slice(2),
+    ],
     {
       stdio: ["inherit", "inherit", "inherit"],
       env: { ...process.env, BASE_URL: baseUrl.origin },
