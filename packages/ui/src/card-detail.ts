@@ -69,15 +69,34 @@ export interface LegalityRow {
   readonly source?: CardLink;
 }
 
+export type RulesNote =
+  | { readonly kind: "ban"; readonly date: string; readonly text: string; readonly source: CardLink }
+  | {
+      readonly kind: "errata";
+      readonly date: string;
+      readonly current: string;
+      readonly previous: string;
+      readonly source: CardLink;
+    }
+  | {
+      readonly kind: "ruling";
+      readonly date: string;
+      readonly question: readonly GlyphTextPart[];
+      readonly answer: readonly (readonly GlyphTextPart[])[];
+      readonly source: CardLink;
+    };
+
 export interface CardInfoContent {
   readonly name: string;
   readonly subtitle: string | null;
   readonly kicker: readonly CardKickerItem[];
   readonly stats: readonly CardStat[];
   readonly rules: readonly string[];
+  readonly textCaption?: string;
   readonly legendSearch?: CardLink;
   readonly tags: readonly CardLink[];
   readonly artist: CardLink | null;
   readonly pricing: PricingContent | null;
   readonly legality: readonly LegalityRow[] | null;
+  readonly notes: readonly RulesNote[];
 }

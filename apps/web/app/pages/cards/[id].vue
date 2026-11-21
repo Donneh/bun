@@ -14,7 +14,7 @@ import {
 } from "@riftkeeper/ui";
 import { useTheme } from "~/composables/theme";
 import { rememberedCard } from "~/utils/card-cache";
-import { cardInfo, legality, localDate, printingSummaries, selectedPrinting } from "~/utils/card-detail";
+import { cardInfo, localDate, printingSummaries, rulesContent, selectedPrinting } from "~/utils/card-detail";
 import { responsiveImage } from "~/utils/card-images";
 import { type CardView, fetchCard, fetchCardRules, fetchPriceHistory } from "~/utils/card-search";
 import { RIOT_NOTICE } from "~/utils/riot-notice";
@@ -59,12 +59,10 @@ const { data: rules } = useLazyAsyncData(
 );
 const info = computed(() =>
   card.value && printing.value
-    ? cardInfo(
-        card.value,
-        printing.value,
-        priceHistory.value ?? null,
-        rules.value ? legality(rules.value, localDate(new Date())) : null,
-      )
+    ? {
+        ...cardInfo(card.value, printing.value, priceHistory.value ?? null),
+        ...(rules.value ? rulesContent(card.value, rules.value, localDate(new Date())) : {}),
+      }
     : null,
 );
 const printings = computed(() => (card.value ? printingSummaries(card.value) : []));

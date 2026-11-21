@@ -187,22 +187,26 @@ test("a card page opens directly, survives a reload and fits a phone", async ({ 
   expect(new URL(page.url()).pathname).toBe("/");
 });
 
-test("a card shows its legality per format, dating a ban that is not in force yet", async ({ page, request }) => {
+test("a card shows its legality, its current text and its rules notes", async ({ page, request }) => {
   const card = await cardWithPrintings(request, 1);
   const announcement = "https://playriftbound.com/en-us/news/announcements/test-ban-list-updates";
+  const errata = "https://playriftbound.com/en-us/news/announcements/test-errata-updates";
+  const faq = "https://playriftbound.com/en-us/news/rules-and-releases/test-faq";
   await page.route(`${apiBase}/cards/${card.id}/rules`, (route) =>
     route.fulfill({
       json: {
         data: {
           sources: [
             { url: announcement, title: "Test Ban List Updates (Effective March 1, 2999)", publishedAt: "2026-01-01" },
+            { url: errata, title: "Test Errata Updates", publishedAt: "2026-02-01" },
+            { url: faq, title: "Test FAQ", publishedAt: "2026-03-01" },
           ],
           bans: [
             { card: card.id, format: "standard", effective: "2999-03-01", source: announcement },
             { card: card.id, format: "2v2", effective: "2026-01-02", source: announcement },
           ],
-          errata: [],
-          rulings: [],
+          errata: [{ card: card.id, previous: "Printed wording.", current: "Corrected wording.", source: errata }],
+          rulings: [{ cards: [card.id], question: "Q: Does it work?", answer: "Yes, for [2].", source: faq }],
         },
       },
     }),
@@ -221,6 +225,18 @@ test("a card shows its legality per format, dating a ban that is not in force ye
     "href",
     announcement,
   );
+
+  await expect(page.getByText("Corrected wording.").first()).toBeVisible();
+  await expect(page.getByText("Updated by errata on Feb 1, 2026. The image shows the printed text.")).toBeVisible();
+  const notes = page.getByRole("region", { name: "Rules notes" }).getByRole("listitem");
+  await expect(notes).toHaveCount(3);
+  await expect(notes.nth(0)).toContainText("Does it work?");
+  await expect(notes.nth(0).getByRole("img", { name: "2 energy" })).toBeVisible();
+  await expect(notes.nth(1)).toContainText("Printed wording.");
+  await expect(notes.nth(2)).toContainText(
+    "Added to the 2v2 Constructed ban list, effective Jan 2, 2026. Added to the Standard ban list, effective Mar 1, 2999.",
+  );
+  await expect(notes.nth(2).getByRole("link", { name: "Test Ban List Updates" })).toHaveAttribute("href", announcement);
 });
 
 test("a legend links to cards within its domains", async ({ page, request }) => {

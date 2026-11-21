@@ -8,6 +8,8 @@ import {
   legality,
   localDate,
   printingSummaries,
+  riotText,
+  rulesContent,
   searchHref,
   selectedPrinting,
 } from "../app/utils/card-detail.ts";
@@ -276,6 +278,99 @@ describe("legality", () => {
   test("takes today from the reader's own calendar day", () => {
     expect(localDate(new Date(2026, 10, 22, 23, 30))).toBe("2026-11-22");
     expect(localDate(new Date(2026, 0, 5, 0, 15))).toBe("2026-01-05");
+  });
+});
+
+describe("rulesContent", () => {
+  const url = (path: string) => `https://playriftbound.com/en-us/news/${path}`;
+  const elnuk = makeCard({
+    id: "elnuk-herd",
+    ability: "Give another friendly unit +3 :rb_might:.",
+    effect: "[Hidden]",
+  });
+  const rules = makeRulesSnapshot({
+    sources: [
+      { url: url("radiance-errata"), title: "Radiance Errata Updates", publishedAt: "2026-10-09" },
+      { url: url("origins-errata"), title: "Riftbound: Origins Card Errata", publishedAt: "2025-10-28" },
+      { url: url("july-bans"), title: "July Ban List Updates", publishedAt: "2026-07-17" },
+      {
+        url: url("radiance-bans"),
+        title: "Radiance Ban List Updates (Effective November 23, 2026)",
+        publishedAt: "2026-11-13",
+      },
+      { url: url("faq"), title: "Vendetta Rules FAQ and Clarifications", publishedAt: "2026-08-14" },
+    ],
+    bans: [
+      { card: "elnuk-herd", format: "2v2", effective: "2026-07-24", source: url("july-bans") },
+      { card: "elnuk-herd", format: "2v2", effective: "2026-11-23", source: url("radiance-bans") },
+      { card: "elnuk-herd", format: "standard", effective: "2026-12-01", source: url("radiance-bans") },
+    ],
+    errata: [
+      { card: "elnuk-herd", previous: "Middle.", current: "Newest.", source: url("radiance-errata") },
+      { card: "elnuk-herd", previous: "Printed.", current: "Middle.", source: url("origins-errata") },
+    ],
+    rulings: [
+      { cards: ["elnuk-herd"], question: "Q: Does it apply?", answer: "Yes.\n- Pay [2][M].", source: url("faq") },
+    ],
+  });
+
+  test("shows the wording of the newest errata by publication date, not by its place in the list, and keeps the effect", () => {
+    const content = rulesContent(elnuk, rules, "2026-11-20");
+
+    expect(content.rules).toEqual(["Newest.", "[Hidden]"]);
+    expect(content.textCaption).toBe("Updated by errata on Oct 9, 2026. The image shows the printed text.");
+  });
+
+  test("keeps the printed text without a caption for a card without errata", () => {
+    const content = rulesContent(elnuk, makeRulesSnapshot(), "2026-11-20");
+
+    expect(content.rules).toEqual(["Give another friendly unit +3 :rb_might:.", "[Hidden]"]);
+    expect(content.textCaption).toBeUndefined();
+    expect(content.notes).toEqual([]);
+  });
+
+  test("lists one note per ban announcement, errata and FAQ answer, newest first, each linked to its source", () => {
+    const notes = rulesContent(elnuk, rules, "2026-11-20").notes;
+
+    expect(notes.map((note) => [note.date, note.kind, note.source.label])).toEqual([
+      ["Nov 13, 2026", "ban", "Radiance Ban List Updates"],
+      ["Oct 9, 2026", "errata", "Radiance Errata Updates"],
+      ["Aug 14, 2026", "ruling", "Vendetta Rules FAQ and Clarifications"],
+      ["Jul 17, 2026", "ban", "July Ban List Updates"],
+      ["Oct 28, 2025", "errata", "Riftbound: Origins Card Errata"],
+    ]);
+    expect(notes.flatMap((note) => (note.kind === "ban" ? [note.text] : []))).toEqual([
+      "Added to the 2v2 Constructed ban list, effective Nov 23, 2026. Added to the Standard ban list, effective Dec 1, 2026.",
+      "Added to the 2v2 Constructed ban list, effective Jul 24, 2026.",
+    ]);
+    expect(notes[1]).toMatchObject({ current: "Newest.", previous: "Middle." });
+    expect(notes[2]).toMatchObject({
+      question: [{ kind: "text", text: "Does it apply?" }],
+      answer: [
+        [{ kind: "text", text: "Yes." }],
+        [
+          { kind: "text", text: "- Pay " },
+          { kind: "glyph", name: "energy_2" },
+          { kind: "glyph", name: "might" },
+          { kind: "text", text: "." },
+        ],
+      ],
+    });
+  });
+});
+
+describe("riotText", () => {
+  test("shows Riot's energy, might, rune and exhaust symbols as glyphs and leaves other brackets as text", () => {
+    expect(riotText("Pay [2][A], [E]: +1 [M]. [T]hen [C] or [Level][>].")).toEqual([
+      { kind: "text", text: "Pay " },
+      { kind: "glyph", name: "energy_2" },
+      { kind: "glyph", name: "rune_rainbow" },
+      { kind: "text", text: ", " },
+      { kind: "glyph", name: "exhaust" },
+      { kind: "text", text: ": +1 " },
+      { kind: "glyph", name: "might" },
+      { kind: "text", text: ". [T]hen [C] or [Level][>]." },
+    ]);
   });
 });
 
