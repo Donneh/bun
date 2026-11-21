@@ -14,6 +14,7 @@ import type {
   PriceTrend,
   PricingContent,
   PrintingSummary,
+  RulesNote,
 } from "@riftkeeper/ui";
 import { isGlyphName } from "@riftkeeper/ui/glyph";
 import { responsiveImage } from "./card-images.ts";
@@ -209,12 +210,21 @@ const FORMATS: readonly { readonly format: Format; readonly label: string }[] = 
   { format: "2v2", label: "2v2 Constructed" },
 ];
 
+function sourceLinks(rules: RulesSnapshot): Map<string, { label: string; href: string; publishedAt: string }> {
+  return new Map(
+    rules.sources.map((source) => [
+      source.url,
+      { label: source.title.replace(/\s*\(.*\)$/, ""), href: source.url, publishedAt: source.publishedAt },
+    ]),
+  );
+}
+
 export function legality(rules: RulesSnapshot, today: string): LegalityRow[] {
-  const titles = new Map(rules.sources.map((source) => [source.url, source.title.replace(/\s*\(.*\)$/, "")]));
+  const sources = sourceLinks(rules);
   const constructed = FORMATS.map(({ format, label }): LegalityRow => {
     const ban = rules.bans.find((entry) => entry.format === format);
     if (ban === undefined) return { format: label, status: "legal", label: "Legal" };
-    const source = { label: titles.get(ban.source) ?? "Riot announcement", href: ban.source };
+    const source = { label: sources.get(ban.source)?.label ?? "Riot announcement", href: ban.source };
     return ban.effective <= today
       ? { format: label, status: "banned", label: "Banned", source }
       : { format: label, status: "upcoming", label: `Banned ${DAY_DATE.format(Date.parse(ban.effective))}`, source };
@@ -222,16 +232,86 @@ export function legality(rules: RulesSnapshot, today: string): LegalityRow[] {
   return [...constructed, { format: "Sealed", status: "legal", label: "Legal", note: "No ban list" }];
 }
 
+const RIOT_SYMBOLS: Readonly<Record<string, string>> = { A: "rune_rainbow", M: "might", S: "might", E: "exhaust" };
+const RIOT_SYMBOL = /(\[(?:[AMSE]|\d+)\](?![A-Za-z]))/;
+
+export function riotText(text: string): GlyphTextPart[] {
+  return text
+    .split(RIOT_SYMBOL)
+    .filter((piece) => piece !== "")
+    .map((piece) => {
+      const symbol = piece.slice(1, -1);
+      const name = RIOT_SYMBOL.test(piece) ? (RIOT_SYMBOLS[symbol] ?? `energy_${symbol}`) : "";
+      return isGlyphName(name) ? { kind: "glyph", name } : { kind: "text", text: piece };
+    });
+}
+
+const formatList = (labels: readonly string[]) =>
+  labels.length < 2 ? (labels[0] ?? "") : `${labels.slice(0, -1).join(", ")} and ${labels.at(-1)}`;
+
+export function rulesContent(
+  card: Card,
+  rules: RulesSnapshot,
+  today: string,
+): Pick<CardInfoContent, "rules" | "textCaption" | "legality" | "notes"> {
+  const sources = sourceLinks(rules);
+  const published = (url: string) => sources.get(url)?.publishedAt ?? "";
+  const link = (url: string) => ({ label: sources.get(url)?.label ?? "Riot", href: url });
+  const day = (date: string) => PRICE_DATE.format(Date.parse(date));
+  const errata = rules.errata.toSorted((a, b) => published(a.source).localeCompare(published(b.source)));
+  const latest = errata.at(-1);
+  const notes: (RulesNote & { readonly sortKey: string })[] = [
+    ...[...new Set(rules.bans.map((ban) => ban.source))].map((url) => {
+      const bans = rules.bans.filter((ban) => ban.source === url);
+      const text = [...new Set(bans.map((ban) => ban.effective))]
+        .toSorted()
+        .map((effective) => {
+          const formats = FORMATS.filter(({ format }) =>
+            bans.some((ban) => ban.format === format && ban.effective === effective),
+          ).map(({ label }) => label);
+          return `Added to the ${formatList(formats)} ban list${formats.length > 1 ? "s" : ""}, effective ${day(effective)}.`;
+        })
+        .join(" ");
+      return {
+        kind: "ban" as const,
+        sortKey: published(url),
+        date: day(published(url)),
+        text,
+        source: link(url),
+      };
+    }),
+    ...errata.map((entry) => ({
+      kind: "errata" as const,
+      sortKey: published(entry.source),
+      date: day(published(entry.source)),
+      current: entry.current,
+      previous: entry.previous,
+      source: link(entry.source),
+    })),
+    ...rules.rulings.map((ruling) => ({
+      kind: "ruling" as const,
+      sortKey: published(ruling.source),
+      date: day(published(ruling.source)),
+      question: riotText(ruling.question.replace(/^Q:\s*/, "")),
+      answer: ruling.answer.split("\n").map(riotText),
+      source: link(ruling.source),
+    })),
+  ];
+  return {
+    rules: [latest?.current ?? card.ability, card.effect].filter((text): text is string => Boolean(text)),
+    ...(latest === undefined
+      ? {}
+      : { textCaption: `Updated by errata on ${day(published(latest.source))}. The image shows the printed text.` }),
+    legality: legality(rules, today),
+    notes: notes.toSorted((a, b) => b.sortKey.localeCompare(a.sortKey)).map(({ sortKey: _, ...note }) => note),
+  };
+}
+
 export function localDate(now: Date): string {
   return [now.getFullYear(), now.getMonth() + 1, now.getDate()].map((part) => String(part).padStart(2, "0")).join("-");
 }
 
-export function cardInfo(
-  card: Card,
-  printing: PricedPrinting,
-  history: PriceHistory | null = null,
-  legalityRows: readonly LegalityRow[] | null = null,
-): CardInfoContent {
+export function cardInfo(card: Card, printing: PricedPrinting, history: PriceHistory | null = null): CardInfoContent {
   return {
     name: card.name,
     subtitle: card.subtitle,
@@ -252,7 +332,8 @@ export function cardInfo(
         ? null
         : { label: printing.artist, href: searchHref(`a:${quotedValue(printing.artist)}`) },
     pricing: pricing(printing, history),
-    legality: legalityRows,
+    legality: null,
+    notes: [],
   };
 }
 

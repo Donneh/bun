@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CardLegality from "./CardLegality.vue";
 import CardPricing from "./CardPricing.vue";
+import CardRulesNotes from "./CardRulesNotes.vue";
 import CardText from "./CardText.vue";
 import type { CardInfoContent, PrintingSummary } from "./card-detail.ts";
 import GlassPanel from "./GlassPanel.vue";
@@ -50,6 +51,7 @@ function follow(event: MouseEvent, href: string) {
 
     <div v-if="card.rules.length > 0" class="section rules">
       <CardText v-for="(text, index) in card.rules" :key="index" :text="text" />
+      <p v-if="card.textCaption" class="text-caption">{{ card.textCaption }}</p>
     </div>
 
     <CardLegality v-if="card.legality" class="section" :rows="card.legality" />
@@ -68,6 +70,8 @@ function follow(event: MouseEvent, href: string) {
       :selected="selected"
       @select="(id: string) => emit('select', id)"
     />
+
+    <CardRulesNotes v-if="card.notes.length > 0" class="section" :notes="card.notes" />
 
     <footer v-if="card.tags.length > 0 || card.artist" class="section foot">
       <ul v-if="card.tags.length > 0" class="tags" aria-label="Tags">
@@ -207,6 +211,12 @@ function follow(event: MouseEvent, href: string) {
 .rules {
   background: color-mix(in srgb, var(--rk-color-domain) 8%, transparent);
   font-size: var(--rk-font-size-body);
+}
+
+.text-caption {
+  margin: 0;
+  color: var(--rk-color-text-muted);
+  font-size: var(--rk-font-size-sm);
 }
 
 .foot {

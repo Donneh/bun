@@ -38,6 +38,7 @@ const ahri: CardInfoContent = {
     { format: "Standard", status: "upcoming", label: "Banned Nov 23" },
     { format: "Sealed", status: "legal", label: "Legal", note: "No ban list" },
   ],
+  notes: [],
 };
 
 const printing = { setName: "Origins", orientation: "portrait" as const, prices: [] };
@@ -71,12 +72,41 @@ describe("CardInfo", () => {
   });
 
   test("leaves out the stat row, pricing, tags and credit when the card has none", () => {
-    const { container } = renderInfo({ ...ahri, stats: [], tags: [], artist: null, pricing: null, legality: null });
+    const { container } = renderInfo({
+      ...ahri,
+      stats: [],
+      tags: [],
+      artist: null,
+      pricing: null,
+      legality: null,
+      notes: [],
+    });
 
     expect(container.querySelector("dl")).toBeNull();
     expect(container.querySelector("footer")).toBeNull();
     expect(screen.queryByRole("region", { name: "Market price" })).toBeNull();
     expect(screen.queryByRole("region", { name: "Legality" })).toBeNull();
+  });
+
+  test("captions errata'd rules text and lists the rules notes after the printings", () => {
+    renderInfo({
+      ...ahri,
+      textCaption: "Updated by errata on Oct 9, 2026. The image shows the printed text.",
+      notes: [
+        {
+          kind: "ban",
+          date: "Nov 13, 2026",
+          text: "Added to the Standard ban list, effective Nov 23, 2026.",
+          source: { label: "Radiance Ban List Updates", href: "https://playriftbound.com/en-us/news/announcements/r" },
+        },
+      ],
+    });
+
+    expect(screen.getByText(/Updated by errata on Oct 9, 2026/)).toBeTruthy();
+    const notes = screen.getByRole("region", { name: "Rules notes" });
+    expect(notes.textContent).toContain("Added to the Standard ban list");
+    const printings = screen.getByRole("list", { name: "Printings" });
+    expect(printings.compareDocumentPosition(notes) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   test("shows the legality right after the rules text", () => {
