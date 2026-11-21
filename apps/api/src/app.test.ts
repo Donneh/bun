@@ -36,6 +36,20 @@ describe("GET /health", () => {
 
     expect(await response.json()).toMatchObject({ data: { version: "version-1" } });
   });
+
+  test("names the deployed Worker version on every response, including errors", async () => {
+    const app = createApp({
+      cards: [makeCard()],
+      prices: makePriceSnapshot(),
+      priceHistory: makePriceHistory(),
+      rules: makeRulesSnapshot(),
+    });
+    const env = { CF_VERSION_METADATA: { id: "version-1" } };
+
+    for (const path of ["/cards", "/cards/no-such-card", "/no-such-route"])
+      expect((await app.request(path, {}, env)).headers.get("x-worker-version")).toBe("version-1");
+    expect((await app.request("/cards")).headers.get("x-worker-version")).toBeNull();
+  });
 });
 
 describe("CORS", () => {

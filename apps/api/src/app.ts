@@ -9,6 +9,8 @@ import { createRandomRoutes } from "./cards/random.routes.ts";
 import { errorBody } from "./http/errors.ts";
 import { createSearchRoutes } from "./search/search.routes.ts";
 
+export const WORKER_VERSION_HEADER = "X-Worker-Version";
+
 interface Bindings {
   readonly CF_VERSION_METADATA?: { readonly id: string };
 }
@@ -26,7 +28,12 @@ export function createApp({
 }) {
   const pricedCards = withPrices(cards, prices);
   return new Hono<{ Bindings: Bindings }>()
-    .use(cors({ origin: "*", allowMethods: ["GET"] }))
+    .use(cors({ origin: "*", allowMethods: ["GET"], exposeHeaders: [WORKER_VERSION_HEADER] }))
+    .use(async (c, next) => {
+      await next();
+      const version = c.env?.CF_VERSION_METADATA?.id;
+      if (version) c.res.headers.set(WORKER_VERSION_HEADER, version);
+    })
     .get("/health", (c) =>
       c.json({ data: { status: "ok", cards: cards.length, version: c.env?.CF_VERSION_METADATA?.id ?? null } }, 200),
     )
